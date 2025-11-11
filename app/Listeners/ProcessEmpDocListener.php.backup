@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Listeners;
+
+use App\Events\ProcessEmpDocEvent;
+use Illuminate\Support\Facades\Auth;
+use Filament\Notifications\Notification;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
+
+class ProcessEmpDocListener
+{
+    /**
+     * Create the event listener.
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Handle the event.
+     */
+    public function handle(ProcessEmpDocEvent $event): void
+    {   $user = $event->user;
+        $message = $event->message;
+        dump($message);
+        Notification::make()
+            ->broadcast($user)
+            ->title('AI Processing Status')
+            ->body($message)
+            ->success()
+            ->send(); // ส่ง notification ผ่าน Livewire/Filament
+    }
+}
