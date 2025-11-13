@@ -14,6 +14,9 @@ class SaveResumeToDB
     public function saveToDB(array $hasOneData, array $hasManyData, $user): void
     {
         $hasOneDataSuccess = $this->saveHasOneResumeLocation($hasOneData);
+        // dump($hasOneData);
+        // dump('--------------------'); 
+        // dump('--------------------');
         // dump($hasOneDataSuccess);
         // dump('--------------------'); 
         // dump('--------------------');

@@ -35,6 +35,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->plugin(SimpleLightBoxPlugin::make())
             ->id('admin')
+            ->font('Noto Sans Thai')
             ->path('/')
             ->login()
             ->profile(EditProfile::class)

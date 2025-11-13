@@ -19,9 +19,9 @@ return new class extends Migration
             $table->string('last_name', 100)->nullable()->comment('นามสกุล');
 
             // ข้อมูลสถาบันและวุฒิการศึกษา
-            $table->string('institution', 255)->comment('สถาบันการศึกษา');
-            $table->string('degree', 150)->comment('ชื่อวุฒิการศึกษา เช่น วศ.บ., บช.บ.');
-            $table->string('education_level', 100)->comment('ระดับการศึกษา เช่น ปริญญาตรี, ปวส.');
+            $table->string('institution', 255)->nullable()->comment('สถาบันการศึกษา');
+            $table->string('degree', 150)->nullable()->comment('ชื่อวุฒิการศึกษา เช่น วศ.บ., บช.บ.');
+            $table->string('education_level', 100)->nullable()->comment('ระดับการศึกษา เช่น ปริญญาตรี, ปวส.');
 
             // ข้อมูลสาขาวิชา
             $table->string('faculty', 150)->nullable()->comment('คณะ');

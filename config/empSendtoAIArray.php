@@ -170,5 +170,12 @@ return [
             'description' => 'เกรดเฉลี่ยสะสม (GPA/CGPA) เป็นตัวเลขทศนิยม 2 ตำแหน่ง'
         ],
         'check' => ['type' => 'string', 'description' => 'ตรวจสอบว่าเป็นเอกสารประเภท transcript จริงๆ ตอบกลับมาว่า yes หรือ no'],
-    ]
+    ],
+    
+    'bookbank' => [
+        'name' => ['type' => 'string', 'description' => 'ชื่อบัญชีถ้ามีภาษาไทยให้เอาภาษาไทย'], // ใช้ Key เดิม
+        'bank_name' => ['type' => 'string', 'description' => 'ชื่อธนาคารถ้ามีภาษาไทยให้เอาภาษาไทย'],
+        'bank_id' => ['type' => 'string', 'description' => 'เอาแต่ตัวเลขอย่างเดียว'],
+        'check' => ['type' => 'string', 'description' => 'ตรวจสอบว่าเป็นเอกสารประเภท สมุดบัญชีธนาคาร จริงๆ ตอบกลับมาว่า yes หรือ no'],
+    ],
 ];

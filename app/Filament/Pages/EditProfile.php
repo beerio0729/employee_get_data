@@ -62,7 +62,8 @@ class EditProfile extends BaseEditProfile
         return
             Tabs::make('Tabs')
             ->tabs([
-                Tab::make('resume')
+                Tab::make('Resume')
+                    ->tabslug('resume')
                     ->schema([
                         FileUpload::make('image_profile')
                             ->label('กรุณาอับโหลดรูปภาพ')
@@ -253,6 +254,7 @@ class EditProfile extends BaseEditProfile
                                                     ->prefix('ปีจบการศึกษา')
                                                     ->hiddenlabel()
                                                     ->placeholder('ปีจบการศึกษา')
+                                                    ->nullable()
                                                     ->options(array_combine($years_education_AD, $years_education_BE)) // key = value เป็น พ.ศ.
                                                     ->placeholder('เลือกปี พ.ศ.'),
                                                 TextInput::make('gpa')
@@ -331,27 +333,27 @@ class EditProfile extends BaseEditProfile
                             })
 
                     ]),
-                Tab::make('บัตรประชาชน')
+                Tab::make('idcard')
+                    ->label('บัตรประชาชน')
+                    ->tabslug('idcard')
                     ->schema([
                         Section::make('ข้อมูลทั่วไป')
                             //->label('ข้อมูลทั่วไป')
                             ->columns(3)
                             ->relationship('userHasoneIdcard')
                             ->schema([
-                                Select::make('prefix_name_th')
+                                TextInput::make('prefix_name_th')
                                     ->label('คำนำหน้าชื่อภาษาไทย')
-                                    ->placeholder('คำนำหน้าชื่อ')
-                                    ->options(config("iconf.prefix_name")),
+                                    ->placeholder('คำนำหน้าชื่อ'),
                                 TextInput::make('name_th')
                                     ->placeholder('กรอกหรือแก้ไขชื่อจริงถ้าข้อมูลผิดพลาด')
                                     ->label('ชื่อภาษาไทย'),
                                 TextInput::make('last_name_th')
                                     ->placeholder('กรอกหรือแก้ไขนามสกุลถ้าข้อมูลผิดพลาด')
                                     ->label('นามสกุลภาษาไทย'),
-                                Select::make('prefix_name_en')
+                                TextInput::make('prefix_name_en')
                                     ->label('คำนำหน้าชื่อภาษาอังกฤษ')
-                                    ->placeholder('PreFix Name')
-                                    ->options(config("iconf.prefix_name_en")),
+                                    ->placeholder('PreFix Name'),
                                 TextInput::make('name_en')
                                     ->placeholder('กรอกหรือแก้ไขชื่อจริงถ้าข้อมูลผิดพลาด')
                                     ->label('ชื่อภาษาอังกฤษ'),
@@ -369,20 +371,26 @@ class EditProfile extends BaseEditProfile
                                     ->displayFormat('d M Y')
                                     ->locale('th')
                                     ->buddhist()
-                                    ->live()
-                                    ->afterStateUpdated(function ($state, Set $set) {
-                                        if ($state) {
-                                            $age = Carbon::parse($state)->age;
-                                            $set('age_id_card',  $age);
-                                        } else {
-                                            $set('age_id_card', null);
-                                        }
-                                    }),
+                                    ->live(),
+                                // ->afterStateUpdated(function ($state, Set $set) {
+                                //     if ($state) {
+                                //         $age = Carbon::parse($state)->age;
+                                //         dump($state);
+                                //         dump('-----------');
+                                //         dump($age);
+                                //         $set('age_id_card',  $age);
+                                //     } else {
+                                //         $set('age_id_card', null);
+                                //     }
+                                // }),
                                 TextInput::make('age_id_card')
                                     ->placeholder(function (Get $get) {
-                                        return Carbon::parse($get('date_of_birth'))->age;
+                                        return empty($get('date_of_birth'))
+                                            ? 'ต้องกรอกวันเกิดเพื่อคำนวณอายุ'
+                                            : Carbon::parse($get('date_of_birth'))->age;
                                     })
-                                    ->autofocus()
+                                    //->live()
+                                    //->autofocus()
                                     ->suffix('ปี')
                                     ->label('อายุ')
                                     ->readOnly() // ทำให้เป็นแบบอ่านอย่างเดียว
@@ -512,10 +520,138 @@ class EditProfile extends BaseEditProfile
                             })
 
                     ]),
-                Tab::make('ประวัติการศึกษา')
-                    ->schema([]),
-                Tab::make('ประวัติการทำงาน')
-                    ->schema([]),
+                Tab::make('วุฒิการศึกษา')
+                    ->tabslug('transcript')
+                    ->schema([
+                        Section::make('ข้อมูลทั่วไป')
+                            //->label('ข้อมูลทั่วไป')
+                            ->columns(3)
+                            ->relationship('userHasoneTranscript')
+                            ->schema([
+                                TextInput::make('prefix_name')
+                                    ->placeholder('ระบุคำนำหน้าชื่อ')
+                                    ->label('ชื่อ'),
+                                TextInput::make('name')
+                                    ->placeholder('กรอกหรือแก้ไขชื่อจริงถ้าข้อมูลผิดพลาด')
+                                    ->label('ชื่อ'),
+                                TextInput::make('last_name')
+                                    ->placeholder('กรอกหรือแก้ไขนามสกุลถ้าข้อมูลผิดพลาด')
+                                    ->label('นามสกุล'),
+                                TextInput::make('institution')
+                                    ->label('สถาบัน/มหาวิทยาลัย')
+                                    ->placeholder('กรอกชื่อสถาบันการศึกษา'),
+                                TextInput::make('degree')
+                                    ->label('ชื่อวุฒิการศึกษา')
+                                    ->placeholder('เช่น วิศวกรรมศาสตรบัณฑิต หรือ ศิลปศาสตรมหาบัณฑิต'),
+                                TextInput::make('education_level') // อาจพิจารณาใช้ Select::make() เพื่อให้เลือกจากตัวเลือกที่กำหนด (เช่น ปริญญาตรี, ปริญญาโท)
+                                    ->label('ระดับการศึกษา')
+                                    ->placeholder('เช่น ปริญญาตรี, ปริญญาโท, มัธยมศึกษาปีที่ 6'),
+                                TextInput::make('faculty')
+                                    ->label('คณะ')
+                                    ->placeholder('กรอกชื่อคณะ'),
+                                TextInput::make('major')
+                                    ->label('สาขาวิชา')
+                                    ->placeholder('กรอกชื่อสาขาวิชา'),
+                                TextInput::make('minor')
+                                    ->label('วิชาโท')
+                                    ->placeholder('กรอกชื่อวิชาโท (หากไม่มีให้ว่างไว้)'),
+                                DatePicker::make('date_of_admission')
+                                    ->label('วันที่เข้ารับการศึกษา')
+                                    ->placeholder('วันที่เข้ารับการศึกษา')
+                                    ->native(false)
+                                    ->displayFormat('d M Y')
+                                    ->locale('th')
+                                    ->buddhist(),
+                                DatePicker::make('date_of_graduation')
+                                    ->label('วันสำเร็จการศึกษา')
+                                    ->placeholder('วันสำเร็จการศึกษา')
+                                    ->native(false)
+                                    ->displayFormat('d M Y')
+                                    ->locale('th')
+                                    ->buddhist(),
+                                TextInput::make('gpa') // แนะนำให้ใช้ DecimalInput เพื่อควบคุมรูปแบบทศนิยม
+                                    ->label('เกรดเฉลี่ย (GPA)')
+                                    ->placeholder('กรอกเกรดเฉลี่ย (เช่น 3.50)')
+                                    ->numeric()
+                                    ->step(0.01) // ให้รับค่าทศนิยมสองตำแหน่ง
+                                    ->maxValue(4.00), // กำหนดค่าสูงสุด
+                            ]),
+                        AdvancedFileUpload::make('transcript')
+                            ->pdfPreviewHeight(400) // Customize preview height
+                            ->pdfDisplayPage(1) // Set default page
+                            ->pdfToolbar(true) // Enable toolbar
+                            ->pdfZoomLevel(100) // Set zoom level
+                            ->pdfFitType(PdfViewFit::FIT) // Set fit type
+                            ->pdfNavPanes(true) // Enable navigation panes
+                            ->label('เลือกไฟล์')
+                            ->openable()
+                            ->deletable(false)
+                            ->multiple()
+                            //->panelLayout('grid')
+                            ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
+                            ->disk('public')
+                            ->directory('emp_files')
+                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $state) {
+
+                                $i = mt_rand(1000, 9000);
+                                $extension = $file->getClientOriginalExtension();
+                                $userEmail = auth()->user()->email;
+                                return "{$userEmail}/transcript_{$i}.{$extension}";
+                            })
+                            ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                            ->afterStateHydrated(function ($component, $state) {
+                                $user = auth()->user();
+                                $doc = $user->userHasmanyDocEmp()->where('file_name', 'transcript')->first();
+                                $component->state($doc ? $doc->path : null);
+                            })
+                    ]),
+                Tab::make('สมุดบัญชีธนาคาร')
+                    ->tabslug('bookbank')
+                    ->schema([
+                        Section::make('ข้อมูลทั่วไป')
+                            //->label('ข้อมูลทั่วไป')
+                            ->columns(3)
+                            ->relationship('userHasoneBookbank')
+                            ->schema([
+                                TextInput::make('name')
+                                    ->placeholder('กรอกหรือแก้ไขชื่อจริงถ้าข้อมูลผิดพลาด')
+                                    ->label('ชื่อ'),
+                                TextInput::make('bank_name')
+                                    ->placeholder('กรอกหรือแก้ไข้ชื่อบัญชีธนาคาร')
+                                    ->label('ชื่อธนาคาร'),
+                                TextInput::make('bank_id')
+                                    ->label('เลขที่บัญชี')
+                                    ->placeholder('กรอกหรือแก้ไขเลขที่บัญชีธนาคาร'),
+                            ]),
+                        AdvancedFileUpload::make('bookbank')
+                            ->pdfPreviewHeight(400) // Customize preview height
+                            ->pdfDisplayPage(1) // Set default page
+                            ->pdfToolbar(true) // Enable toolbar
+                            ->pdfZoomLevel(100) // Set zoom level
+                            ->pdfFitType(PdfViewFit::FIT) // Set fit type
+                            ->pdfNavPanes(true) // Enable navigation panes
+                            ->label('เลือกไฟล์')
+                            ->openable()
+                            ->deletable(false)
+                            ->multiple()
+                            //->panelLayout('grid')
+                            ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
+                            ->disk('public')
+                            ->directory('emp_files')
+                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $state) {
+
+                                $i = mt_rand(1000, 9000);
+                                $extension = $file->getClientOriginalExtension();
+                                $userEmail = auth()->user()->email;
+                                return "{$userEmail}/bookbank_{$i}.{$extension}";
+                            })
+                            ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                            ->afterStateHydrated(function ($component, $state) {
+                                $user = auth()->user();
+                                $doc = $user->userHasmanyDocEmp()->where('file_name', 'bookbank')->first();
+                                $component->state($doc ? $doc->path : null);
+                            })
+                    ]),
             ])->columnSpanFull()->persistTabInQueryString();
     }
 

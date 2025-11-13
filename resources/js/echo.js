@@ -1,4 +1,4 @@
-// console.log('test')
+console.log('test')
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 window.Pusher = Pusher;
@@ -17,15 +17,15 @@ window.Echo.private('user.' + id)
         //alert(e.message);
         console.log(e.modal_status)
         console.log(e.message)
-        updateStatusModal(e.message, e.modal_status)
+        updateStatusModal(e.message, e.modal_status, e.slug);
     });
 
-function updateStatusModal(message, modal_status) {
+function updateStatusModal(message, modal_status, slug) {
     const modalId = 'simple-status-modal';
 
     // ** 1. ตรวจสอบเงื่อนไขการเสร็จสิ้นก่อนเริ่มกระบวนการ Modal **
     if (modal_status === 'close') {
-        closeModal(message, modalId);
+        closeModal(message, modalId, slug);
 
         return; // ออกจากฟังก์ชันทันที ไม่ต้องสร้าง Modal
     }
@@ -63,7 +63,7 @@ function updateStatusModal(message, modal_status) {
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.9); /* สีดำทึบ */
+            background-color: rgba(0, 0, 0, 0.7); /* สีดำทึบ */
             display: flex;
             align-items: center; 
             justify-content: center; 
@@ -92,18 +92,19 @@ function updateStatusModal(message, modal_status) {
     }
 }
 
-function closeModal(message, modalId) { //สำหรับปิด modal
+function closeModal(message, modalId, slug) { //สำหรับปิด modal
     document.getElementById('modal-message').textContent = message;
     const modalToRemove = document.getElementById(modalId);
 
     // หน่วงเวลา 2 วินาที ก่อนปิด Modal และรีเฟรชหน้าจอ
     setTimeout(() => {
-        if (modalToRemove) {
-            // ปิด Modal โดยเรียก .remove()
-            modalToRemove.remove();
+        if(slug === null){
+            window.location.reload();
+        } else {
+            const appUrl = import.meta.env.VITE_APP_URL;
+            window.location.href = appUrl+"/profile?tab="+slug+"::data::tab";
         }
-        // รีเฟรชหน้าจอ
-        window.location.reload();
+            
     }, 3000);
 }
 // alert('test');

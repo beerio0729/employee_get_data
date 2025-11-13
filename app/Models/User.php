@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use App\Models\DocEmp;
 
 use App\Models\Idcard;
+use App\Models\Bookbank;
 use App\Models\Transcript;
 use App\Models\Resume\Resume;
 use App\Models\Resume\ResumeSkills;
@@ -131,6 +132,11 @@ class User extends Authenticatable
     public function userHasoneTranscript()
     {
         return $this->hasOne(Transcript::class, 'user_id', 'id');
+    }
+    
+    public function userHasoneBookbank()
+    {
+        return $this->hasOne(Bookbank::class, 'user_id', 'id');
     }
 
     public function userHasmanyDocEmp()

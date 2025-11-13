@@ -72,4 +72,10 @@ return [
         'check',
     ],
 
+    // 'bookbank' => [
+    //     'name',
+    //     'back_name',
+    //     'back_id'
+    // ],
+
 ];

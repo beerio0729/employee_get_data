@@ -19,6 +19,7 @@ class ProcessEmpDocEvent implements ShouldBroadcastNow
     public string $message;
     public $user;
     public $modal_status;
+    public $file_name;
 
     /**
      * Create a new event instance.
@@ -28,11 +29,17 @@ class ProcessEmpDocEvent implements ShouldBroadcastNow
      * @param string|null $modal_status รหัสข้อผิดพลาด (Optional)
      * @return void
      */
-    public function __construct(string $message, $user, ?string $modal_status = "open")
+    public function __construct(
+        string $message, 
+        $user, 
+        ?string $modal_status = "open",
+        ?string $file_name = null,
+        )
     {
         $this->message = $message;
         $this->user = $user;
-        $this->modal_status = $modal_status; // เก็บค่าที่ส่งมาใน Property ใหม่
+        $this->modal_status = $modal_status;
+        $this->file_name = $file_name;
     }
 
     /**
@@ -52,7 +59,8 @@ class ProcessEmpDocEvent implements ShouldBroadcastNow
     {   //dump($this->modal_status);
         return [
             'message' => $this->message,
-            'modal_status' => $this->modal_status
+            'modal_status' => $this->modal_status,
+            'slug' => $this->file_name,
         ];
     }
 

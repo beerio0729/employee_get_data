@@ -11,13 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('doc_emps', function (Blueprint $table) {
+        Schema::create('bookbanks', function (Blueprint $table) {
             $table->id();
             $table->foreignID('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->string('file_name')->nullable();
-            $table->string('path')->nullable();
-            $table->boolean('confirm')->default(false)->after('path');
-            $table->boolean('check')->nullable();
+            $table->string('name')->nullable()->comment('ชื่อบัญชี');
+            $table->string('bank_name')->nullable()->comment('ชื่อธนาคาร');
+            $table->string('bank_id')->nullable()->comment('เลขที่บัญชี');
             $table->timestamps();
         });
     }
@@ -27,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('doc_emps');
+        Schema::dropIfExists('bookbanks');
     }
 };

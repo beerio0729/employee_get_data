@@ -14,6 +14,7 @@ class DocEmp extends Model
         "user_id",
         "file_name",
         "path",
+        "confirm",
         "check"
     ];
     

@@ -42,7 +42,7 @@ class ProcessEmpDocJob implements ShouldQueue
         $this->name_file = array_keys($data)[0]; //ถอด key ของ array จะได้ชนิดเอกสาร
         $this->filePaths = $data[$this->name_file];
         $this->user = $user;
-        //dump($this->name_file);
+        //dump($data);
     }
 
     /**
@@ -65,17 +65,9 @@ class ProcessEmpDocJob implements ShouldQueue
 
         if ($this->hasOneData['check'] === 'yes') {
             $this->processSaveToDB($this->hasOneData, $this->hasManyData);
-            event(new ProcessEmpDocEvent('กระบวนการเสร็จสิ้น', $this->user, 'close'));
+            event(new ProcessEmpDocEvent('กระบวนการเสร็จสิ้น', $this->user, 'close', $this->name_file));
         } else {
-
-            $doc_file = $this->user->userHasmanyDocEmp()
-                ->where('file_name', $this->name_file)
-                ->first();
-
-            if ($doc_file) {
-                Storage::disk('public')->delete($doc_file->path);
-                $doc_file->delete();
-            }
+            $this->deleteFile();
             // 2. โยน Exception เพื่อสั่งให้ Job Worker จัดการ
             $this->fail('ขออภัย! คุณอับโหลดเอกสารผิดประเภท โปรดอับโหลดเอกสารตามประเภทที่ระบุ');
         }
@@ -88,6 +80,7 @@ class ProcessEmpDocJob implements ShouldQueue
             $this->user,
             'close' // error
         ));
+        $this->deleteFile();
     }
 
     /**
@@ -328,10 +321,20 @@ class ProcessEmpDocJob implements ShouldQueue
 
     public function processSaveToDB(array $hasOneData, array $hasManyData): void
     {   
-        dump($hasOneData);
-        return;
-        // $className = 'App\\Services\\JobForSaveDBFromAI\\Save' . ucfirst($this->name_file) . 'ToDB';
-        // $instance = new $className();
-        // $instance->saveToDB($hasOneData, $hasManyData, $this->user);
+        $className = 'App\\Services\\JobForSaveDBFromAI\\Save' . ucfirst($this->name_file) . 'ToDB';
+        $instance = new $className();
+        $instance->saveToDB($hasOneData, $hasManyData, $this->user);
     }
+    
+    public function deleteFile()
+        {
+             $doc_file = $this->user->userHasmanyDocEmp()
+                ->where('file_name', $this->name_file)
+                ->first();
+
+            if ($doc_file) {
+                Storage::disk('public')->delete($doc_file->path);
+                $doc_file->delete();
+            }
+        }
 }
