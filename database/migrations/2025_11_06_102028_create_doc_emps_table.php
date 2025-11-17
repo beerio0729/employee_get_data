@@ -15,8 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignID('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->string('file_name')->nullable();
+            $table->string('file_name_th')->nullable();
             $table->string('path')->nullable();
-            $table->boolean('confirm')->default(false)->after('path');
+            $table->boolean('confirm')->default(false);
             $table->boolean('check')->nullable();
             $table->timestamps();
         });

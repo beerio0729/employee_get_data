@@ -17,15 +17,15 @@ window.Echo.private('user.' + id)
         //alert(e.message);
         console.log(e.modal_status)
         console.log(e.message)
-        updateStatusModal(e.message, e.modal_status, e.slug);
+        updateStatusModal(e.message, e.modal_status, e.slug, e.success);
     });
 
-function updateStatusModal(message, modal_status, slug) {
+function updateStatusModal(message, modal_status, slug, success) {
     const modalId = 'simple-status-modal';
 
     // ** 1. ตรวจสอบเงื่อนไขการเสร็จสิ้นก่อนเริ่มกระบวนการ Modal **
     if (modal_status === 'close') {
-        closeModal(message, modalId, slug);
+        closeModal(message, modalId, slug, success);
 
         return; // ออกจากฟังก์ชันทันที ไม่ต้องสร้าง Modal
     }
@@ -92,17 +92,20 @@ function updateStatusModal(message, modal_status, slug) {
     }
 }
 
-function closeModal(message, modalId, slug) { //สำหรับปิด modal
+function closeModal(message, modalId, slug, success) { //สำหรับปิด modal
     document.getElementById('modal-message').textContent = message;
     const modalToRemove = document.getElementById(modalId);
-
+    
     // หน่วงเวลา 2 วินาที ก่อนปิด Modal และรีเฟรชหน้าจอ
     setTimeout(() => {
-        if(slug === null){
-            window.location.reload();
-        } else {
+        if(success){
+            console.log(success);
             const appUrl = import.meta.env.VITE_APP_URL;
             window.location.href = appUrl+"/profile?tab="+slug+"::data::tab";
+        } else {
+            modalToRemove.remove();
+            console.log(slug);
+            Livewire.dispatch('document-upload-error', {actionId: slug});
         }
             
     }, 3000);

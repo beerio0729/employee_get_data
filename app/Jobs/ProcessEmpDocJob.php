@@ -23,8 +23,9 @@ class ProcessEmpDocJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    protected $name_file;
-    protected $filePaths;
+    protected $file_name;
+    protected $file_name_th;
+    protected $file_Paths;
     public $hasOneData = [];
     public $hasManyData = [];
     public $user;
@@ -37,12 +38,13 @@ class ProcessEmpDocJob implements ShouldQueue
     /**
      * สร้าง Job Instance ใหม่
      */
-    public function __construct(array $data, $user)
-    {
-        $this->name_file = array_keys($data)[0]; //ถอด key ของ array จะได้ชนิดเอกสาร
-        $this->filePaths = $data[$this->name_file];
+    public function __construct(array $data, $user, $file_name_th)
+    {   
+        $this->file_name = array_keys($data)[0]; //ถอด key ของ array จะได้ชนิดเอกสาร เพราะเรียงไว้ฟอร์มแรก
+        $this->file_name_th = $file_name_th;
+        $this->file_Paths = $data[$this->file_name];
         $this->user = $user;
-        //dump($data);
+        event(new ProcessEmpDocEvent('กำลังเตรียมข้อมูล...', $this->user));
     }
 
     /**
@@ -50,14 +52,13 @@ class ProcessEmpDocJob implements ShouldQueue
      */
     public function handle(): void
     {
-        event(new ProcessEmpDocEvent('กำลังเตรียมข้อมูล...', $this->user));
-        if (is_array($this->filePaths)) {
+        if (is_array($this->file_Paths)) {
             // Case 1: Multiple Files (Array)
-            $contents = $this->buildMultiContents($this->filePaths);
+            $contents = $this->buildMultiContents($this->file_Paths);
         } else {
             // Case 2: Single File (String)
-            // เราส่ง $this->filePaths เข้าไปตรงๆ ซึ่งตอนนี้คือ String
-            $contents = $this->buildContents($this->filePaths);
+            // เราส่ง $this->file_Paths เข้าไปตรงๆ ซึ่งตอนนี้คือ String
+            $contents = $this->buildContents($this->file_Paths);
         }
 
         event(new ProcessEmpDocEvent('เตรียมข้อมูลเสร็จแล้ว Ai กำลังประมวลผล...', $this->user));
@@ -65,11 +66,11 @@ class ProcessEmpDocJob implements ShouldQueue
 
         if ($this->hasOneData['check'] === 'yes') {
             $this->processSaveToDB($this->hasOneData, $this->hasManyData);
-            event(new ProcessEmpDocEvent('กระบวนการเสร็จสิ้น', $this->user, 'close', $this->name_file));
+            event(new ProcessEmpDocEvent('กระบวนการเสร็จสิ้น', $this->user, 'close', $this->file_name, true));
         } else {
             $this->deleteFile();
             // 2. โยน Exception เพื่อสั่งให้ Job Worker จัดการ
-            $this->fail('ขออภัย! คุณอับโหลดเอกสารผิดประเภท โปรดอับโหลดเอกสารตามประเภทที่ระบุ');
+            $this->fail('ขออภัย! เอกสารของคุณไม่ใช้ "'.$this->file_name_th.'" โปรดอับโหลดเอกสารให้ถูกประเภท');
         }
     }
 
@@ -78,7 +79,10 @@ class ProcessEmpDocJob implements ShouldQueue
         event(new ProcessEmpDocEvent(
             $exception->getMessage() ?? 'ขออภัย! เกิดข้อผิดพลาดโปรดลองใหม่อีกครั้ง',
             $this->user,
-            'close' // error
+            'close',
+            $this->file_name,
+            false
+            
         ));
         $this->deleteFile();
     }
@@ -89,15 +93,15 @@ class ProcessEmpDocJob implements ShouldQueue
      * @return void
      */
 
-    protected function buildContents($filePaths)
+    protected function buildContents($file_Paths)
     {
 
-        $fileContent = Storage::disk('public')->get($filePaths);
-        $mimeType = Storage::disk('public')->mimeType($filePaths);
+        $fileContent = Storage::disk('public')->get($file_Paths);
+        $mimeType = Storage::disk('public')->mimeType($file_Paths);
         //dump($mimeType);
         $parts = [
             [
-                'text' => config("empPromtForAi.{$this->name_file}", [])
+                'text' => config("empPromtForAi.{$this->file_name}", [])
             ],
             [
                 'inline_data' => [
@@ -116,16 +120,16 @@ class ProcessEmpDocJob implements ShouldQueue
         return $contents;
     }
 
-    protected function buildMultiContents(array $filePaths): array
+    protected function buildMultiContents(array $file_Paths): array
     {
         // Logic ที่เราสร้างขึ้นสำหรับ Array และ Loop
         $parts = [
             [
-                'text' => config("empPromtForAi.{$this->name_file}", [])
+                'text' => config("empPromtForAi.{$this->file_name}", [])
             ]
         ];
 
-        foreach ($filePaths as $filePath) {
+        foreach ($file_Paths as $filePath) {
             $fileContent = Storage::disk('public')->get($filePath);
             $mimeType = Storage::disk('public')->mimeType($filePath);
 
@@ -152,7 +156,7 @@ class ProcessEmpDocJob implements ShouldQueue
         $url = "{$baseUrl}{$model}:generateContent?key={$apiKey}";
 
         // 2. กำหนด JSON Schema (ใช้ Schema เดิมจาก Controller)
-        $arrayForSchema = config("empSendtoAIArray.{$this->name_file}", []);
+        $arrayForSchema = config("empSendtoAIArray.{$this->file_name}", []);
         $jsonSchema = [
             'type' => 'object',
             'properties' => $arrayForSchema,
@@ -321,7 +325,7 @@ class ProcessEmpDocJob implements ShouldQueue
 
     public function processSaveToDB(array $hasOneData, array $hasManyData): void
     {   
-        $className = 'App\\Services\\JobForSaveDBFromAI\\Save' . ucfirst($this->name_file) . 'ToDB';
+        $className = 'App\\Services\\JobForSaveDBFromAI\\Save' . ucfirst($this->file_name) . 'ToDB';
         $instance = new $className();
         $instance->saveToDB($hasOneData, $hasManyData, $this->user);
     }
@@ -329,7 +333,7 @@ class ProcessEmpDocJob implements ShouldQueue
     public function deleteFile()
         {
              $doc_file = $this->user->userHasmanyDocEmp()
-                ->where('file_name', $this->name_file)
+                ->where('file_name', $this->file_name)
                 ->first();
 
             if ($doc_file) {

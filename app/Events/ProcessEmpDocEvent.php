@@ -20,6 +20,7 @@ class ProcessEmpDocEvent implements ShouldBroadcastNow
     public $user;
     public $modal_status;
     public $file_name;
+    public $success;
 
     /**
      * Create a new event instance.
@@ -34,12 +35,14 @@ class ProcessEmpDocEvent implements ShouldBroadcastNow
         $user, 
         ?string $modal_status = "open",
         ?string $file_name = null,
+        ?bool $success = null
         )
     {
         $this->message = $message;
         $this->user = $user;
         $this->modal_status = $modal_status;
         $this->file_name = $file_name;
+        $this->success = $success;
     }
 
     /**
@@ -61,6 +64,7 @@ class ProcessEmpDocEvent implements ShouldBroadcastNow
             'message' => $this->message,
             'modal_status' => $this->modal_status,
             'slug' => $this->file_name,
+            'success' => $this->success,
         ];
     }
 

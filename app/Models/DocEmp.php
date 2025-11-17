@@ -13,6 +13,7 @@ class DocEmp extends Model
     protected $fillable = [
         "user_id",
         "file_name",
+        "file_name_th",
         "path",
         "confirm",
         "check"

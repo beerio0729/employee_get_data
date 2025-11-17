@@ -12,7 +12,7 @@ class SaveIdcardToDB
     public function saveToDB(array $hasOneData, array $hasManyData, $user): void
     {
         $hasOneDataSuccess = $this->saveHasOneResumeLocation($hasOneData);
-        //dump($hasOneDataSuccess);
+        dump($hasOneData);
         $user->userHasoneIdcard()->updateOrCreate(
             ['user_id' => $user->id],
             $hasOneDataSuccess

@@ -159,11 +159,11 @@ return [
         ],
         'date_of_admission' => [
             'type' => 'string',
-            'description' => 'วันที่/ปีที่เข้าศึกษา (รูปแบบ YYYY-MM-DD หรือ ปี พ.ศ.)'
+            'description' => 'วันที่/ปีที่เข้าศึกษา (รูปแบบ YYYY-MM-DD หรือ ปี ค.ศ.)'
         ],
         'date_of_graduation' => [
             'type' => 'string',
-            'description' => 'วันที่/ปีที่สำเร็จการศึกษา/ได้รับวุฒิ (รูปแบบ YYYY-MM-DD หรือ ปี พ.ศ.)'
+            'description' => 'วันที่/ปีที่สำเร็จการศึกษา/ได้รับวุฒิ (รูปแบบ YYYY-MM-DD หรือ ปี ค.ศ.)'
         ],
         'gpa' => [
             'type' => 'string', // ใช้ 'number' สำหรับตัวเลขทศนิยม

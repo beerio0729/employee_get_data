@@ -14,6 +14,7 @@ use Filament\View\PanelsRenderHook;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Vite;
+use App\Filament\Pages\Auth\Register;
 use Filament\Http\Middleware\Authenticate;
 use App\Filament\Widgets\UserProfileWidget;
 use Illuminate\Session\Middleware\StartSession;
@@ -39,6 +40,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('/')
             ->login()
             ->profile(EditProfile::class)
+            ->registration(Register::class)
             ->databaseNotifications()
             //->databaseNotificationsPolling('3s')
             ->colors([

@@ -38,8 +38,6 @@ class EditProfile extends BaseEditProfile
     {
         return $schema
             ->components([
-                $this->getDataResume(),
-
                 Section::make('คลิกที่นี่เพื่อเปลี่ยน Email หรือ Password')
                     ->description('ท่านสามารถแก้ไขอีเมลหรือรหัสผ่านได้ หรือ จะไม่แก้ไขก็ได้')
                     ->hiddenLabel()
@@ -47,7 +45,8 @@ class EditProfile extends BaseEditProfile
                         $this->getEmailFormComponent(),
                         $this->getPasswordFormComponent(),
                         $this->getPasswordConfirmationFormComponent(),
-                    ])->columns(3)->collapsed()
+                    ])->columns(3)->collapsed(),
+                $this->getDataResume(),
             ]);
     }
 
@@ -69,21 +68,25 @@ class EditProfile extends BaseEditProfile
                             ->label('กรุณาอับโหลดรูปภาพ')
                             ->disk('public')
                             ->visibility('public')
-                            //->disabled()
+                            ->disabled()
                             ->openable()
                             ->deletable(false)
                             ->panelLayout('grid')
                             //->avatar()
                             ->directory('emp_files')
-                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file) {
+                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component) {
                                 $extension = $file->getClientOriginalExtension();
                                 $userEmail = auth()->user()->email;
-                                return "{$userEmail}/image_profile.{$extension}";
+                                return "{$userEmail}/$component->getName().{$extension}";
                             })
                             ->afterStateHydrated(function ($component, $state) {
                                 $user = auth()->user();
-                                $doc = $user->userHasmanyDocEmp()->where('file_name', 'image_profile')->first();
+                                $doc = $user->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
                                 $component->state($doc ? $doc->path : null);
+                            })
+                            ->hidden(function ($component, $record) {
+                                $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
+                                return $doc ? 0 : 1;
                             })
                             //->maxSize(3000)
                             //->columnSpan(2)
@@ -316,20 +319,25 @@ class EditProfile extends BaseEditProfile
                             ->pdfNavPanes(true) // Enable navigation panes
                             ->label('เลือกไฟล์')
                             ->openable()
+                            ->disabled()
                             ->deletable(false)
                             ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
                             ->disk('public')
                             ->directory('emp_files')
-                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file) {
+                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component) {
                                 $extension = $file->getClientOriginalExtension();
                                 $userEmail = auth()->user()->email;
-                                return "{$userEmail}/resume.{$extension}";
+                                return "{$userEmail}/$component->getName().{$extension}";
                             })
                             ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                             ->afterStateHydrated(function ($component) {
                                 $user = auth()->user();
-                                $doc = $user->userHasmanyDocEmp()->where('file_name', 'resume')->first();
+                                $doc = $user->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
                                 $component->state($doc ? $doc->path : null);
+                            })
+                            ->hidden(function ($component, $record) {
+                                $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
+                                return $doc ? 0 : 1;
                             })
 
                     ]),
@@ -494,7 +502,7 @@ class EditProfile extends BaseEditProfile
                                     ->hiddenlabel()
                                     ->placeholder('รหัสไปรษณีย์')
                             ])->collapsed(),
-                        AdvancedFileUpload::make('id_card')
+                        AdvancedFileUpload::make('idcard')
                             ->pdfPreviewHeight(400) // Customize preview height
                             ->pdfDisplayPage(1) // Set default page
                             ->pdfToolbar(true) // Enable toolbar
@@ -503,20 +511,25 @@ class EditProfile extends BaseEditProfile
                             ->pdfNavPanes(true) // Enable navigation panes
                             ->label('เลือกไฟล์')
                             ->openable()
+                            ->disabled()
                             ->deletable(false)
                             ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
                             ->disk('public')
                             ->directory('emp_files')
-                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file) {
+                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component) {
                                 $extension = $file->getClientOriginalExtension();
                                 $userEmail = auth()->user()->email;
-                                return "{$userEmail}/idcard.{$extension}";
+                                return "{$userEmail}/$component->getName().{$extension}";
                             })
                             ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                             ->afterStateHydrated(function ($component) {
                                 $user = auth()->user();
-                                $doc = $user->userHasmanyDocEmp()->where('file_name', 'idcard')->first();
+                                $doc = $user->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
                                 $component->state($doc ? $doc->path : null);
+                            })
+                            ->hidden(function ($component, $record) {
+                                $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
+                                return $doc ? 0 : 1;
                             })
 
                     ]),
@@ -587,22 +600,25 @@ class EditProfile extends BaseEditProfile
                             ->openable()
                             ->deletable(false)
                             ->multiple()
-                            //->panelLayout('grid')
+                            ->disabled()
                             ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
                             ->disk('public')
                             ->directory('emp_files')
-                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $state) {
-
+                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component, $state) {
                                 $i = mt_rand(1000, 9000);
                                 $extension = $file->getClientOriginalExtension();
                                 $userEmail = auth()->user()->email;
-                                return "{$userEmail}/transcript_{$i}.{$extension}";
+                                return "{$userEmail}/$component->getName()_{$i}.{$extension}";
                             })
                             ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                             ->afterStateHydrated(function ($component, $state) {
                                 $user = auth()->user();
-                                $doc = $user->userHasmanyDocEmp()->where('file_name', 'transcript')->first();
+                                $doc = $user->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
                                 $component->state($doc ? $doc->path : null);
+                            })
+                            ->hidden(function ($component, $record) {
+                                $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
+                                return $doc ? 0 : 1;
                             })
                     ]),
                 Tab::make('สมุดบัญชีธนาคาร')
@@ -634,22 +650,27 @@ class EditProfile extends BaseEditProfile
                             ->openable()
                             ->deletable(false)
                             ->multiple()
+                            ->disabled()
                             //->panelLayout('grid')
                             ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
                             ->disk('public')
                             ->directory('emp_files')
-                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $state) {
+                            ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component, $state) {
 
                                 $i = mt_rand(1000, 9000);
                                 $extension = $file->getClientOriginalExtension();
                                 $userEmail = auth()->user()->email;
-                                return "{$userEmail}/bookbank_{$i}.{$extension}";
+                                return "{$userEmail}/$component->getName().{$extension}";
                             })
                             ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                             ->afterStateHydrated(function ($component, $state) {
                                 $user = auth()->user();
-                                $doc = $user->userHasmanyDocEmp()->where('file_name', 'bookbank')->first();
+                                $doc = $user->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
                                 $component->state($doc ? $doc->path : null);
+                            })
+                            ->hidden(function ($component, $record) {
+                                $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
+                                return $doc ? 0 : 1;
                             })
                     ]),
             ])->columnSpanFull()->persistTabInQueryString();
@@ -664,4 +685,5 @@ class EditProfile extends BaseEditProfile
     {
         return env('APP_URL');
     }
+    
 }

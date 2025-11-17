@@ -2,20 +2,17 @@
 
 namespace App\Filament\Resources\Roles;
 
-use BackedEnum;
-use App\Models\Role;
-use Filament\Tables\Table;
-use Filament\Schemas\Schema;
-use Filament\Resources\Resource;
-use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Resources\Roles\Pages\CreateRole;
 use App\Filament\Resources\Roles\Pages\EditRole;
 use App\Filament\Resources\Roles\Pages\ListRoles;
-use App\Filament\Resources\Roles\Pages\CreateRole;
 use App\Filament\Resources\Roles\Schemas\RoleForm;
 use App\Filament\Resources\Roles\Tables\RolesTable;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Models\Role;
+use BackedEnum;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Table;
 
 class RoleResource extends Resource
 {
@@ -23,7 +20,7 @@ class RoleResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
-    protected static ?string $recordTitleAttribute = 'Role';
+    protected static ?string $recordTitleAttribute = 'กำหนดสถานะพนักงาน';
 
     public static function form(Schema $schema): Schema
     {
@@ -50,18 +47,11 @@ class RoleResource extends Resource
             'edit' => EditRole::route('/{record}/edit'),
         ];
     }
-
-    public static function getRecordRouteBindingEloquentQuery(): Builder
-    {
-        return parent::getRecordRouteBindingEloquentQuery()
-            ->withoutGlobalScopes([
-                SoftDeletingScope::class,
-            ]);
-    }
     
-     public static function canViewAny(): bool
-    {
-        if (Auth::user()->role_id === 1) {
+    // ป้องกันไม่ให้ผู้ใช้ทั่วไปเข้าถึง Resource
+    public static function canViewAny(): bool
+    {   $user = auth()->user();
+        if (in_array($user->role_id, [1, 2])) {
             return true;
         } else {
             return false;
@@ -70,7 +60,8 @@ class RoleResource extends Resource
 
     public static function canCreate(): bool
     {
-        if (Auth::user()->role_id === 1) {
+        $user = auth()->user();
+        if (in_array($user->role_id, [1, 2])) {
             return true;
         } else {
             return false;
@@ -79,7 +70,8 @@ class RoleResource extends Resource
 
     public static function canEdit($record): bool
     {
-        if (Auth::user()->role_id === 1) {
+        $user = auth()->user();
+        if (in_array($user->role_id, [1, 2])) {
             return true;
         } else {
             return false;
@@ -88,7 +80,8 @@ class RoleResource extends Resource
 
     public static function canDelete($record): bool
     {
-        if (Auth::user()->role_id === 1) {
+        $user = auth()->user();
+        if (in_array($user->role_id, [1, 2])) {
             return true;
         } else {
             return false;

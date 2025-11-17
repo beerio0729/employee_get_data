@@ -11,10 +11,8 @@ class Role extends Model
     
     protected $table = "roles"; //ชื่อตาราง
     protected $fillable = [
-        'id',
         'name',
         'active',
-        'deleted_at',
         'created_at'
     ];
 

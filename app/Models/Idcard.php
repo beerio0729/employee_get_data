@@ -35,4 +35,19 @@ class Idcard extends Model
         'date_of_issue'=> 'date', //วันที่ออกบัตร
         'date_of_expiry'=> 'date',
     ];
+    
+    public function idcardBelongtoprovince()
+    {
+        return $this->belongsTo(Provinces::class, 'province_id', 'id');
+    }
+
+    public function idcardBelongtodistrict()
+    {
+        return $this->belongsTo(Districts::class, 'district_id', 'id');
+    }
+
+    public function idcardBelongtosubdistrict()
+    {
+        return $this->belongsTo(Subdistricts::class, 'subdistrict_id', 'id');
+    }
 }
