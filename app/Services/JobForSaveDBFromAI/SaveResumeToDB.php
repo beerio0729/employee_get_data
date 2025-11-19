@@ -14,7 +14,7 @@ class SaveResumeToDB
     public function saveToDB(array $hasOneData, array $hasManyData, $user): void
     {
         $hasOneDataSuccess = $this->saveHasOneResumeLocation($hasOneData);
-        // dump($hasOneData);
+        dump($user->userHasoneResume->id);
         // dump('--------------------'); 
         // dump('--------------------');
         // dump($hasOneDataSuccess);
@@ -25,7 +25,10 @@ class SaveResumeToDB
             ['user_id' => $user->id],
             $hasOneDataSuccess
         );
-        $resume->resumeHasonelocation()->create($hasOneDataSuccess);
+        $resume->resumeHasonelocation()->updateOrCreate(
+            ['resume_id' => $user->userHasoneResume->id],
+            $hasOneDataSuccess
+        );
         $resume->resumeHasoneJobPreference()->create($hasOneDataSuccess);
 
         $workExperiences = $hasManyData['work_experience'] ?? [];

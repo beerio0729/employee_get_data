@@ -4,12 +4,16 @@ namespace App\Filament\Pages;
 
 
 use Closure;
+use Detection\MobileDetect;
 use Filament\Actions\Action;
 use App\Jobs\ProcessEmpDocJob;
 use Filament\Support\Enums\Size;
 use Filament\Actions\ActionGroup;
+use App\Events\ProcessEmpDocEvent;
+use Filament\Actions\DeleteAction;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Facades\Log;
+use App\Jobs\ProcessAnotherEmpDocJob;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Toggle;
 use Illuminate\Support\Facades\Storage;
@@ -40,7 +44,7 @@ class Dashboard extends BaseDashboard
     ';
     public $modal = [
         'is_open' => false,
-        'action_id' => null,
+        'action_id' => null
     ];
 
     protected $listeners = [
@@ -50,9 +54,10 @@ class Dashboard extends BaseDashboard
     public bool $isSubmitDisabledFromFile = true;
     public bool $isSubmitDisabledFromConfirm = true;
 
+    public bool $isMobile;
 
     public function updateStateInFile($value)
-    {   
+    {
         $this->isSubmitDisabledFromFile = $value; // Disable if empty
     }
 
@@ -65,6 +70,8 @@ class Dashboard extends BaseDashboard
     /************************************** */
     public function getActions(): array
     {
+        $detect = new MobileDetect();
+        $this->isMobile = $detect->isMobile();
         return [
             ActionGroup::make([
                 Action::make('image_profile')
@@ -204,17 +211,14 @@ class Dashboard extends BaseDashboard
                     ->schema(function ($action) {
                         return [
                             AdvancedFileUpload::make($action->getName())
-                                ->pdfPreviewHeight(400) // Customize preview height
-                                ->pdfDisplayPage(1) // Set default page
-                                ->pdfToolbar(true) // Enable toolbar
-                                ->pdfZoomLevel(100) // Set zoom level
-                                ->pdfFitType(PdfViewFit::FIT) // Set fit type
-                                ->pdfNavPanes(true) // Enable navigation panes
                                 ->label('เลือกไฟล์')
                                 ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
                                 ->disk('public')
                                 ->directory('emp_files')
                                 ->required()
+                                ->previewable(function () {
+                                    return $this->isMobile ? 0 : 1;
+                                })
                                 ->validationMessages([
                                     'required' => 'คุณยังไม่ได้อับโหลดเอกสารใดๆ กรุณาอับโหลดไฟล์ก่อนส่ง',
                                 ])
@@ -319,7 +323,7 @@ class Dashboard extends BaseDashboard
                             );
                         }
 
-                        ProcessEmpDocJob::dispatch($data, $user, $action->getLabel());
+                        ProcessEmpDocJob::dispatch($data[$action->getName()], $user, $action->getName(), $action->getLabel());
                     }),
                 Action::make('idcard')
                     ->label('บัตรประชาชน')
@@ -343,12 +347,9 @@ class Dashboard extends BaseDashboard
                     ->schema(function ($action) {
                         return [
                             AdvancedFileUpload::make($action->getName())
-                                ->pdfPreviewHeight(400) // Customize preview height
-                                ->pdfDisplayPage(1) // Set default page
-                                ->pdfToolbar(true) // Enable toolbar
-                                ->pdfZoomLevel(100) // Set zoom level
-                                ->pdfFitType(PdfViewFit::FIT) // Set fit type
-                                ->pdfNavPanes(true) // Enable navigation panes
+                                ->previewable(function () {
+                                    return $this->isMobile ? 0 : 1;
+                                })
                                 ->label('เลือกไฟล์')
                                 ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
                                 ->disk('public')
@@ -433,7 +434,7 @@ class Dashboard extends BaseDashboard
                                 ]
                             );
                         }
-                        ProcessEmpDocJob::dispatch($data, $user, $action->getLabel());
+                        ProcessEmpDocJob::dispatch($data[$action->getName()], $user, $action->getName(), $action->getLabel());
                     }),
                 Action::make('transcript')
                     ->label('ใบแสดงผลการศึกษา')
@@ -441,6 +442,136 @@ class Dashboard extends BaseDashboard
                     ->modalSubmitAction(function ($action) {
                         $action->disabled(fn(): bool => ($this->isSubmitDisabledFromFile || $this->isSubmitDisabledFromConfirm));
                     })
+
+                    ->modalSubmitActionLabel(
+                        fn($action) => auth()->user()->userHasmanyDocEmp()->where('file_name', $action->getName())->exists()
+                            ? 'อับเดตข้อมูล'
+                            : 'อับโหลดข้อมูล'
+                    )
+                    ->button()
+                    ->icon(fn($action) => auth()->user()->userHasmanyDocEmp()->where('file_name', $action->getName())->exists()
+                        ? 'heroicon-m-check-circle'
+                        : 'heroicon-m-exclamation-triangle')
+                    ->color(fn($action) => auth()->user()->userHasmanyDocEmp()->where('file_name', $action->getName())->exists()
+                        ? 'success'
+                        : 'warning')
+                    ->schema(function ($action) {
+                        return [
+                            AdvancedFileUpload::make($action->getName())
+                                ->previewable(function () {
+                                    return $this->isMobile ? 0 : 1;
+                                })
+                                ->panelLayout(function () {
+                                    return $this->isMobile ? null : 'grid';
+                                })
+                                ->label('เลือกไฟล์')
+                                ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
+                                ->disk('public')
+                                ->directory('emp_files')
+                                ->multiple()
+                                ->required()
+                                ->validationMessages([
+                                    'required' => 'คุณยังไม่ได้อับโหลดเอกสารใดๆ กรุณาอับโหลดไฟล์ก่อนส่ง',
+                                ])
+                                ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file) use ($action) {
+                                    $i = mt_rand(1000, 9000);
+                                    $extension = $file->getClientOriginalExtension();
+                                    $userEmail = auth()->user()->email;
+                                    return "{$userEmail}/{$action->getName()}/{$action->getName()}_{$i}.{$extension}";
+                                })
+                                ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                                ->afterStateUpdated(function (Set $set, $state) {
+                                    $set('confirm', 0);
+                                    $this->updateStateInFile(empty($state));
+                                })
+                                ->afterStateHydrated(function () {
+                                    $this->updateStateInFile(true);
+                                })
+                                ->deleteUploadedFileUsing(function ($state) use ($action) {
+                                    // ลบไฟล์จริงใน storage และลบ record ใน DB ด้วย
+                                    $user = auth()->user();
+                                    $doc = $user->userHasmanyDocEmp()
+                                        ->where('file_name', $action->getName())
+                                        ->first();
+                                    $path = $doc->path;
+
+                                    $fileDelete = array_values(array_diff($path, $state));
+                                    if (count($path) > 1) {
+                                        //dump($fileDelete);
+                                        Storage::disk('public')->delete($fileDelete[0]);
+                                        //dump($path);
+                                        $pathSuccess = array_values(array_diff($path, $fileDelete));
+                                        //dump($pathSuccess);
+                                        $user->userHasmanyDocEmp()->updateOrCreate(
+                                            ['file_name' => $action->getName()],
+                                            ['path' => $pathSuccess]
+                                        );
+                                    } else {
+                                        Storage::disk('public')->delete($path);
+                                        $doc->delete();
+                                    }
+                                    $this->updateStateInConfirm(true);
+                                }),
+                            Toggle::make('confirm')
+                                ->label(new HtmlString($this->confirm))
+                                ->accepted()
+                                ->live()
+                                ->afterStateHydrated(function () {
+                                    $this->updateStateInConfirm(false);
+                                })
+                                ->default(false)
+                                ->validationMessages([
+                                    'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
+                                ])
+                                // ->disabled(function () use ($action) {
+                                //     $user = auth()->user();
+                                //     $doc_file = $user->userHasmanyDocEmp()
+                                //         ->where('file_name', $action->getName())
+                                //         ->first();
+                                //     return !empty($doc_file) ? 1 : 0;
+                                // })
+                                ->afterStateUpdated(function ($state) {
+                                    $this->updateStateInConfirm($state);
+                                }),
+
+                        ];
+                    })
+                    ->fillForm(function ($action): array {
+                        $user = auth()->user();
+                        $doc = $user->userHasmanyDocEmp()->where('file_name', $action->getName())->first();
+
+                        // ต้อง Return Array โดย Key ต้องตรงกับชื่อ Field (emp_image)
+                        return [
+                            $action->getName() => $doc ? $doc->path : null,
+                            'confirm' => $doc ? $doc->confirm : false,
+                        ];
+                    })
+
+                    ->action(function (array $data, $action) {
+                        $user = auth()->user();
+
+                        if (!empty($data[$action->getName()])) {
+                            $user->userHasmanyDocEmp()->updateOrCreate(
+                                ['file_name' => $action->getName()],
+                                [
+                                    'user_id' => $user->id,
+                                    'file_name_th' => $action->getLabel(),
+                                    'path' => $data[$action->getName()],
+                                    'confirm' => $data['confirm'],
+                                ]
+                            );
+                        }
+                        ProcessEmpDocJob::dispatch($data[$action->getName()], $user, $action->getName(), $action->getLabel());
+                    }),
+
+
+
+                Action::make('another')
+                    ->label('เอกสารเพิ่มเติม')
+                    ->closeModalByClickingAway(false)
+                    // ->modalSubmitAction(function ($action) {
+                    //     $action->disabled(fn(): bool => ($this->isSubmitDisabledFromFile || $this->isSubmitDisabledFromConfirm));
+                    // })
 
                     ->modalSubmitActionLabel(
                         fn($action) => auth()->user()->userHasmanyDocEmp()->where('file_name', $action->getName())->exists()
@@ -468,15 +599,19 @@ class Dashboard extends BaseDashboard
                                 ->disk('public')
                                 ->directory('emp_files')
                                 ->multiple()
-                                ->required()
+                                ->reorderable()
+                                ->appendFiles()
+                                ->panelLayout(function () {
+                                    return $this->isMobile ? null : 'grid';
+                                })
                                 ->validationMessages([
                                     'required' => 'คุณยังไม่ได้อับโหลดเอกสารใดๆ กรุณาอับโหลดไฟล์ก่อนส่ง',
                                 ])
                                 ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file) use ($action) {
-                                    $i = mt_rand(1000, 9000);
                                     $extension = $file->getClientOriginalExtension();
+                                    $name = $file->getClientOriginalName();
                                     $userEmail = auth()->user()->email;
-                                    return "{$userEmail}/{$action->getName()}_{$i}.{$extension}";
+                                    return "{$userEmail}/{$action->getName()}/{$name}.{$extension}";
                                 })
                                 ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                                 ->afterStateUpdated(function (Set $set, $state) {
@@ -486,17 +621,30 @@ class Dashboard extends BaseDashboard
                                 ->afterStateHydrated(function () {
                                     $this->updateStateInFile(true);
                                 })
-                                ->deleteUploadedFileUsing(function () use ($action) {
+                                ->deleteUploadedFileUsing(function ($state) use ($action) {
                                     // ลบไฟล์จริงใน storage และลบ record ใน DB ด้วย
                                     $user = auth()->user();
                                     $doc = $user->userHasmanyDocEmp()
                                         ->where('file_name', $action->getName())
                                         ->first();
+                                    $path = $doc->path;
 
-                                    if ($doc) {
-                                        Storage::disk('public')->delete($doc->path);
+                                    $fileDelete = array_values(array_diff($path, $state));
+                                    if (count($path) > 1) {
+                                        //dump($fileDelete);
+                                        Storage::disk('public')->delete($fileDelete[0]);
+                                        //dump($path);
+                                        $pathSuccess = array_values(array_diff($path, $fileDelete));
+                                        //dump($pathSuccess);
+                                        $user->userHasmanyDocEmp()->updateOrCreate(
+                                            ['file_name' => $action->getName()],
+                                            ['path' => $pathSuccess]
+                                        );
+                                    } else {
+                                        Storage::disk('public')->delete($path);
                                         $doc->delete();
                                     }
+                                    $this->updateStateInConfirm(true);
                                 }),
                             Toggle::make('confirm')
                                 ->label(new HtmlString($this->confirm))
@@ -509,13 +657,13 @@ class Dashboard extends BaseDashboard
                                 ->validationMessages([
                                     'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
                                 ])
-                                ->disabled(function () use ($action) {
-                                    $user = auth()->user();
-                                    $doc_file = $user->userHasmanyDocEmp()
-                                        ->where('file_name', $action->getName())
-                                        ->first();
-                                    return !empty($doc_file) ? 1 : 0;
-                                })
+                                // ->disabled(function () use ($action) {
+                                //     $user = auth()->user();
+                                //     $doc_file = $user->userHasmanyDocEmp()
+                                //         ->where('file_name', $action->getName())
+                                //         ->first();
+                                //     return !empty($doc_file) ? 1 : 0;
+                                // })
                                 ->afterStateUpdated(function ($state) {
                                     $this->updateStateInConfirm($state);
                                 }),
@@ -532,124 +680,13 @@ class Dashboard extends BaseDashboard
                             'confirm' => $doc ? $doc->confirm : false,
                         ];
                     })
-
                     ->action(function (array $data, $action) {
-                        $user = auth()->user();
-
-                        if (!empty($data[$action->getName()])) {
-                            $user->userHasmanyDocEmp()->updateOrCreate(
-                                ['file_name' => $action->getName()],
-                                [
-                                    'user_id' => $user->id,
-                                    'file_name_th' => $action->getLabel(),
-                                    'path' => $data[$action->getName()],
-                                    'confirm' => $data['confirm'],
-                                ]
-                            );
-                        }
-                        ProcessEmpDocJob::dispatch($data, $user, $action->getLabel());
-                    }),
-                Action::make('bookbank')
-                    ->label('สมุดบัญชีธนาคาร')
-                    ->closeModalByClickingAway(false)
-                    ->modalSubmitAction(function ($action) {
-                        $action->disabled(fn(): bool => ($this->isSubmitDisabledFromFile || $this->isSubmitDisabledFromConfirm));
-                    })
-
-                    ->modalSubmitActionLabel(
-                        fn($action) => auth()->user()->userHasmanyDocEmp()->where('file_name', $action->getName())->exists()
-                            ? 'อับเดตข้อมูล'
-                            : 'อับโหลดข้อมูล'
-                    )
-                    ->button()
-                    ->icon(fn($action) => auth()->user()->userHasmanyDocEmp()->where('file_name', $action->getName())->exists()
-                        ? 'heroicon-m-check-circle'
-                        : 'heroicon-m-exclamation-triangle')
-                    ->color(fn($action) => auth()->user()->userHasmanyDocEmp()->where('file_name', $action->getName())->exists()
-                        ? 'success'
-                        : 'warning')
-                    ->schema(function ($action) {
-                        return [
-                            AdvancedFileUpload::make($action->getName())
-                                ->pdfPreviewHeight(400) // Customize preview height
-                                ->pdfDisplayPage(1) // Set default page
-                                ->pdfToolbar(true) // Enable toolbar
-                                ->pdfZoomLevel(100) // Set zoom level
-                                ->pdfFitType(PdfViewFit::FIT) // Set fit type
-                                ->pdfNavPanes(true) // Enable navigation panes
-                                ->label('เลือกไฟล์')
-                                ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
-                                ->disk('public')
-                                ->directory('emp_files')
-
-                                ->required()
-                                ->validationMessages([
-                                    'required' => 'คุณยังไม่ได้อับโหลดเอกสารใดๆ กรุณาอับโหลดไฟล์ก่อนส่ง',
-                                ])
-                                ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file) use ($action) {
-                                    $i = mt_rand(1000, 9000);
-                                    $extension = $file->getClientOriginalExtension();
-                                    $userEmail = auth()->user()->email;
-                                    return "{$userEmail}/{$action->getName()}_{$i}.{$extension}";
-                                })
-                                ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
-                                ->afterStateUpdated(function (Set $set, $state) {
-                                    $set('confirm', 0);
-                                    $this->updateStateInFile(empty($state));
-                                })
-                                ->afterStateHydrated(function () {
-                                    $this->updateStateInFile(true);
-                                })
-                                ->deleteUploadedFileUsing(function () use ($action) {
-                                    // ลบไฟล์จริงใน storage และลบ record ใน DB ด้วย
-                                    $user = auth()->user();
-                                    $doc = $user->userHasmanyDocEmp()
-                                        ->where('file_name', $action->getName())
-                                        ->first();
-
-                                    if ($doc) {
-                                        Storage::disk('public')->delete($doc->path);
-                                        $doc->delete();
-                                    }
-                                }),
-                            Toggle::make('confirm')
-                                ->label(new HtmlString($this->confirm))
-                                ->accepted()
-                                ->live()
-                                ->afterStateHydrated(function () {
-                                    $this->updateStateInConfirm(false);
-                                })
-                                ->default(false)
-                                ->validationMessages([
-                                    'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
-                                ])
-                                ->disabled(function () use ($action) {
-                                    $user = auth()->user();
-                                    $doc_file = $user->userHasmanyDocEmp()
-                                        ->where('file_name', $action->getName())
-                                        ->first();
-                                    return !empty($doc_file) ? 1 : 0;
-                                })
-                                ->afterStateUpdated(function ($state) {
-                                    $this->updateStateInConfirm($state);
-                                }),
-
-                        ];
-                    })
-                    ->fillForm(function ($action): array {
                         $user = auth()->user();
                         $doc = $user->userHasmanyDocEmp()->where('file_name', $action->getName())->first();
-
-                        // ต้อง Return Array โดย Key ต้องตรงกับชื่อ Field (emp_image)
-                        return [
-                            $action->getName() => $doc ? $doc->path : null,
-                            'confirm' => $doc ? $doc->confirm : false,
-                        ];
-                    })
-
-                    ->action(function (array $data, $action) {
-                        $user = auth()->user();
-
+                        // dump($doc->path);
+                        // dump($data);
+                        $fileForSend = array_values(array_diff($data[$action->getName()], $doc->path ?? []));
+                        // dump($fileDelete);
                         if (!empty($data[$action->getName()])) {
                             $user->userHasmanyDocEmp()->updateOrCreate(
                                 ['file_name' => $action->getName()],
@@ -661,9 +698,15 @@ class Dashboard extends BaseDashboard
                                 ]
                             );
                         }
-                        ProcessEmpDocJob::dispatch($data, $user, $action->getLabel());
-                    }),
-            ])->label('อับโหลดเอกสาร')
+                        ProcessAnotherEmpDocJob::dispatch(
+                            $fileForSend,
+                            $user,
+                            $action->getName(),
+                            $action->getLabel()
+                        );
+                    })
+            ])
+                ->label('อับโหลดเอกสาร')
                 ->extraAttributes([
                     'style' => 'font-size: 1.3rem;',
                 ])
@@ -680,3 +723,122 @@ class Dashboard extends BaseDashboard
         $this->mountAction($actionId);
     }
 }
+
+
+
+
+
+                // Action::make('bookbank')
+                //     ->label('สมุดบัญชีธนาคาร')
+                //     ->closeModalByClickingAway(false)
+                //     ->modalSubmitAction(function ($action) {
+                //         $action->disabled(fn(): bool => ($this->isSubmitDisabledFromFile || $this->isSubmitDisabledFromConfirm));
+                //     })
+
+                //     ->modalSubmitActionLabel(
+                //         fn($action) => auth()->user()->userHasmanyDocEmp()->where('file_name', $action->getName())->exists()
+                //             ? 'อับเดตข้อมูล'
+                //             : 'อับโหลดข้อมูล'
+                //     )
+                //     ->button()
+                //     ->icon(fn($action) => auth()->user()->userHasmanyDocEmp()->where('file_name', $action->getName())->exists()
+                //         ? 'heroicon-m-check-circle'
+                //         : 'heroicon-m-exclamation-triangle')
+                //     ->color(fn($action) => auth()->user()->userHasmanyDocEmp()->where('file_name', $action->getName())->exists()
+                //         ? 'success'
+                //         : 'warning')
+                //     ->schema(function ($action) {
+                //         return [
+                //             AdvancedFileUpload::make($action->getName())
+                //                 ->pdfPreviewHeight(400) // Customize preview height
+                //                 ->pdfDisplayPage(1) // Set default page
+                //                 ->pdfToolbar(true) // Enable toolbar
+                //                 ->pdfZoomLevel(100) // Set zoom level
+                //                 ->pdfFitType(PdfViewFit::FIT) // Set fit type
+                //                 ->pdfNavPanes(true) // Enable navigation panes
+                //                 ->label('เลือกไฟล์')
+                //                 ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
+                //                 ->disk('public')
+                //                 ->directory('emp_files')
+
+                //                 ->required()
+                //                 ->validationMessages([
+                //                     'required' => 'คุณยังไม่ได้อับโหลดเอกสารใดๆ กรุณาอับโหลดไฟล์ก่อนส่ง',
+                //                 ])
+                //                 ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file) use ($action) {
+                //                     $i = mt_rand(1000, 9000);
+                //                     $extension = $file->getClientOriginalExtension();
+                //                     $userEmail = auth()->user()->email;
+                //                     return "{$userEmail}/{$action->getName()}_{$i}.{$extension}";
+                //                 })
+                //                 ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                //                 ->afterStateUpdated(function (Set $set, $state) {
+                //                     $set('confirm', 0);
+                //                     $this->updateStateInFile(empty($state));
+                //                 })
+                //                 ->afterStateHydrated(function () {
+                //                     $this->updateStateInFile(true);
+                //                 })
+                //                 ->deleteUploadedFileUsing(function () use ($action) {
+                //                     // ลบไฟล์จริงใน storage และลบ record ใน DB ด้วย
+                //                     $user = auth()->user();
+                //                     $doc = $user->userHasmanyDocEmp()
+                //                         ->where('file_name', $action->getName())
+                //                         ->first();
+
+                //                     if ($doc) {
+                //                         Storage::disk('public')->delete($doc->path);
+                //                         $doc->delete();
+                //                     }
+                //                 }),
+                //             Toggle::make('confirm')
+                //                 ->label(new HtmlString($this->confirm))
+                //                 ->accepted()
+                //                 ->live()
+                //                 ->afterStateHydrated(function () {
+                //                     $this->updateStateInConfirm(false);
+                //                 })
+                //                 ->default(false)
+                //                 ->validationMessages([
+                //                     'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
+                //                 ])
+                //                 ->disabled(function () use ($action) {
+                //                     $user = auth()->user();
+                //                     $doc_file = $user->userHasmanyDocEmp()
+                //                         ->where('file_name', $action->getName())
+                //                         ->first();
+                //                     return !empty($doc_file) ? 1 : 0;
+                //                 })
+                //                 ->afterStateUpdated(function ($state) {
+                //                     $this->updateStateInConfirm($state);
+                //                 }),
+
+                //         ];
+                //     })
+                //     ->fillForm(function ($action): array {
+                //         $user = auth()->user();
+                //         $doc = $user->userHasmanyDocEmp()->where('file_name', $action->getName())->first();
+
+                //         // ต้อง Return Array โดย Key ต้องตรงกับชื่อ Field (emp_image)
+                //         return [
+                //             $action->getName() => $doc ? $doc->path : null,
+                //             'confirm' => $doc ? $doc->confirm : false,
+                //         ];
+                //     })
+
+                //     ->action(function (array $data, $action) {
+                //         $user = auth()->user();
+
+                //         if (!empty($data[$action->getName()])) {
+                //             $user->userHasmanyDocEmp()->updateOrCreate(
+                //                 ['file_name' => $action->getName()],
+                //                 [
+                //                     'user_id' => $user->id,
+                //                     'file_name_th' => $action->getLabel(),
+                //                     'path' => $data[$action->getName()],
+                //                     'confirm' => $data['confirm'],
+                //                 ]
+                //             );
+                //         }
+                //         ProcessEmpDocJob::dispatch($data, $user, $action->getName(), $action->getLabel());
+                //     }),

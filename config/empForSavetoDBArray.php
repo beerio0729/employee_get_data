@@ -58,7 +58,7 @@ return [
         'check',
     ],
 
-    'maritalDoc' => [
+    'marital' => [
         'marital_doc_status',
         'spouse_name',
         'divorce_date',

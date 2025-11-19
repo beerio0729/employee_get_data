@@ -1,30 +1,22 @@
 <?php
+
+use function PHPSTORM_META\type;
+
 return [
-    'idcard' => [
-        // Personal Info (Keys จาก Simplified Schema)
-        'prefix_name_th' => ['type' => 'string'],
-        'name_th' => ['type' => 'string'],
-        'last_name_th' => ['type' => 'string'],
-        'prefix_name_en' => ['type' => 'string'],
-        'name_en' => ['type' => 'string'],
-        'last_name_en' => ['type' => 'string'],
-        'id_card_number' => ['type' => 'string', 'description' => 'รหัสบัตรประชาชน'],
-        'religion' => ['type' => 'string'],
-        'date_of_birth' => ['type' => 'string', 'description' => 'วันเกิดในรูปแบบ ค.ศ. YYYY-MM-DD'],
-        'address' => ['type' => 'string', 'description' => 'ที่อยู่ตามบัตรประชาชน (ไม่รวม จังหวัด อำเภอ ตำบล รหัสไปรษณีย์)'],
-        'subdistrict' => ['type' => 'string', 'description' => 'ชื่อตำบล'],
-        'district' => ['type' => 'string', 'description' => 'ชื่ออำเภอ'],
-        'province' => ['type' => 'string', 'description' => 'ชื่อจังหวัด'],
-        'date_of_issue' => ['type' => 'string', 'description' => 'วันออกบัตร ค.ศ. YYYY-MM-DD'],
-        'date_of_expiry' => ['type' => 'string', 'description' => 'วันบัตรหมดอายุ ค.ศ. YYYY-MM-DD'],
-        'check' => ['type' => 'string', 'description' => 'ตรวจสอบว่าเป็นเอกสารประเภท บัตรประชาชน จริงๆ ตอบกลับมาว่า yes หรือ no'],
-    ],
-
-
-    // B. Sub-Schema สำหรับ Resume (Work/Skill/Contact Info)
     'resume' => [
         // Contact Info (Keys จาก Simplified Schema)
-        'full_name' => ['type' => 'string', 'description' => 'ชื่อ-นามสกุล'],
+        'prefix_name' => [
+            'type' => 'string',
+            'description' => 'คำนำหน้าชื่อที่ระบุในเอกสาร ภาษาไทยหรืออังกฤษ) เช่น นาย, นางสาว, Mr. Miss'
+        ],
+        'name' => [
+            'type' => 'string',
+            'description' => 'ชื่อ (ภาษาไทยหรืออังกฤษ) ที่ระบุในเอกสาร'
+        ],
+        'last_name' => [
+            'type' => 'string',
+            'description' => 'นามสกุล (ภาษาไทยหรืออังกฤษ) ที่ระบุในเอกสาร'
+        ],
         'email' => ['type' => 'string', 'description' => 'อีเมลติดต่อ'],
         'tel' => ['type' => 'string', 'description' => 'เบอร์โทรศัพท์มือถือ'],
         'weight' => ['type' => 'string', 'description' => 'น้ำหนัก (ตัวเลขเท่านั้น)'],
@@ -106,20 +98,26 @@ return [
         ],
     ],
 
-    // C. Sub-Schema สำหรับใบผ่านเกณฑ์ทหาร
-    'military' => [
-        'military' => ['type' => 'string', 'description' => 'สถานะการเกณฑ์ทหาร (พ้นภาระ, ยังไม่ถึงกำหนด, อื่นๆ)'], // ใช้ Key เดิม
-        'military_doc_detail' => ['type' => 'string', 'description' => 'รายละเอียดเพิ่มเติมจากเอกสารเกณฑ์ทหาร'],
+    'idcard' => [
+        // Personal Info (Keys จาก Simplified Schema)
+        'prefix_name_th' => ['type' => 'string'],
+        'name_th' => ['type' => 'string'],
+        'last_name_th' => ['type' => 'string'],
+        'prefix_name_en' => ['type' => 'string'],
+        'name_en' => ['type' => 'string'],
+        'last_name_en' => ['type' => 'string'],
+        'id_card_number' => ['type' => 'string', 'description' => 'รหัสบัตรประชาชน'],
+        'religion' => ['type' => 'string'],
+        'date_of_birth' => ['type' => 'string', 'description' => 'วันเกิดในรูปแบบ ค.ศ. YYYY-MM-DD'],
+        'address' => ['type' => 'string', 'description' => 'ที่อยู่ตามบัตรประชาชน (ไม่รวม จังหวัด อำเภอ ตำบล รหัสไปรษณีย์)'],
+        'subdistrict' => ['type' => 'string', 'description' => 'ชื่อตำบล'],
+        'district' => ['type' => 'string', 'description' => 'ชื่ออำเภอ'],
+        'province' => ['type' => 'string', 'description' => 'ชื่อจังหวัด'],
+        'date_of_issue' => ['type' => 'string', 'description' => 'วันออกบัตร ค.ศ. YYYY-MM-DD'],
+        'date_of_expiry' => ['type' => 'string', 'description' => 'วันบัตรหมดอายุ ค.ศ. YYYY-MM-DD'],
+        'check' => ['type' => 'string', 'description' => 'ตรวจสอบว่าเป็นเอกสารประเภท บัตรประชาชน จริงๆ ตอบกลับมาว่า yes หรือ no'],
     ],
 
-    // D. Sub-Schema สำหรับใบสมรส/หย่า (Field เพิ่มเติม)
-    'maritalDoc' => [
-        'marital_doc_status' => ['type' => 'string', 'description' => 'สถานะการสมรสที่ระบุในเอกสาร (สมรส, หย่า, หม้าย, อื่นๆ)'],
-        'spouse_name' => ['type' => 'string', 'description' => 'ชื่อคู่สมรส (ถ้ามี)'],
-        'divorce_date' => ['type' => 'string', 'description' => 'วันหย่า (ถ้ามี)'],
-    ],
-
-    // E. Sub-Schema สำหรับวุฒิการศึกษา (แยกจาก Array Education ใน Resume)
     'transcript' => [
         'prefix_name' => [
             'type' => 'string',
@@ -171,10 +169,10 @@ return [
         ],
         'check' => ['type' => 'string', 'description' => 'ตรวจสอบว่าเป็นเอกสารประเภท transcript จริงๆ ตอบกลับมาว่า yes หรือ no'],
     ],
-    
+
     'bookbank' => [
         'name' => ['type' => 'string', 'description' => 'ชื่อบัญชีถ้ามีภาษาไทยให้เอาภาษาไทย'], // ใช้ Key เดิม
-        'bank_name' => ['type' => 'string', 'description' => 'ชื่อธนาคารถ้ามีภาษาไทยให้เอาภาษาไทย'],
+        'bank_name' => ['type' => 'string', 'description' => 'ชื่อธนาคารถ้ามีภาษาไทยให้เอาภาษาไทย ตัดคำว่าธนาคารออก'],
         'bank_id' => ['type' => 'string', 'description' => 'เอาแต่ตัวเลขอย่างเดียว'],
         'check' => ['type' => 'string', 'description' => 'ตรวจสอบว่าเป็นเอกสารประเภท สมุดบัญชีธนาคาร จริงๆ ตอบกลับมาว่า yes หรือ no'],
     ],

@@ -13,6 +13,7 @@
         "filament/schemas": "^4.1",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "mobiledetect/mobiledetectlib": "^4.8",
         "pusher/pusher-php-server": "^7.2",
         "solution-forest/filament-simplelightbox": "^1.0",
         "zenepay/filament-buddhist-date-picker": "^4.0"

@@ -16,10 +16,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Http\Client\ConnectionException;
 
-/**
- * Job สำหรับประมวลผล Resume Text ที่ดึงมาจาก PDF ผ่าน Gemini API ใน Background
- */
-class ProcessEmpDocJob implements ShouldQueue
+class ProcessAnotherEmpDocJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -35,12 +32,11 @@ class ProcessEmpDocJob implements ShouldQueue
     public int $timeout = 180;
     public $dontReport = [\RuntimeException::class];
 
-    /**
-     * สร้าง Job Instance ใหม่
-     */
-    public function __construct(array|string $data, $user, $file_name, $file_name_th)
-    {   dump($data);
-        $this->file_name = $file_name; //ถอด key ของ array จะได้ชนิดเอกสาร เพราะเรียงไว้ฟอร์มแรก
+    /**********************************************/
+
+    public function __construct(array $data, $user, $file_name, $file_name_th)
+    {   
+        $this->file_name = $file_name;
         $this->file_name_th = $file_name_th;
         $this->file_Paths = $data;
         $this->user = $user;
@@ -48,30 +44,20 @@ class ProcessEmpDocJob implements ShouldQueue
     }
 
     /**
-     * เมธอดนี้จะถูกเรียกเมื่อ Worker ดึง Job ออกจากคิว
+     * Execute the job.
      */
     public function handle(): void
     {
-        if (is_array($this->file_Paths)) {
-            // Case 1: Multiple Files (Array)
-            $contents = $this->buildMultiContents($this->file_Paths);
-        } else {
-            // Case 2: Single File (String)
-            // เราส่ง $this->file_Paths เข้าไปตรงๆ ซึ่งตอนนี้คือ String
-            $contents = $this->buildContents($this->file_Paths);
-        }
+        $contents = $this->buildMultiContents($this->file_Paths);
 
         event(new ProcessEmpDocEvent('เตรียมข้อมูลเสร็จแล้ว Ai กำลังประมวลผล...', $this->user));
         $this->sendJsonToAi($contents);
-
-        if ($this->hasOneData['check'] === 'yes') {
-            $this->processSaveToDB($this->hasOneData, $this->hasManyData);
-            event(new ProcessEmpDocEvent('กระบวนการเสร็จสิ้น', $this->user, 'close', $this->file_name, true));
-        } else {
-            $this->deleteFile();
-            // 2. โยน Exception เพื่อสั่งให้ Job Worker จัดการ
-            $this->fail('ขออภัย! เอกสารของคุณไม่ใช้ "'.$this->file_name_th.'" โปรดอับโหลดเอกสารให้ถูกประเภท');
-        }
+        // // dump($this->hasOneData);
+        // // dump('----------------many---------------');
+        // // dump('-----------------------------------');
+        // // dump($this->hasManyData);
+        $this->processSaveToDB($this->hasOneData, $this->hasManyData);
+        event(new ProcessEmpDocEvent('กระบวนการเสร็จสิ้น', $this->user, 'close', $this->file_name, true));
     }
 
     public function failed(?Throwable $exception): void
@@ -82,47 +68,13 @@ class ProcessEmpDocJob implements ShouldQueue
             'close',
             $this->file_name,
             false
-            
+
         ));
         $this->deleteFile();
     }
 
-    /**
-     * Execute the job.
-     *
-     * @return void
-     */
-
-    protected function buildContents($file_Paths)
-    {
-
-        $fileContent = Storage::disk('public')->get($file_Paths);
-        $mimeType = Storage::disk('public')->mimeType($file_Paths);
-        //dump($mimeType);
-        $parts = [
-            [
-                'text' => config("empPromtForAi.{$this->file_name}", [])
-            ],
-            [
-                'inline_data' => [
-                    'mime_type' => $mimeType,
-                    'data' => base64_encode($fileContent)
-                ]
-            ]
-        ];
-
-        $contents =
-            [
-                'role' => 'user',
-                'parts' => $parts,
-            ];
-
-        return $contents;
-    }
-
     protected function buildMultiContents(array $file_Paths): array
     {
-        // Logic ที่เราสร้างขึ้นสำหรับ Array และ Loop
         $parts = [
             [
                 'text' => config("empPromtForAi.{$this->file_name}", [])
@@ -132,7 +84,6 @@ class ProcessEmpDocJob implements ShouldQueue
         foreach ($file_Paths as $filePath) {
             $fileContent = Storage::disk('public')->get($filePath);
             $mimeType = Storage::disk('public')->mimeType($filePath);
-
             $parts[] = [
                 'inline_data' => [
                     'mime_type' => $mimeType,
@@ -140,12 +91,13 @@ class ProcessEmpDocJob implements ShouldQueue
                 ]
             ];
         }
-
+        //dump($parts);
         return [
             'role' => 'user',
             'parts' => $parts,
         ];
     }
+
     protected function sendJsonToAi($contents): void
     {
 
@@ -155,13 +107,6 @@ class ProcessEmpDocJob implements ShouldQueue
         $baseUrl = 'https://generativelanguage.googleapis.com/v1beta/models/';
         $url = "{$baseUrl}{$model}:generateContent?key={$apiKey}";
 
-        // 2. กำหนด JSON Schema (ใช้ Schema เดิมจาก Controller)
-        $arrayForSchema = config("empSendtoAIArray.{$this->file_name}", []);
-        $jsonSchema = [
-            'type' => 'object',
-            'properties' => $arrayForSchema,
-        ];
-
         // 3. กำหนด Payload (Body)
         $payload = [
             'contents' => $contents,
@@ -170,7 +115,6 @@ class ProcessEmpDocJob implements ShouldQueue
                 'temperature' => 0.0,
                 'maxOutputTokens' => 8192,
                 'responseMimeType' => 'application/json',
-                'responseSchema' => $jsonSchema
             ],
             'systemInstruction' => [
                 'parts' => [[
@@ -320,23 +264,22 @@ class ProcessEmpDocJob implements ShouldQueue
         return $value;
     }
 
-
     public function processSaveToDB(array $hasOneData, array $hasManyData): void
-    {   
+    {
         $className = 'App\\Services\\JobForSaveDBFromAI\\Save' . ucfirst($this->file_name) . 'ToDB';
         $instance = new $className();
-        $instance->saveToDB($hasOneData, $hasManyData, $this->user);
+        $instance->saveToDB($hasOneData, $hasManyData, $this->user, $this->file_Paths);
     }
-    
-    public function deleteFile()
-        {
-             $doc_file = $this->user->userHasmanyDocEmp()
-                ->where('file_name', $this->file_name)
-                ->first();
 
-            if ($doc_file) {
-                Storage::disk('public')->delete($doc_file->path);
-                $doc_file->delete();
-            }
+    public function deleteFile()
+    {
+        $doc_file = $this->user->userHasmanyDocEmp()
+            ->where('file_name', $this->file_name)
+            ->first();
+
+        if ($doc_file) {
+            Storage::disk('public')->delete($doc_file->path);
+            $doc_file->delete();
         }
+    }
 }

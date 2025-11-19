@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+class AnotherDoc extends Model
+{   
+    use HasFactory;
+    
+    protected $table = "another_docs"; //ชื่อตาราง
+    protected $fillable = [
+        'doc_type',
+        'data',
+        'file_path',
+        'date_of_issue', //วันที่ออกบัตร
+        'date_of_expiry', //วันบัตรหมดอายุ
+    ];
+}

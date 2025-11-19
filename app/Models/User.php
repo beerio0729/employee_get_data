@@ -9,6 +9,7 @@ use App\Models\DocEmp;
 
 use App\Models\Idcard;
 use App\Models\Bookbank;
+use App\Models\AnotherDoc;
 use App\Models\Transcript;
 use App\Models\Resume\Resume;
 use App\Models\Resume\ResumeSkills;
@@ -72,9 +73,7 @@ class User extends Authenticatable
     {
         if (empty($this->userHasManyResume)) {
             return null;
-        } 
-        
-        elseif(empty($this->userHasManyResumeToWorkExperiences)) {
+        } elseif (empty($this->userHasManyResumeToWorkExperiences)) {
             return null;
         }
         $summary = $this->userHasManyResumeToWorkExperiences
@@ -124,7 +123,7 @@ class User extends Authenticatable
             }
         );
     }
-    
+
     public function userBelongToRole()
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
@@ -155,24 +154,22 @@ class User extends Authenticatable
         return $this->hasMany(DocEmp::class, 'user_id', 'id');
     }
 
+    public function userHasmanyAnotherDoc()
+    {
+        return $this->hasMany(AnotherDoc::class, 'user_id', 'id');
+    }
+
     //--------------Relation to Resume---------------//
 
     public function userHasOneResumeToLocation()
     {
-        if (empty($this->userHasoneResume)) {
-            return null;
-        } else {
-            return $this->userHasoneResume->hasOne(ResumeLocation::class, 'resume_id', 'id') ?? [];
-        }
+        return $this->userHasoneResume->hasOne(ResumeLocation::class, 'resume_id', 'id');
     }
 
     public function userHasOneResumeToJobPreference()
     {
-        if (empty($this->userHasoneResume)) {
-            return null;
-        } else {
-            return $this->userHasoneResume->hasOne(ResumeJobPreferences::class, 'resume_id', 'id');
-        }
+
+        return $this->userHasoneResume->hasOne(ResumeJobPreferences::class, 'resume_id', 'id');
     }
 
     public function userHasManyResumeToEducation()

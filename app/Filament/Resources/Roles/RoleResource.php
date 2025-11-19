@@ -51,7 +51,7 @@ class RoleResource extends Resource
     // ป้องกันไม่ให้ผู้ใช้ทั่วไปเข้าถึง Resource
     public static function canViewAny(): bool
     {   $user = auth()->user();
-        if (in_array($user->role_id, [1, 2])) {
+        if ($user->role_id === 1) {
             return true;
         } else {
             return false;
@@ -61,7 +61,7 @@ class RoleResource extends Resource
     public static function canCreate(): bool
     {
         $user = auth()->user();
-        if (in_array($user->role_id, [1, 2])) {
+        if ($user->role_id === 1) {
             return true;
         } else {
             return false;
@@ -71,7 +71,7 @@ class RoleResource extends Resource
     public static function canEdit($record): bool
     {
         $user = auth()->user();
-        if (in_array($user->role_id, [1, 2])) {
+        if ($user->role_id === 1) {
             return true;
         } else {
             return false;
@@ -81,7 +81,7 @@ class RoleResource extends Resource
     public static function canDelete($record): bool
     {
         $user = auth()->user();
-        if (in_array($user->role_id, [1, 2])) {
+        if ($user->role_id === 1) {
             return true;
         } else {
             return false;
