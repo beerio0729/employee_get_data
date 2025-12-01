@@ -1,3 +1,4 @@
 import './bootstrap';
 alert('test');
-console.log('test');
+console.log('testappjs');
+

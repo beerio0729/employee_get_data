@@ -17,7 +17,7 @@ return [
             'type' => 'string',
             'description' => 'นามสกุล (ภาษาไทยหรืออังกฤษ) ที่ระบุในเอกสาร'
         ],
-        'email' => ['type' => 'string', 'description' => 'อีเมลติดต่อ'],
+        //'email' => ['type' => 'string', 'description' => 'อีเมลติดต่อ'],
         'tel' => ['type' => 'string', 'description' => 'เบอร์โทรศัพท์มือถือ'],
         'weight' => ['type' => 'string', 'description' => 'น้ำหนัก (ตัวเลขเท่านั้น)'],
         'height' => ['type' => 'string', 'description' => 'ส่วนสูง (ตัวเลขเท่านั้น)'],
@@ -38,9 +38,11 @@ return [
             'items' => ['type' => 'object', 'properties' => [
                 'company' => ['type' => 'string'],
                 'position' => ['type' => 'string'],
-                'duration' => ['type' => 'string', 'description' => 'ช่วงเวลาทำงาน เช่น "2015-07 - 2024-10"'],
+                'start' => ['type' => 'string', 'description' => 'ช่วงเวลาเริ่มงาน เช่น YYYY/MM เท่านั้น'],
+                'last' => ['type' => 'string', 'description' => 'ช่วงที่ลาออก เช่น YYYY/MM หรือ ปัจจุบัน'],
                 'salary' => ['type' => 'string', 'description' => 'เงินเดือนล่าสุด (ตัวเลขเท่านั้น)'],
                 'details' => ['type' => 'string', 'description' => 'รายละเอียดหน้าที่ความรับผิดชอบ'],
+                'reason_for_leaving' => ['type' => 'string', 'description' => 'เหตุผลที่ลาออก'],
             ]]
         ],
         'education' => [
@@ -58,19 +60,19 @@ return [
         ],
         'lang_skill' => [
             'type' => 'array',
-            'description' => 'รายการทักษะทางภาษา',
+            'description' => 'รายการทักษะทางภาษามี',
             'items' => ['type' => 'object', 'properties' => [
-                'language' => ['type' => 'string'],
-                'speaking' => ['type' => 'string', 'description' => 'ระดับ: ดีเยี่ยม, พอใช้, อื่นๆ'],
-                'reading' => ['type' => 'string'],
-                'writing' => ['type' => 'string'],
+                'language' => ['type' => 'string', 'description' => 'ให้เปลี่ยนเป็นภาษาอังกฤษ เช่น thai, japan เป็นต้น'],
+                'speaking' => ['type' => 'string', 'description' => 'ระดับ: fluent, good, fair เท่านั้น'],
+                'listening' => ['type' => 'string' , 'description' => 'ระดับ: fluent, good, fair เท่านั้น'],
+                'writing' => ['type' => 'string' , 'description' => 'ระดับ: fluent, good, fair เท่านั้น'],
             ]]
         ],
         'skills' => [
             'type' => 'array',
-            'description' => 'รายการทักษะทางเทคนิค/เครื่องมือ',
+            'description' => 'ทักษะความชำนาญด้านต่างๆ ไม่รวมเกี่ยวกับทักษะด้านการขับรถ',
             'items' => ['type' => 'object', 'properties' => [
-                'skill_name' => ['type' => 'string'],
+                'skill_name' => ['type' => 'string', 'description' => 'ถ้าอยู่ใน List เดียวกันเช่น เป็น . หรือ - หรือเป็นข้อๆ ให้เอามาอยู่ใน cell เดียวกัน'],
                 'level' => ['type' => 'string', 'description' => 'ระดับความชำนาญ: สูง, กลาง, พื้นฐาน'],
             ]]
         ],
@@ -141,7 +143,7 @@ return [
         ],
         'education_level' => [
             'type' => 'string',
-            'description' => 'ระดับการศึกษา เช่น ปริญญาตรี, ปริญญาโท, ปวส.'
+            'description' => 'ระดับการศึกษา เช่น ปริญญาตรี, มัธยมศึกษา ถ้าเอกสารเป็นอังกฤษต้องใช้ภาษาอังกฤษ'
         ],
         'faculty' => [
             'type' => 'string',
@@ -167,7 +169,7 @@ return [
             'type' => 'string', // ใช้ 'number' สำหรับตัวเลขทศนิยม
             'description' => 'เกรดเฉลี่ยสะสม (GPA/CGPA) เป็นตัวเลขทศนิยม 2 ตำแหน่ง'
         ],
-        'check' => ['type' => 'string', 'description' => 'ตรวจสอบว่าเป็นเอกสารประเภท transcript จริงๆ ตอบกลับมาว่า yes หรือ no'],
+        'check' => ['type' => 'string', 'description' => 'ตรวจสอบว่าเป็นเอกสารประเภท transcript จริงๆ ตอบกลับมาว่า yes หรือ no']
     ],
 
     'bookbank' => [

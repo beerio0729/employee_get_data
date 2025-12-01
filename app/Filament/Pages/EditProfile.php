@@ -17,8 +17,8 @@ use Filament\Support\Enums\Size;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Illuminate\Support\HtmlString;
+use App\Jobs\ProcessNoJsonEmpDocJob;
 use Filament\Forms\Components\Field;
-use App\Jobs\ProcessAnotherEmpDocJob;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -44,7 +44,7 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 class EditProfile extends BaseEditProfile
 {
     public bool $isMobile;
-
+    public $current_tab;
     public bool $isSubmitDisabledFromFile = true;
     public bool $isSubmitDisabledFromConfirm = true;
 
@@ -98,17 +98,18 @@ class EditProfile extends BaseEditProfile
         $currentYear_AD = date('Y'); // เช่น ค.ศ. 2025
         $years_education_AD = range($currentYear_AD - 30, $currentYear_AD); // 40 ปีย้อนหลัง
 
-
-
         return
             Tabs::make('Tabs')
+            ->contained(false)
             ->tabs([
                 Tab::make('Resume')
                     ->tabslug('resume')
+                    ->extraAttributes(fn() => $this->isMobile ? ["style" => "padding: 20px 10px"] : [])
                     ->schema([
                         FileUpload::make('image_profile')
                             ->label('กรุณาอับโหลดรูปภาพ')
                             ->disk('public')
+                            ->dehydrated(false)
                             ->visibility('public')
                             ->disabled()
                             ->openable()
@@ -136,62 +137,77 @@ class EditProfile extends BaseEditProfile
 
                         Section::make('ข้อมูลทั่วไปจาก Resume')
                             //->label('ข้อมูลทั่วไป')
-                            ->columns(3)
+                            ->columns(4)
                             ->relationship('userHasoneResume')
                             ->schema([
-                                Select::make('prefix_name')
-                                    ->hiddenlabel()
-                                    ->placeholder('คำนำหน้าชื่อ')
-                                    ->options(config("iconf.prefix_name")),
+                                TextInput::make('prefix_name')
+                                    ->label('คำนำหน้าชื่อ')
+                                    ->placeholder('กรอกคำนำหน้าชื่อ'),
                                 TextInput::make('name')
-                                    ->hiddenlabel()
-                                    ->placeholder('ชื่อ'),
+                                    ->label('ชื่อ')
+                                    ->placeholder('กรอกชื่อ'),
                                 TextInput::make('last_name')
-                                    ->hiddenlabel()
-                                    ->placeholder('นามสกุล'),
+                                    ->label('นามสกุล')
+                                    ->placeholder('กรอกนามสกุล'),
                                 DatePicker::make('date_of_birth')
-                                    ->hiddenlabel()
-                                    ->placeholder('วัน/เดือน/ปี เกิด')
+                                    ->label('วัน/เดือน/ปี เกิด')
+                                    ->placeholder('ระบุ วัน/เดือน/ปี เกิด')
                                     ->native(false)
                                     ->displayFormat('d M Y')
                                     ->locale('th')
                                     ->buddhist(),
-                                TextInput::make('id_card')->hiddenlabel()
-                                    ->label('เลขบัตรประชาชน')
-                                    ->columnSpan(1)
-                                    //->required()
-                                    ->mask('9-9999-99999-99-9')
-                                    ->placeholder('รหัสบัตรประชาชน (กรอกเฉพาะตัวเลข)'),
+                                TextInput::make('nationality')
+                                    ->label('สัญชาติ')
+                                    ->placeholder('ระบุสัญชาติ'),
                                 TextInput::make('tel')
                                     ->columnSpan(1)
                                     ->placeholder('เบอร์โทรศัพท์ (กรอกเฉพาะตัวเลข)')
                                     ->mask('999-999-9999')
-                                    ->hiddenlabel()
+                                    ->label('เบอร์โทรศัพท์')
                                     ->tel()
                                     ->telRegex('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/'),
                                 Select::make('marital_status')
-                                    ->hiddenlabel()
+                                    ->label('สถานภาพสมรส')
                                     ->placeholder('สถานภาพสมรส')
-                                    ->options(config('iconf.marital_status'))
+                                    ->options(config('iconf.marital_status')),
+                                TextInput::make('religion')
+                                    ->label('ศาสนา')
+                                    ->placeholder('ระบุศาสนาที่ท่านนับถือ'),
+                                TextInput::make('height')
+                                    ->label('ส่วนสูง')
+                                    ->placeholder('ระบุส่วนสูง cm')
+                                    ->postfix('cm'),
+                                TextInput::make('weight')
+                                    ->label('น้ำหนัก')
+                                    ->placeholder('ระบุน้ำหนัก kg')
+                                    ->postfix('kg'),
                             ])->collapsed(),
-                        Section::make('ที่อยู่')
-                            //->hiddenLabel()
-                            ->columns(3)
-                            //->contained(false)
+                        Section::make('ที่อยู่ปัจจุบัน')
+                            ->description('กรุณากรอกที่อยู่ปัจจุบันที่ติดต่อได้ เพื่อการส่งเอกสารที่จำเป็นไปให้ท่านได้ถูกต้อง')
+                            ->columns(4)
                             ->relationship('userHasoneResumeToLocation')
                             ->schema([
+                                Toggle::make('same_id_card')
+                                    ->label('ใช้ที่อยู่เดียวกับบัตรประชาชน')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, Set $set) {
+                                        if ($state) {
+                                            $set('address', null);
+                                            $set('province_id', null);
+                                            $set('district_id', null);
+                                            $set('subdistrict_id', null);
+                                            $set('zipcode', null);
+                                        }
+                                    }),
                                 Textarea::make('address')
-                                    ->hiddenlabel()->placeholder('กรุณากรอกรายละเอียดที่อยู่ให้ละเอียดที่สุด')
-                                    ->columnSpan(3),
+                                    ->label('รายละเอียดที่อยู่')
+                                    ->placeholder('กรุณากรอกรายละเอียดที่อยู่ให้ละเอียดที่สุด')
+                                    ->columnSpan(4),
                                 Select::make('province_id')
                                     ->options(Provinces::pluck('name_th', 'id'))
                                     ->live()
-                                    // ->columnSpan([
-                                    //     'default' => 2,
-                                    //     'md' => 1
-                                    // ])
                                     ->preload()
-                                    ->hiddenlabel()
+                                    ->label('จังหวัด')
                                     ->placeholder('จังหวัด')
                                     ->searchable()
                                     ->afterStateUpdated(function (Select $column, Set $set) {
@@ -211,12 +227,8 @@ class EditProfile extends BaseEditProfile
                                         return $data;
                                     })
                                     ->live()
-                                    // ->columnSpan([
-                                    //     'default' => 2,
-                                    //     'md' => 1
-                                    // ])
                                     ->preload()
-                                    ->hiddenlabel()
+                                    ->label('อำเภอ')
                                     ->placeholder('อำเภอ')
                                     ->searchable()
                                     ->afterStateUpdated(function (Set $set) {
@@ -230,30 +242,22 @@ class EditProfile extends BaseEditProfile
                                             ->pluck('name_th', 'id');
                                         return $data;
                                     })
-                                    ->hiddenlabel()
-                                    // ->columnSpan([
-                                    //     'default' => 2,
-                                    //     'md' => 1
-                                    // ])
+                                    ->label('ตำบล')
                                     ->preload()
                                     ->placeholder('ตำบล')
                                     ->live()
                                     ->searchable()
                                     ->afterStateUpdated(function (Select $column, Set $set) {
-                                        $state = $column->getState(); //รับค่าปัจจุบันในฟิลด์นี้หลังที่ Input ข้อมูลแล้ว
-                                        $zipcode = Subdistricts::where('id', $state)->pluck('zipcode'); //ไปที่ Subdistrict โดยที่ id = ปัจจุบันที่เราเลือก
-                                        $set('zipcode', Str::slug($zipcode)); //เอาค่าที่ได้ซึ่งเป็นอาเรย์มาถอดให้เหลือค่าอย่างเดียวด้วย Str::slug()แล้วเอาค่าที่ได้มาใส่ และส่งค่าไปยัง ฟิลด์ที่เลือกในที่นี้คือ zipcode
+                                        $state = $column->getState();
+                                        $zipcode = Subdistricts::where('id', $state)->pluck('zipcode');
+                                        $set('zipcode', Str::slug($zipcode));
                                     }),
                                 TextInput::make('zipcode')
                                     ->live()
-                                    // ->columnSpan([
-                                    //     'default' => 2,
-                                    //     'md' => 1
-                                    // ])
-                                    ->hiddenlabel()
+                                    ->label('รหัสไปรษณีย์')
                                     ->placeholder('รหัสไปรษณีย์')
                             ])->collapsed(),
-                        Section::make('ประวัติการศึกษา')
+                        /*Section::make('ประวัติการศึกษา')
                             ->schema([
                                 Repeater::make('educations')
                                     ->addable(false)
@@ -308,7 +312,7 @@ class EditProfile extends BaseEditProfile
 
                                             ]),
                                     ]),
-                            ])->collapsed(),
+                            ])->collapsed(),*/
                         Section::make('ประสบการณ์การทำงาน')
                             ->schema([
                                 Repeater::make('experiences')
@@ -317,204 +321,205 @@ class EditProfile extends BaseEditProfile
                                     ->relationship('userHasmanyResumeToWorkExperiences')
                                     ->schema([
                                         Fieldset::make('details')
-                                            ->hiddenLabel()
+                                            ->label('รายละเอียดประสบการณ์ทำงาน')
                                             ->columns(2)
-                                            ->contained(false)
+                                            ->contained(true)
                                             ->schema([
                                                 TextInput::make('company')
-                                                    ->hiddenlabel()
-                                                    ->placeholder('บริษัทที่เคยทำงาน')
-                                                    ->label('บริษัท')
-                                                    ->prefix('บริษัท'),
+                                                    ->label('บริษัทที่เคยทำงาน')
+                                                    ->placeholder('กรอกชื่อบริษัท'),
                                                 TextInput::make('position')
-                                                    ->hiddenlabel()
                                                     ->label('ตำแหน่ง')
-                                                    ->prefix('ตำแหน่ง')
-                                                    ->placeholder('ตำแหน่งเดิมที่เคยทำงาน'),
-                                                TextInput::make('duration')
-                                                    ->hiddenlabel()
-                                                    ->label('ช่วงเวลา')
-                                                    ->prefix('ช่วงเวลา')
-                                                    ->placeholder('เช่น ม.ค 2540 - ม.ค 2550'),
+                                                    ->placeholder('กรอกตำแหน่งเดิมที่เคยทำงาน'),
+                                                TextInput::make('start')
+                                                    ->label('ช่วงที่เริ่มทำงาน')
+                                                    ->placeholder('เช่น ม.ค. 2540'),
+                                                TextInput::make('last')
+                                                    ->label('ช่วงที่ลาออก')
+                                                    ->placeholder('เช่น ธ.ค. 2545'),
                                                 TextInput::make('salary')
-                                                    ->hiddenlabel()
                                                     ->label('เงินเดือน')
-                                                    ->prefix('เงินเดือน')
-                                                    ->placeholder('เงินเดือนที่เคยได้จากตำแหน่งนั้น'),
+                                                    ->placeholder('เงินเดือนที่เคยได้รับ'),
+                                                TextInput::make('reason_for_leaving')
+                                                    ->label('สาเหตุที่ลาออก')
+                                                    ->placeholder('กรอกสาเหตุที่ลาออก'),
                                                 TextArea::make('details')
-                                                    ->label('รายละเอียด')
-                                                    ->placeholder('กรอกรายละเอียดเนื้องาน')
+                                                    ->label('รายละเอียดเนื้องาน')
+                                                    ->placeholder('กรอกรายละเอียดเนื้องานที่รับผิดชอบโดยสรุป')
                                                     ->columnSpan(2),
                                             ]),
                                     ]),
                             ])->collapsed(),
-                        Section::make('เรซูเม่')
-                            ->id('resume')
-                            ->collapsible()
+                        // Section::make('ไฟล์เอกสารเรซูเม่')
+                        //     ->id('resume')
+                        //     ->collapsible()
+                        //     ->description('ท่านสามารถลบเอกสาร และข้อมูลด้วยการคลิกที่ "X" ด้านขวาของเอกสารนั้น')
+                        //     ->footer(
+                        //         function ($component) {
+                        //             return [
+                        //                 Action::make('file_resume')
+                        //                     ->tooltip('ใช้เฉพาะการอับเดตเอกสารเท่านั้น ไม่เกี่ยวกับการแก้ไขข้อมูลในฟอร์ม')
+                        //                     ->hidden(fn($get) => !$get($component->getId() . 'confirm'))
+                        //                     ->label("อับเดตเอกสาร" . str_replace('ไฟล์เอกสาร', '', $component->getHeading()))
+                        //                     ->action(function ($livewire, $component, $record) {
+                        //                         $user_id = auth()->user()->id;
+                        //                         $data = $livewire->form->getState(); //ดึงค่า data จากฟอร์ม
+                        //                         if (!empty($data[$component->getId()])) {
+                        //                             $record->userHasmanyDocEmp()->updateOrCreate(
+                        //                                 ['file_name' => $component->getId()],
+                        //                                 [
+                        //                                     'user_id' => $record->id,
+                        //                                     'file_name_th' => str_replace('ไฟล์เอกสาร', '', $component->getHeading()),
+                        //                                     'path' => $data[$component->getId()],
+                        //                                     'confirm' => $data[$component->getId() . 'confirm'],
+                        //                                 ]
+                        //                             );
+                        //                         }
+                        //                         ProcessEmpDocJob::dispatch(
+                        //                             $data[$component->getId()],
+                        //                             User::find($user_id),
+                        //                             $component->getId(),
+                        //                             str_replace('ไฟล์เอกสาร', '', $component->getHeading())
+                        //                         );
+                        //                     }),
+                        //                 DeleteAction::make($component->getHeading())
+                        //                     ->label("เคลียร์ข้อมูล" . str_replace('ไฟล์เอกสาร', '', $component->getHeading()) . "ทั้งหมด")
+                        //                     ->requiresConfirmation()
+                        //                     ->modalHeading("เคลียร์ข้อมูลและเอกสาร \"" . str_replace('ไฟล์เอกสาร', '', $component->getHeading()) . "\" ทั้งหมด")
+                        //                     ->modalDescription("คุณต้องการเคลียร์ข้อมูล \"" . str_replace('ไฟล์เอกสาร', '', $component->getHeading()) . "\" รวมถึงไฟล์ด้วยใช่หรือไม่")
+                        //                     ->modalSubmitActionLabel('ยืนยันการเคลียร์ข้อมูล')
+                        //                     ->action(function ($record, $component) {
+                        //                         //dump($component->getHeading());
+                        //                         $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getId())->first();
 
-                            ->description('ท่านสามารถลบเอกสาร และข้อมูลด้วยการคลิกที่ "X" ด้านขวาของเอกสารนั้น')
-                            ->footer(
-                                function ($component) {
-                                    return [
-                                        Action::make('file_resume')
-                                            ->button()
-                                            ->label('อับเดตเอกสาร')
-                                            ->action(function ($livewire, $component, $record) {
 
-                                                $user_id = auth()->user()->id;
-                                                $data = $livewire->form->getState(); //ดึงค่า data จากฟอร์ม
+                        //                         // 3.1 HasOne Relations (Location, JobPreference)
+                        //                         $record->userHasOneResumeToLocation()->delete();
+                        //                         $record->userHasOneResumeToJobPreference()->delete();
 
-                                                if (!empty($data[$component->getId()])) {
-                                                    $record->userHasmanyDocEmp()->updateOrCreate(
-                                                        ['file_name' => $component->getId()],
-                                                        [
-                                                            'user_id' => $record->id,
-                                                            'file_name_th' => $component->getHeading(),
-                                                            'path' => $data[$component->getId()],
-                                                            'confirm' => $data['confirm'],
-                                                        ]
-                                                    );
-                                                }
-                                                ProcessEmpDocJob::dispatch(
-                                                    $data[$component->getId()],
-                                                    User::find($user_id),
-                                                    $component->getId(),
-                                                    $component->getHeading()
-                                                );
-                                            }),
-                                        DeleteAction::make($component->getHeading())
-                                            ->label("เคลียร์ข้อมูล")
-                                            ->requiresConfirmation()
-                                            ->modalHeading("เคลียร์ข้อมูลและเอกสาร \"{$component->getHeading()}\" ทั้งหมด")
-                                            ->modalDescription("คุณต้องการเคลียร์ข้อมูล \"{$component->getHeading()}\ รวมถึงไฟล์ด้วยใช่หรือไม่")
-                                            ->modalSubmitActionLabel('ยืนยันการเคลียร์ข้อมูล')
-                                            ->action(function ($record, $component) {
-                                                //dump($component->getHeading());
-                                                $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getId())->first();
-                                                if (!empty($doc)) {
+                        //                         // 3.2 HasMany Relations (Education, Work Experiences, etc.)
+                        //                         $record->userHasManyResumeToEducation()->delete();
+                        //                         $record->userHasManyResumeToWorkExperiences()->delete();
+                        //                         $record->userHasManyResumeToLangSkill()->delete();
+                        //                         $record->userHasManyResumeToSkill()->delete();
+                        //                         $record->userHasManyResumeToCertificate()->delete();
+                        //                         $record->userHasManyResumeToOtherContact()->delete();
 
-                                                    // 3.1 HasOne Relations (Location, JobPreference)
-                                                    $record->userHasOneResumeToLocation()->delete();
-                                                    $record->userHasOneResumeToJobPreference()->delete();
+                        //                         $record->userHasOneResume()->update([
+                        //                             'prefix_name' => null,      // คำนำหน้าชื่อ
+                        //                             'name' => null,             // ชื่อ
+                        //                             'last_name' => null,        // นามสกุล
+                        //                             'tel' => null,              // เบอร์โทรศัพท์
+                        //                             'date_of_birth' => null,    // วัน/เดือน/ปี เกิด
+                        //                             'marital_status' => null,   // สถานภาพสมรส
+                        //                             'id_card' => null,          // เลขบัตรประชาชน
+                        //                             'gender' => null,           // เพศ
+                        //                             'height' => null,           // ส่วนสูง
+                        //                             'weight' => null,           // น้ำหนัก
+                        //                             'military' => null,         // เกณฑ์ทหาร
+                        //                             'nationality' => null,      // สัญชาติ
+                        //                             'religion' => null,         // ศาสนา
+                        //                         ]);
+                        //                         if (!empty($doc)) {
+                        //                             Storage::disk('public')->delete($doc->path);
+                        //                             $doc->delete();
+                        //                         }
+                        //                         return redirect("/profile?tab={$component->getId()}::data::tab");
+                        //                     })
+                        //                     ->successNotificationTitle('เคลียร์ข้อมูลทั้งหมดเรียบร้อยแล้ว'),
+                        //             ];
+                        //         }
+                        //     )
+                        //     ->schema([
+                        //         AdvancedFileUpload::make('resume')
+                        //             ->hiddenLabel()
+                        //             ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
+                        //             ->disk('public')
+                        //             ->directory('emp_files')
+                        //             ->reorderable()
+                        //             ->openable()
+                        //             ->reactive()
+                        //             ->appendFiles()
+                        //             ->removeUploadedFileButtonPosition('right')
+                        //             ->pdfFitType(PdfViewFit::FIT)
+                        //             ->previewable(function () {
+                        //                 return $this->isMobile ? 0 : 1;
+                        //             })
+                        //             ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                        //             ->afterStateHydrated(function ($component, $record) {
+                        //                 $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
+                        //                 $component->state($doc ? $doc->path : null);
+                        //             })
+                        //             ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component) {
+                        //                 $i = mt_rand(1000, 9000);
+                        //                 $extension = $file->getClientOriginalExtension();
+                        //                 $userEmail = auth()->user()->email;
+                        //                 return "{$userEmail}/{$component->getName()}/{$component->getName()}_{$i}.{$extension}";
+                        //             })
+                        //             ->deleteUploadedFileUsing(function ($record, $component) {
+                        //                 $doc = $record->userHasmanyDocEmp()
+                        //                     ->where('file_name', $component->getName())
+                        //                     ->first();
+                        //                 if ($doc) {
+                        //                     $path = $doc->path;
+                        //                     Storage::disk('public')->delete($path);
+                        //                     $doc->delete();
 
-                                                    // 3.2 HasMany Relations (Education, Work Experiences, etc.)
-                                                    $record->userHasManyResumeToEducation()->delete();
-                                                    $record->userHasManyResumeToWorkExperiences()->delete();
-                                                    $record->userHasManyResumeToLangSkill()->delete();
-                                                    $record->userHasManyResumeToSkill()->delete();
-                                                    $record->userHasManyResumeToCertificate()->delete();
-                                                    $record->userHasManyResumeToOtherContact()->delete();
 
-                                                    $record->userHasOneResume()->update([
-                                                        'prefix_name' => null,      // คำนำหน้าชื่อ
-                                                        'name' => null,             // ชื่อ
-                                                        'last_name' => null,        // นามสกุล
-                                                        'tel' => null,              // เบอร์โทรศัพท์
-                                                        'date_of_birth' => null,    // วัน/เดือน/ปี เกิด
-                                                        'marital_status' => null,   // สถานภาพสมรส
-                                                        'id_card' => null,          // เลขบัตรประชาชน
-                                                        'gender' => null,           // เพศ
-                                                        'height' => null,           // ส่วนสูง
-                                                        'weight' => null,           // น้ำหนัก
-                                                        'military' => null,         // เกณฑ์ทหาร
-                                                        'nationality' => null,      // สัญชาติ
-                                                        'religion' => null,         // ศาสนา
-                                                    ]);
+                        //                     // 3.1 HasOne Relations (Location, JobPreference)
+                        //                     $record->userHasOneResumeToLocation()->delete(); // ต้องเรียกเมธอดที่สร้าง Relation
+                        //                     $record->userHasOneResumeToJobPreference()->delete();
 
-                                                    Storage::disk('public')->delete($doc->path);
-                                                    $doc->delete();
-                                                    return redirect("/profile?tab={$component->getId()}::data::tab");
-                                                }
-                                            })
-                                            ->successNotificationTitle('เคลียร์ข้อมูลทั้งหมดเรียบร้อยแล้ว'),
-                                    ];
-                                }
-                            )
-                            ->schema([
-                                AdvancedFileUpload::make('resume')
-                                    ->hiddenLabel()
-                                    ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
-                                    ->disk('public')
-                                    ->directory('emp_files')
-                                    ->reorderable()
-                                    ->openable()
-                                    ->appendFiles()
-                                    ->removeUploadedFileButtonPosition('right')
-                                    ->pdfFitType(PdfViewFit::FIT)
-                                    ->previewable(function () {
-                                        return $this->isMobile ? 0 : 1;
-                                    })
-                                    ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
-                                    ->afterStateHydrated(function ($component, $record) {
-                                        $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
-                                        $component->state($doc ? $doc->path : null);
-                                    })
-                                    ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component) {
-                                        $i = mt_rand(1000, 9000);
-                                        $extension = $file->getClientOriginalExtension();
-                                        $userEmail = auth()->user()->email;
-                                        return "{$userEmail}/{$component->getName()}/{$component->getName()}_{$i}.{$extension}";
-                                    })
-                                    ->deleteUploadedFileUsing(function ($state, $record, $component) {
+                        //                     // 3.2 HasMany Relations (Education, Work Experiences, etc.)
+                        //                     $record->userHasManyResumeToEducation()->delete();
+                        //                     $record->userHasManyResumeToWorkExperiences()->delete();
+                        //                     $record->userHasManyResumeToLangSkill()->delete();
+                        //                     $record->userHasManyResumeToSkill()->delete();
+                        //                     $record->userHasManyResumeToCertificate()->delete();
+                        //                     $record->userHasManyResumeToOtherContact()->delete();
 
-                                        $doc = $record->userHasmanyDocEmp()
-                                            ->where('file_name', $component->getName())
-                                            ->first();
-                                        $path = $doc->path;
+                        //                     $record->userHasOneResume()->update([
+                        //                         'prefix_name' => null,      // คำนำหน้าชื่อ
+                        //                         'name' => null,             // ชื่อ
+                        //                         'last_name' => null,        // นามสกุล
+                        //                         'tel' => null,              // เบอร์โทรศัพท์
+                        //                         'date_of_birth' => null,    // วัน/เดือน/ปี เกิด
+                        //                         'marital_status' => null,   // สถานภาพสมรส
+                        //                         'id_card' => null,          // เลขบัตรประชาชน
+                        //                         'gender' => null,           // เพศ
+                        //                         'height' => null,           // ส่วนสูง
+                        //                         'weight' => null,           // น้ำหนัก
+                        //                         'military' => null,         // เกณฑ์ทหาร
+                        //                         'nationality' => null,      // สัญชาติ
+                        //                         'religion' => null,         // ศาสนา
+                        //                     ]);
+                        //                 }
+                        //                 redirect("/profile?tab={$component->getName()}");
+                        //             }),
+                        //         Toggle::make('resumeconfirm')
+                        //             ->label(new HtmlString($this->confirm))
+                        //             ->accepted()
+                        //             ->live()
+                        //             ->afterStateHydrated(function ($record, $component) {
+                        //                 $doc = $record->userHasmanyDocEmp()
+                        //                     ->where('file_name', str_replace('confirm', '', $component->getName()))->first();
+                        //                 $component->state(!empty($doc) ? $doc->confirm : 0);
+                        //             })
+                        //             ->default(false)
+                        //             ->validationMessages([
+                        //                 'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
+                        //             ])
 
-                                        Storage::disk('public')->delete($path);
-                                        $doc->delete();
-
-                                        if ($doc) {
-                                            // 3.1 HasOne Relations (Location, JobPreference)
-                                            $record->userHasOneResumeToLocation()->delete(); // ต้องเรียกเมธอดที่สร้าง Relation
-                                            $record->userHasOneResumeToJobPreference()->delete();
-
-                                            // 3.2 HasMany Relations (Education, Work Experiences, etc.)
-                                            $record->userHasManyResumeToEducation()->delete();
-                                            $record->userHasManyResumeToWorkExperiences()->delete();
-                                            $record->userHasManyResumeToLangSkill()->delete();
-                                            $record->userHasManyResumeToSkill()->delete();
-                                            $record->userHasManyResumeToCertificate()->delete();
-                                            $record->userHasManyResumeToOtherContact()->delete();
-
-                                            $record->userHasOneResume()->update([
-                                                'prefix_name' => null,      // คำนำหน้าชื่อ
-                                                'name' => null,             // ชื่อ
-                                                'last_name' => null,        // นามสกุล
-                                                'tel' => null,              // เบอร์โทรศัพท์
-                                                'date_of_birth' => null,    // วัน/เดือน/ปี เกิด
-                                                'marital_status' => null,   // สถานภาพสมรส
-                                                'id_card' => null,          // เลขบัตรประชาชน
-                                                'gender' => null,           // เพศ
-                                                'height' => null,           // ส่วนสูง
-                                                'weight' => null,           // น้ำหนัก
-                                                'military' => null,         // เกณฑ์ทหาร
-                                                'nationality' => null,      // สัญชาติ
-                                                'religion' => null,         // ศาสนา
-                                            ]);
-                                        }
-                                        return redirect("/profile?tab={$component->getName()}::data::tab");
-                                    }),
-                                Toggle::make('confirm')
-                                    ->label(new HtmlString($this->confirm))
-                                    ->accepted()
-                                    ->live()
-                                    ->afterStateHydrated(function () {
-                                        $this->updateStateInConfirm(false);
-                                    })
-                                    ->default(false)
-                                    ->validationMessages([
-                                        'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
-                                    ])
-
-                                    ->afterStateUpdated(function ($state) {
-                                        $this->updateStateInConfirm($state);
-                                    }),
-                            ]),
+                        //     ]),
 
                     ]),
+
+
+
+
+
                 Tab::make('idcard')
+                    ->extraAttributes(fn() => $this->isMobile ? ["style" => "padding: 20px 10px"] : [])
                     ->label('บัตรประชาชน')
                     ->tabslug('idcard')
                     ->schema([
@@ -564,7 +569,7 @@ class EditProfile extends BaseEditProfile
                                     //->autofocus()
                                     ->suffix('ปี')
                                     ->label('อายุ')
-                                    ->readOnly() // ทำให้เป็นแบบอ่านอย่างเดียว
+                                    ->readonly() // ทำให้เป็นแบบอ่านอย่างเดียว
                                     ->dehydrated(false), // ป้องกันไม่ให้บันทึกค่านี้ลง DB/ สำคัญ: ป้องกันไม่ให้ Filament พยายามบันทึกค่านี้
                                 TextInput::make('religion')
                                     ->placeholder('กรอกหรือแก้ไขศาสนาที่คุณนับถือ')
@@ -661,120 +666,128 @@ class EditProfile extends BaseEditProfile
                                     ->hiddenlabel()
                                     ->placeholder('รหัสไปรษณีย์')
                             ])->collapsed(),
-                        Section::make('บัตรประชาชน') //fileupload
-                            ->id('idcard')
-                            ->collapsible()
-                            ->description('ท่านสามารถลบเอกสาร และข้อมูลด้วยการคลิกที่ "X" ด้านขวาของเอกสารนั้น')
-                            ->footer(
-                                function ($component) {
-                                    return [
-                                        Action::make('file_idcard')
-                                            ->label('อับเดตเอกสาร')
-                                            ->action(function ($livewire, $component, $record) {
-                                                $user_id = auth()->user()->id;
-                                                $data = $livewire->form->getState(); //ดึงค่า data จากฟอร์ม
+                        // Section::make('ไฟล์เอกสารบัตรประชาชน') //fileupload
+                        //     ->id('idcard')
+                        //     ->collapsible()
+                        //     ->description('ท่านสามารถลบเอกสาร และข้อมูลด้วยการคลิกที่ "X" ด้านขวาของเอกสารนั้น')
+                        //     ->footer(
+                        //         function ($component) {
+                        //             return [
+                        //                 Action::make('file_idcard')
+                        //                     ->tooltip('ใช้เฉพาะการอับเดตเอกสารเท่านั้น ไม่เกี่ยวกับการแก้ไขข้อมูลในฟอร์ม')
+                        //                     ->hidden(fn($get) => !$get('confirm'))
+                        //                     ->label("อับเดตเอกสาร" . str_replace('ไฟล์เอกสาร', '', $component->getHeading()))
+                        //                     ->action(function ($livewire, $component, $record) {
 
-                                                if (!empty($data[$component->getId()])) {
-                                                    $record->userHasmanyDocEmp()->updateOrCreate(
-                                                        ['file_name' => $component->getId()],
-                                                        [
-                                                            'user_id' => $record->id,
-                                                            'file_name_th' => $component->getHeading(),
-                                                            'path' => $data[$component->getId()],
-                                                            'confirm' => $data['confirm'],
-                                                        ]
-                                                    );
-                                                }
-                                                ProcessEmpDocJob::dispatch(
-                                                    $data[$component->getId()],
-                                                    User::find($user_id),
-                                                    $component->getId(),
-                                                    $component->getHeading()
-                                                );
-                                            }),
-                                        DeleteAction::make($component->getHeading())
-                                            ->label("เคลียร์ข้อมูล")
-                                            ->requiresConfirmation()
-                                            ->modalHeading("เคลียร์ข้อมูลและเอกสาร \"{$component->getHeading()}\" ทั้งหมด")
-                                            ->modalDescription("คุณต้องการเคลียร์ข้อมูล \"{$component->getHeading()}\ รวมถึงไฟล์ด้วยใช่หรือไม่")
-                                            ->modalSubmitActionLabel('ยืนยันการเคลียร์ข้อมูล')
-                                            ->action(function ($record, $component) {
-                                                //dump($component->getHeading());
-                                                $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getId())->first();
-                                                if (!empty($doc)) {
-                                                    $record->userHasOneIdcard()->delete();
-                                                    Storage::disk('public')->delete($doc->path);
-                                                    $doc->delete();
-                                                    return redirect("/profile?tab={$component->getId()}::data::tab");
-                                                }
-                                            })
-                                            ->successNotificationTitle('เคลียร์ข้อมูลทั้งหมดเรียบร้อยแล้ว'),
-                                    ];
-                                }
-                            )
-                            ->schema([
-                                AdvancedFileUpload::make('idcard')
-                                    ->hiddenLabel()
-                                    ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
-                                    ->disk('public')
-                                    ->directory('emp_files')
-                                    ->reorderable()
-                                    ->openable()
-                                    ->appendFiles()
-                                    ->removeUploadedFileButtonPosition('right')
-                                    ->pdfFitType(PdfViewFit::FIT)
-                                    ->previewable(function () {
-                                        return $this->isMobile ? 0 : 1;
-                                    })
-                                    ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
-                                    ->afterStateHydrated(function ($component, $record) {
-                                        $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
-                                        $component->state($doc ? $doc->path : null);
-                                    })
-                                    ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component) {
-                                        $i = mt_rand(1000, 9000);
-                                        $extension = $file->getClientOriginalExtension();
-                                        $userEmail = auth()->user()->email;
-                                        return "{$userEmail}/{$component->getName()}/{$component->getName()}_{$i}.{$extension}";
-                                    })
-                                    ->deleteUploadedFileUsing(function ($state, $record, $component) {
+                        //                         $user_id = auth()->user()->id;
+                        //                         $data = $livewire->form->getState(); //ดึงค่า data จากฟอร์ม
 
-                                        $doc = $record->userHasmanyDocEmp()
-                                            ->where('file_name', $component->getName())
-                                            ->first();
-                                        $path = $doc->path;
-                                        if (!empty($doc)) {
-                                            $record->userHasOneIdcard()->delete();
-                                            Storage::disk('public')->delete($path);
-                                            $doc->delete();
-                                            return redirect("/profile?tab={$component->getId()}::data::tab");
-                                        }
-                                        return redirect("/profile?tab={$component->getName()}::data::tab");
-                                    }),
-                                Toggle::make('confirm')
-                                    ->label(new HtmlString($this->confirm))
-                                    ->accepted()
-                                    ->live()
-                                    ->afterStateHydrated(function () {
-                                        $this->updateStateInConfirm(false);
-                                    })
-                                    ->default(false)
-                                    ->validationMessages([
-                                        'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
-                                    ])
+                        //                         if (!empty($data[$component->getId()])) {
+                        //                             $record->userHasmanyDocEmp()->updateOrCreate(
+                        //                                 ['file_name' => $component->getId()],
+                        //                                 [
+                        //                                     'user_id' => $record->id,
+                        //                                     'file_name_th' => str_replace('ไฟล์เอกสาร', '', $component->getHeading()),
+                        //                                     'path' => $data[$component->getId()],
+                        //                                     'confirm' => $data['confirm'],
+                        //                                 ]
+                        //                             );
+                        //                         }
+                        //                         ProcessEmpDocJob::dispatch(
+                        //                             $data[$component->getId()],
+                        //                             User::find($user_id),
+                        //                             $component->getId(),
+                        //                             str_replace('ไฟล์เอกสาร', '', $component->getHeading())
+                        //                         );
+                        //                     }),
+                        //                 DeleteAction::make($component->getHeading())
+                        //                     ->label("เคลียร์ข้อมูล" . str_replace('ไฟล์เอกสาร', '', $component->getHeading()) . "ทั้งหมด")
+                        //                     ->requiresConfirmation()
+                        //                     ->modalHeading("เคลียร์ข้อมูลและเอกสาร \"" . str_replace('ไฟล์เอกสาร', '', $component->getHeading()) . "\" ทั้งหมด")
+                        //                     ->modalDescription("คุณต้องการเคลียร์ข้อมูล \"" . str_replace('ไฟล์เอกสาร', '', $component->getHeading()) . "\" รวมถึงไฟล์ด้วยใช่หรือไม่")
+                        //                     ->modalSubmitActionLabel('ยืนยันการเคลียร์ข้อมูล')
+                        //                     ->action(function ($record, $component) {
+                        //                         $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getId())->first();
+                        //                         $record->userHasOneIdcard()->delete();
+                        //                         if (!empty($doc)) {
+                        //                             Storage::disk('public')->delete($doc->path);
+                        //                             $doc->delete();
+                        //                         }
+                        //                         return redirect("/profile?tab={$component->getId()}::data::tab");
+                        //                     })
+                        //                     ->successNotificationTitle('เคลียร์ข้อมูลทั้งหมดเรียบร้อยแล้ว'),
+                        //             ];
+                        //         }
+                        //     )
+                        //     ->schema([
+                        //         AdvancedFileUpload::make('idcard')
+                        //             ->hiddenLabel()
+                        //             ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
+                        //             ->disk('public')
+                        //             ->dehydrated(false)
+                        //             ->directory('emp_files')
+                        //             ->reorderable()
+                        //             ->openable()
+                        //             ->appendFiles()
+                        //             ->removeUploadedFileButtonPosition('right')
+                        //             ->pdfFitType(PdfViewFit::FIT)
+                        //             ->previewable(function () {
+                        //                 return $this->isMobile ? 0 : 1;
+                        //             })
+                        //             ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                        //             ->afterStateHydrated(function ($component, $record) {
+                        //                 $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
+                        //                 $component->state($doc ? $doc->path : null);
+                        //                 $this->updateStateInConfirm(true);
+                        //             })
+                        //             ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component) {
+                        //                 $i = mt_rand(1000, 9000);
+                        //                 $extension = $file->getClientOriginalExtension();
+                        //                 $userEmail = auth()->user()->email;
+                        //                 return "{$userEmail}/{$component->getName()}/{$component->getName()}_{$i}.{$extension}";
+                        //             })
+                        //             ->deleteUploadedFileUsing(function ($state, $record, $component) {
 
-                                    ->afterStateUpdated(function ($state) {
-                                        $this->updateStateInConfirm($state);
-                                    }),
-                            ]),
+                        //                 $doc = $record->userHasmanyDocEmp()
+                        //                     ->where('file_name', $component->getName())
+                        //                     ->first();
+                        //                 $path = $doc->path;
+                        //                 $record->userHasOneIdcard()->delete();
+                        //                 if (!empty($doc)) {
+                        //                     Storage::disk('public')->delete($path);
+                        //                     $doc->delete();
+                        //                 }
+                        //                 return redirect("/profile?tab={$component->getName()}");
+                        //             }),
+                        //         Toggle::make('idcardconfirm')
+                        //             ->label(new HtmlString($this->confirm))
+                        //             ->accepted()
+                        //             ->live()
+                        //             ->afterStateHydrated(function ($record, $component) {
+                        //                 $doc = $record->userHasmanyDocEmp()
+                        //                     ->where('file_name', str_replace('confirm', '', $component->getName()))->first();
+                        //                 $component->state(!empty($doc) ? $doc->confirm : 0);
+                        //             })
+                        //             ->default(false)
+                        //             ->validationMessages([
+                        //                 'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
+                        //             ])
+                        //     ]),
                     ]),
                 Tab::make('วุฒิการศึกษา')
+                    ->extraAttributes(fn() => $this->isMobile ? ["style" => "padding: 20px 10px"] : [])
                     ->tabslug('transcript')
                     ->schema([
-                        Section::make('ข้อมูลทั่วไป')
-                            ->collapsed()
+                        Repeater::make('transcripts')
+                            ->addable(false)
                             ->columns(3)
-                            ->relationship('userHasoneTranscript')
+                            ->label('ข้อมูลเอกสารเพิ่มเติม')
+                            ->itemLabel(fn(array $state): ?string => $state['degree'] ?? null)
+                            ->collapsed()
+                            ->compact()
+                            ->deletable(false)
+                            ->live()
+                            ->relationship('userHasmanyTranscript')
                             ->schema([
                                 TextInput::make('prefix_name')
                                     ->formatStateUsing(fn($state) => ucwords($state ?? ''))
@@ -833,135 +846,137 @@ class EditProfile extends BaseEditProfile
                                     ->step(0.01) // ให้รับค่าทศนิยมสองตำแหน่ง
                                     ->maxValue(4.00), // กำหนดค่าสูงสุด
                             ]),
-                        Section::make('วุฒิการศึกษา')
-                            ->id('transcript')
-                            ->collapsible()
+                        // Section::make('วุฒิการศึกษา')
+                        //     ->id('transcript')
+                        //     ->collapsible()
+                        //     ->contained(false)
+                        //     ->description('ท่านสามารถลบเอกสาร และข้อมูลด้วยการคลิกที่ "X" ด้านขวาของเอกสารนั้น')
+                        //     ->footer(
+                        //         function ($component) {
+                        //             return [
+                        //                 Action::make('file_transcript')
+                        //                     ->label('อับเดตเอกสาร')
+                        //                     ->action(function ($livewire, $component, $record) {
+                        //                         $user_id = auth()->user()->id;
+                        //                         $data = $livewire->form->getState(); //ดึงค่า data จากฟอร์ม
+                        //                         $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getId())->first();
+                        //                         $fileForSend = array_values(array_diff($data[$component->getId()], $doc->path ?? []));
 
-                            ->description('ท่านสามารถลบเอกสาร และข้อมูลด้วยการคลิกที่ "X" ด้านขวาของเอกสารนั้น')
-                            ->footer(
-                                function ($component) {
-                                    return [
-                                        Action::make('file_transcript')
-                                            ->label('อับเดตเอกสาร')
-                                            ->action(function ($livewire, $component, $record) {
+                        //                         if (!empty($data[$component->getId()])) {
+                        //                             $record->userHasmanyDocEmp()->updateOrCreate(
+                        //                                 ['file_name' => $component->getId()],
+                        //                                 [
+                        //                                     'user_id' => $record->id,
+                        //                                     'file_name_th' => $component->getHeading(),
+                        //                                     'path' => $data[$component->getId()],
+                        //                                     'confirm' => $data['confirm'],
+                        //                                 ]
+                        //                             );
+                        //                         }
 
-                                                $user_id = auth()->user()->id;
-                                                $data = $livewire->form->getState(); //ดึงค่า data จากฟอร์ม
+                        //                         ProcessNoJsonEmpDocJob::dispatch(
+                        //                             $fileForSend,
+                        //                             User::find($user_id),
+                        //                             $component->getId(),
+                        //                             $component->getHeading()
+                        //                         );
+                        //                     }),
+                        //                 DeleteAction::make($component->getHeading())
+                        //                     ->label("เคลียร์ข้อมูล{$component->getHeading()}")
+                        //                     ->requiresConfirmation()
+                        //                     ->modalHeading("เคลียร์ข้อมูลและเอกสาร \"{$component->getHeading()}\" ทั้งหมด")
+                        //                     ->modalDescription("คุณต้องการเคลียร์ข้อมูล \"{$component->getHeading()}\" รวมถึงไฟล์ด้วยใช่หรือไม่")
+                        //                     ->modalSubmitActionLabel('ยืนยันการเคลียร์ข้อมูล')
+                        //                     ->action(function ($record, $component) {
+                        //                         //dump($component->getHeading());
+                        //                         $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getId())->first();
+                        //                         $record->userHasmanyTranscript()->delete();
+                        //                         if (!empty($doc)) {
+                        //                             Storage::disk('public')->delete($doc->path);
+                        //                             $doc->delete();
+                        //                         }
+                        //                         return redirect("/profile?tab={$component->getId()}::data::tab");
+                        //                     })
 
-                                                if (!empty($data[$component->getId()])) {
-                                                    $record->userHasmanyDocEmp()->updateOrCreate(
-                                                        ['file_name' => $component->getId()],
-                                                        [
-                                                            'user_id' => $record->id,
-                                                            'file_name_th' => $component->getHeading(),
-                                                            'path' => $data[$component->getId()],
-                                                            'confirm' => $data['confirm'],
-                                                        ]
-                                                    );
-                                                }
+                        //                     ->successNotificationTitle('เคลียร์ข้อมูลทั้งหมดเรียบร้อยแล้ว'),
+                        //             ];
+                        //         }
+                        //     )
+                        //     ->schema([
+                        //         AdvancedFileUpload::make('transcript')
+                        //             ->hiddenLabel()
+                        //             ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
+                        //             ->disk('public')
+                        //             ->dehydrated(false)
+                        //             ->directory('emp_files')
+                        //             ->multiple()
+                        //             ->reorderable()
+                        //             ->openable()
+                        //             ->appendFiles()
+                        //             ->removeUploadedFileButtonPosition('right')
+                        //             ->pdfFitType(PdfViewFit::FIT)
+                        //             ->previewable(function () {
+                        //                 return $this->isMobile ? 0 : 1;
+                        //             })
+                        //             ->panelLayout(function () {
+                        //                 return $this->isMobile ? null : 'grid';
+                        //             })
+                        //             ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                        //             ->afterStateHydrated(function ($component, $record) {
+                        //                 $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
+                        //                 $component->state($doc ? $doc->path : null);
+                        //             })
+                        //             ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component) {
+                        //                 $i = mt_rand(1000, 9000);
+                        //                 $extension = $file->getClientOriginalExtension();
+                        //                 $userEmail = auth()->user()->email;
+                        //                 return "{$userEmail}/{$component->getName()}/{$component->getName()}_{$i}.{$extension}";
+                        //             })
+                        //             ->deleteUploadedFileUsing(function ($state, $record, $component) {
 
-                                                ProcessEmpDocJob::dispatch(
-                                                    $data[$component->getId()],
-                                                    User::find($user_id),
-                                                    $component->getId(),
-                                                    $component->getHeading()
-                                                );
-                                            }),
-                                        DeleteAction::make($component->getHeading())
-                                            ->label("เคลียร์ข้อมูล")
-                                            ->requiresConfirmation()
-                                            ->modalHeading("เคลียร์ข้อมูลและเอกสาร \"{$component->getHeading()}\" ทั้งหมด")
-                                            ->modalDescription("คุณต้องการเคลียร์ข้อมูล \"{$component->getHeading()}\" รวมถึงไฟล์ด้วยใช่หรือไม่")
-                                            ->modalSubmitActionLabel('ยืนยันการเคลียร์ข้อมูล')
-                                            ->action(function ($record, $component) {
-                                                //dump($component->getHeading());
-                                                $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getId())->first();
-                                                if (!empty($doc)) {
-                                                    $record->userHasoneTranscript()->delete();
-                                                    Storage::disk('public')->delete($doc->path);
-                                                    $doc->delete();
-                                                    return redirect("/profile?tab={$component->getId()}::data::tab");
-                                                }
-                                            })
-                                            ->successNotificationTitle('เคลียร์ข้อมูลทั้งหมดเรียบร้อยแล้ว'),
-                                    ];
-                                }
-                            )
-                            ->schema([
-                                AdvancedFileUpload::make('transcript')
-                                    ->hiddenLabel()
-                                    ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
-                                    ->disk('public')
-                                    ->directory('emp_files')
-                                    ->multiple()
-                                    ->reorderable()
-                                    ->openable()
-                                    ->appendFiles()
-                                    ->removeUploadedFileButtonPosition('right')
-                                    ->pdfFitType(PdfViewFit::FIT)
-                                    ->previewable(function () {
-                                        return $this->isMobile ? 0 : 1;
-                                    })
-                                    ->panelLayout(function () {
-                                        return $this->isMobile ? null : 'grid';
-                                    })
-                                    ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
-                                    ->afterStateHydrated(function ($component, $record) {
-                                        $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
-                                        $component->state($doc ? $doc->path : null);
-                                    })
-                                    ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component) {
-                                        $i = mt_rand(1000, 9000);
-                                        $extension = $file->getClientOriginalExtension();
-                                        $userEmail = auth()->user()->email;
-                                        return "{$userEmail}/{$component->getName()}/{$component->getName()}_{$i}.{$extension}";
-                                    })
-                                    ->deleteUploadedFileUsing(function ($state, $record, $component) {
+                        //                 $doc = $record->userHasmanyDocEmp()
+                        //                     ->where('file_name', $component->getName())
+                        //                     ->first();
+                        //                 $path = $doc->path;
 
-                                        $doc = $record->userHasmanyDocEmp()
-                                            ->where('file_name', $component->getName())
-                                            ->first();
-                                        $path = $doc->path;
-
-                                        $fileDelete = array_values(array_diff($path, $state));
-                                        if (count($path) > 1) {
-                                            Storage::disk('public')->delete($fileDelete[0]);
-                                            $pathSuccess = array_values(array_diff($path, $fileDelete));
-                                            $record->userHasmanyDocEmp()->updateOrCreate(
-                                                ['file_name' => $component->getName()],
-                                                ['path' => $pathSuccess]
-                                            );
-                                        } else {
-                                            Storage::disk('public')->delete($path);
-                                            $doc->delete();
-                                        }
-                                        $doc_transcript = $record->userHasoneTranscript()
-                                            ->where('user_id', $record->id)
-                                            ->first();
-                                        if (!empty($doc_transcript)) {
-                                            $doc_transcript->delete();
-                                        }
-                                        return redirect("/profile?tab={$component->getName()}::data::tab");
-                                    }),
-                                Toggle::make('confirm')
-                                    ->label(new HtmlString($this->confirm))
-                                    ->accepted()
-                                    ->live()
-                                    ->afterStateHydrated(function () {
-                                        $this->updateStateInConfirm(false);
-                                    })
-                                    ->default(false)
-                                    ->validationMessages([
-                                        'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
-                                    ])
-
-                                    ->afterStateUpdated(function ($state) {
-                                        $this->updateStateInConfirm($state);
-                                    }),
-                            ]),
+                        //                 $fileDelete = array_values(array_diff($path, $state));
+                        //                 if (count($path) > 1) {
+                        //                     Storage::disk('public')->delete($fileDelete[0]);
+                        //                     $pathSuccess = array_values(array_diff($path, $fileDelete));
+                        //                     $record->userHasmanyDocEmp()->updateOrCreate(
+                        //                         ['file_name' => $component->getName()],
+                        //                         ['path' => $pathSuccess]
+                        //                     );
+                        //                 } else {
+                        //                     Storage::disk('public')->delete($path);
+                        //                     $doc->delete();
+                        //                 }
+                        //                 $doc_transcript = $record->userHasmanyTranscript()
+                        //                     ->where('file_path', $fileDelete[0])
+                        //                     ->first();
+                        //                 if (!empty($doc_transcript)) {
+                        //                     $doc_transcript->delete();
+                        //                 }
+                        //                 return redirect("/profile?tab={$component->getName()}");
+                        //             }),
+                        //         Toggle::make('transcriptconfirm')
+                        //             ->label(new HtmlString($this->confirm))
+                        //             ->accepted()
+                        //             ->live()
+                        //             ->afterStateHydrated(function ($record, $component) {
+                        //                 $doc = $record->userHasmanyDocEmp()
+                        //                     ->where('file_name', str_replace('confirm', '', $component->getName()))->first();
+                        //                 $component->state(!empty($doc) ? $doc->confirm : 0);
+                        //             })
+                        //             ->default(false)
+                        //             ->validationMessages([
+                        //                 'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
+                        //             ])
+                        //     ]),
                     ]),
-                
+
                 Tab::make('เอกสารเพิ่มเติม')
+                    ->extraAttributes(fn() => $this->isMobile ? ["style" => "padding: 20px 10px"] : [])
                     ->tabslug('another')
                     ->schema([
                         Repeater::make('anothers')
@@ -997,134 +1012,132 @@ class EditProfile extends BaseEditProfile
                                     ->autosize()
                                     ->columnSpan(3),
                             ]),
-                        Section::make('เอกสารเพิ่มเติม')
-                            ->id('another')
-                            ->collapsible()
+                        // Section::make('เอกสารเพิ่มเติม')
+                        //     ->id('another')
+                        //     ->collapsible()
+                        //     ->contained(false)
+                        //     ->description('ท่านสามารถลบเอกสาร และข้อมูลด้วยการคลิกที่ "X" ด้านขวาของเอกสารนั้น')
+                        //     ->footer(
+                        //         function ($component) {
+                        //             return [
+                        //                 Action::make('file_another')
+                        //                     ->label('อับเดตเอกสาร')
+                        //                     ->action(function ($livewire, $component, $record) {
 
-                            ->description('ท่านสามารถลบเอกสาร และข้อมูลด้วยการคลิกที่ "X" ด้านขวาของเอกสารนั้น')
-                            ->footer(
-                                function ($component) {
-                                    return [
-                                        Action::make('file_another')
-                                            ->label('อับเดตเอกสาร')
-                                            ->action(function ($livewire, $component, $record) {
+                        //                         $user_id = auth()->user()->id;
+                        //                         $data = $livewire->form->getState(); //ดึงค่า data จากฟอร์ม
+                        //                         $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getId())->first();
+                        //                         $fileForSend = array_values(array_diff($data[$component->getId()], $doc->path ?? []));
+                        //                         if (!empty($data[$component->getId()])) {
+                        //                             $record->userHasmanyDocEmp()->updateOrCreate(
+                        //                                 ['file_name' => $component->getId()],
+                        //                                 [
+                        //                                     'user_id' => $record->id,
+                        //                                     'file_name_th' => $component->getHeading(),
+                        //                                     'path' => $data[$component->getId()],
+                        //                                     'confirm' => $data['confirm'],
+                        //                                 ]
+                        //                             );
+                        //                         }
 
-                                                $user_id = auth()->user()->id;
-                                                $data = $livewire->form->getState(); //ดึงค่า data จากฟอร์ม
-                                                $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getId())->first();
-                                                $fileForSend = array_values(array_diff($data[$component->getId()], $doc->path ?? []));
+                        //                         ProcessNoJsonEmpDocJob::dispatch(
+                        //                             $fileForSend,
+                        //                             User::find($user_id),
+                        //                             $component->getId(),
+                        //                             $component->getHeading()
+                        //                         );
+                        //                     }),
+                        //                 DeleteAction::make($component->getHeading())
+                        //                     ->label("เคลียร์ข้อมูล{$component->getHeading()}")
+                        //                     ->requiresConfirmation()
+                        //                     ->modalHeading("เคลียร์ข้อมูลและเอกสาร \"{$component->getHeading()}\" ทั้งหมด")
+                        //                     ->modalDescription("คุณต้องการเคลียร์ข้อมูล \"{$component->getHeading()}\ รวมถึงไฟล์ด้วยใช่หรือไม่")
+                        //                     ->modalSubmitActionLabel('ยืนยันการเคลียร์ข้อมูล')
+                        //                     ->action(function ($record, $component) {
+                        //                         //dump($component->getHeading());
+                        //                         $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getId())->first();
+                        //                         $record->userHasmanyAnotherDoc()->delete();
+                        //                         if (!empty($doc)) {
+                        //                             Storage::disk('public')->delete($doc->path);
+                        //                             $doc->delete();
+                        //                         }
+                        //                         return redirect("/profile?tab={$component->getId()}::data::tab");
+                        //                     })
+                        //                     ->successNotificationTitle('เคลียร์ข้อมูลทั้งหมดเรียบร้อยแล้ว'),
+                        //             ];
+                        //         }
+                        //     )
+                        //     ->schema([
+                        //         AdvancedFileUpload::make('another')
+                        //             ->hiddenLabel()
+                        //             ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
+                        //             ->disk('public')
+                        //             ->dehydrated(false)
+                        //             ->directory('emp_files')
+                        //             ->multiple()
+                        //             ->reorderable()
+                        //             ->openable()
+                        //             ->appendFiles()
+                        //             ->removeUploadedFileButtonPosition('right')
+                        //             ->pdfFitType(PdfViewFit::FIT)
+                        //             ->previewable(function () {
+                        //                 return $this->isMobile ? 0 : 1;
+                        //             })
+                        //             ->panelLayout(function () {
+                        //                 return $this->isMobile ? null : 'grid';
+                        //             })
+                        //             ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
+                        //             ->afterStateHydrated(function ($component, $record) {
+                        //                 $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
+                        //                 $component->state($doc ? $doc->path : null);
+                        //             })
+                        //             ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component) {
+                        //                 $name = $file->getClientOriginalName();
+                        //                 $extension = $file->getClientOriginalExtension();
+                        //                 $userEmail = auth()->user()->email;
+                        //                 return "{$userEmail}/{$component->getName()}/{$name}.{$extension}";
+                        //             })
+                        //             ->deleteUploadedFileUsing(function ($state, $record, $component) {
 
-                                                if (!empty($data[$component->getId()])) {
-                                                    $record->userHasmanyDocEmp()->updateOrCreate(
-                                                        ['file_name' => $component->getId()],
-                                                        [
-                                                            'user_id' => $record->id,
-                                                            'file_name_th' => $component->getHeading(),
-                                                            'path' => $data[$component->getId()],
-                                                            'confirm' => $data['confirm'],
-                                                        ]
-                                                    );
-                                                }
+                        //                 $doc = $record->userHasmanyDocEmp()
+                        //                     ->where('file_name', $component->getName())
+                        //                     ->first();
+                        //                 $path = $doc->path;
 
-                                                ProcessAnotherEmpDocJob::dispatch(
-                                                    $fileForSend,
-                                                    User::find($user_id),
-                                                    $component->getId(),
-                                                    $component->getHeading()
-                                                );
-                                            }),
-                                        DeleteAction::make($component->getHeading())
-                                            ->label("เคลียร์ข้อมูล")
-                                            ->requiresConfirmation()
-                                            ->modalHeading("เคลียร์ข้อมูลและเอกสาร \"{$component->getHeading()}\" ทั้งหมด")
-                                            ->modalDescription("คุณต้องการเคลียร์ข้อมูล \"{$component->getHeading()}\ รวมถึงไฟล์ด้วยใช่หรือไม่")
-                                            ->modalSubmitActionLabel('ยืนยันการเคลียร์ข้อมูล')
-                                            ->action(function ($record, $component) {
-                                                //dump($component->getHeading());
-                                                $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getId())->first();
-                                                if (!empty($doc)) {
-                                                    $record->userHasmanyAnotherDoc()->delete();
-                                                    Storage::disk('public')->delete($doc->path);
-                                                    $doc->delete();
-                                                    return redirect("/profile?tab={$component->getId()}::data::tab");
-                                                }
-                                            })
-                                            ->successNotificationTitle('เคลียร์ข้อมูลทั้งหมดเรียบร้อยแล้ว'),
-                                    ];
-                                }
-                            )
-                            ->schema([
-                                AdvancedFileUpload::make('another')
-                                    ->hiddenLabel()
-                                    ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
-                                    ->disk('public')
-                                    ->directory('emp_files')
-                                    ->multiple()
-                                    ->reorderable()
-                                    ->openable()
-                                    ->appendFiles()
-                                    ->removeUploadedFileButtonPosition('right')
-                                    ->pdfFitType(PdfViewFit::FIT)
-                                    ->previewable(function () {
-                                        return $this->isMobile ? 0 : 1;
-                                    })
-                                    ->panelLayout(function () {
-                                        return $this->isMobile ? null : 'grid';
-                                    })
-                                    ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
-                                    ->afterStateHydrated(function ($component, $record) {
-                                        $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
-                                        $component->state($doc ? $doc->path : null);
-                                    })
-                                    ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component) {
-                                        $name = $file->getClientOriginalName();
-                                        $extension = $file->getClientOriginalExtension();
-                                        $userEmail = auth()->user()->email;
-                                        return "{$userEmail}/{$component->getName()}/{$name}.{$extension}";
-                                    })
-                                    ->deleteUploadedFileUsing(function ($state, $record, $component) {
-
-                                        $doc = $record->userHasmanyDocEmp()
-                                            ->where('file_name', $component->getName())
-                                            ->first();
-                                        $path = $doc->path;
-
-                                        $fileDelete = array_values(array_diff($path, $state));
-                                        if (count($path) > 1) {
-                                            Storage::disk('public')->delete($fileDelete[0]);
-                                            $pathSuccess = array_values(array_diff($path, $fileDelete));
-                                            $record->userHasmanyDocEmp()->updateOrCreate(
-                                                ['file_name' => $component->getName()],
-                                                ['path' => $pathSuccess]
-                                            );
-                                        } else {
-                                            Storage::disk('public')->delete($path);
-                                            $doc->delete();
-                                        }
-                                        $doc_another = $record->userHasmanyAnotherDoc()
-                                            ->where('file_path', $fileDelete[0])
-                                            ->first();
-                                        if (!empty($doc_another)) {
-                                            $doc_another->delete();
-                                        }
-                                        return redirect("/profile?tab={$component->getName()}::data::tab");
-                                    }),
-                                Toggle::make('confirm')
-                                    ->label(new HtmlString($this->confirm))
-                                    ->accepted()
-                                    ->live()
-                                    ->afterStateHydrated(function () {
-                                        $this->updateStateInConfirm(false);
-                                    })
-                                    ->default(false)
-                                    ->validationMessages([
-                                        'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
-                                    ])
-
-                                    ->afterStateUpdated(function ($state) {
-                                        $this->updateStateInConfirm($state);
-                                    }),
-                            ]),
+                        //                 $fileDelete = array_values(array_diff($path, $state));
+                        //                 if (count($path) > 1) {
+                        //                     Storage::disk('public')->delete($fileDelete[0]);
+                        //                     $pathSuccess = array_values(array_diff($path, $fileDelete));
+                        //                     $record->userHasmanyDocEmp()->updateOrCreate(
+                        //                         ['file_name' => $component->getName()],
+                        //                         ['path' => $pathSuccess]
+                        //                     );
+                        //                 } else {
+                        //                     Storage::disk('public')->delete($path);
+                        //                     $doc->delete();
+                        //                 }
+                        //                 $doc_another = $record->userHasmanyAnotherDoc()
+                        //                     ->where('file_path', $fileDelete[0])
+                        //                     ->first();
+                        //                 if (!empty($doc_another)) {
+                        //                     $doc_another->delete();
+                        //                 }
+                        //                 return redirect("/profile?tab={$component->getName()}");
+                        //             }),
+                        //         Toggle::make('anotherconfirm')
+                        //             ->label(new HtmlString($this->confirm))
+                        //             ->accepted()
+                        //             ->live()
+                        //             ->afterStateHydrated(function ($record, $component) {
+                        //                 $doc = $record->userHasmanyDocEmp()
+                        //                     ->where('file_name', str_replace('confirm', '', $component->getName()))->first();
+                        //                 $component->state(!empty($doc) ? $doc->confirm : 0);
+                        //             })
+                        //             ->default(false)
+                        //             ->validationMessages([
+                        //                 'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
+                        //             ])
+                        //     ]),
 
 
                     ])
@@ -1136,11 +1149,13 @@ class EditProfile extends BaseEditProfile
         return 'filament-panels::components.layout.index';
     }
 
-    // protected function getRedirectUrl(): ?string
-    // {
-    //     return env('APP_URL');
-    // }
-
+    function getActiveTabName()
+    {
+        $url = request()->header('Referer');
+        $query = parse_url($url, PHP_URL_QUERY);
+        $tabName = str_replace('tab=', '', $query);
+        $this->current_tab = $tabName;
+    }
 }
 
 
@@ -1148,7 +1163,7 @@ class EditProfile extends BaseEditProfile
 
 
 // Tab::make('สมุดบัญชีธนาคาร')
-                //     ->tabslug('bookbank')
+                //     ->statePath('bookbank')
                 //     ->schema([
                 //         Section::make('ข้อมูลทั่วไป')
                 //             ->collapsed()
@@ -1179,11 +1194,12 @@ class EditProfile extends BaseEditProfile
                 //             ->multiple()
                 //             ->disabled()
                 //             //->panelLayout('grid')
-                //             ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
+                //             //->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
                 //             ->disk('public')
+                //                ->dehydrated(false)
                 //             ->directory('emp_files')
                 //             ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component, $state) {
-
+                //
                 //                 $i = mt_rand(1000, 9000);
                 //                 $extension = $file->getClientOriginalExtension();
                 //                 $userEmail = auth()->user()->email;

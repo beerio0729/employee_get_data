@@ -15,6 +15,7 @@ class ResumeLocation extends Model
     protected $table = "resume_locations";
     protected $fillable = [
         'resume_id',
+        'same_id_card',
         'address',
         'province_id',
         'district_id',

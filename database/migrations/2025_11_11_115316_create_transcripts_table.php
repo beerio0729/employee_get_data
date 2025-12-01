@@ -34,6 +34,7 @@ return new class extends Migration
 
             // เกรดเฉลี่ย
             $table->decimal('gpa', 4, 2)->nullable()->comment('เกรดเฉลี่ย (x.xx)'); // 4 หลัก, ทศนิยม 2 ตำแหน่ง (รองรับ 99.99 แต่ใช้จริงแค่ 4.00)
+            $table->string('file_path');
             $table->timestamps();
         });
     }

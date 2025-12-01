@@ -14,7 +14,7 @@ class ResumeLangSkills extends Model
         "resume_id",
         "language",
         "speaking",
-        "reading",
+        "listening",
         "writing"
     ];
 }

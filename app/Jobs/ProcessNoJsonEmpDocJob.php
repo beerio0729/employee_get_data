@@ -16,7 +16,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Http\Client\ConnectionException;
 
-class ProcessAnotherEmpDocJob implements ShouldQueue
+class ProcessNoJsonEmpDocJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -57,7 +57,7 @@ class ProcessAnotherEmpDocJob implements ShouldQueue
         // // dump('-----------------------------------');
         // // dump($this->hasManyData);
         $this->processSaveToDB($this->hasOneData, $this->hasManyData);
-        event(new ProcessEmpDocEvent('กระบวนการเสร็จสิ้น', $this->user, 'close', $this->file_name, true));
+        event(new ProcessEmpDocEvent('กระบวนการเสร็จสิ้น โปรดตรวจสอบข้อมูลโดยละเอียดอีกครั้ง', $this->user, 'close', $this->file_name, true));
     }
 
     public function failed(?Throwable $exception): void

@@ -20,5 +20,6 @@ class Transcript extends Model
         'date_of_admission', //ปีที่เข้าศึกษา
         'date_of_graduation', //ปีที่เข้าศึกษา
         'gpa', //เกรดเฉลี่ย
+        'file_path'
     ];
 }

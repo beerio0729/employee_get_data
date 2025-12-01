@@ -70,16 +70,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
-            ->assets(
-                [
-                    // **ใช้ Vite::asset() เพื่อให้ชี้ไปยัง public/build/assets/app-xxxxxx.js**
-                    // 'resources/js/app.js' คือ Entry Point ที่กำหนดใน vite.config.js
-                    Js::make('echo-scripts', Vite::asset('resources/js/echo.js')),
-                ],
-                // 'default' คือ Package Name
-                'default'
-            )->renderHook(
-                // แทรก Script เข้าไปในส่วนท้ายของ Head หรือ Body เพื่อให้โค้ด Echo อ่านได้
+            ->renderHook(
                 PanelsRenderHook::BODY_START,
                 fn() => Auth::check()
                     ? '<script>window.App = window.App || {}; window.App.userId = ' . Auth::id() . ';</script>'

@@ -1,4 +1,3 @@
-console.log('test')
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 window.Pusher = Pusher;
@@ -10,9 +9,9 @@ window.Echo = new Echo({
     forceTLS: true
 });
 //window.Echo.channel('test-channel')
-const id = window.App ? window.App.userId : null;
+//
 //window.Echo.private('user.${id}')
-window.Echo.private('user.' + id)
+window.Echo.private('user.' + window.App.userId)
     .listen('.ProcessEmpDocEvent', (e) => {
         //alert(e.message);
         console.log(e.modal_status)
@@ -22,6 +21,12 @@ window.Echo.private('user.' + id)
 
 function updateStatusModal(message, modal_status, slug, success) {
     const modalId = 'simple-status-modal';
+
+    if (modal_status === 'edit') {
+        Livewire.dispatch('document-upload-error', { actionId: slug });
+
+        return; // ออกจากฟังก์ชันทันที ไม่ต้องสร้าง Modal
+    }
 
     // ** 1. ตรวจสอบเงื่อนไขการเสร็จสิ้นก่อนเริ่มกระบวนการ Modal **
     if (modal_status === 'close') {
@@ -82,38 +87,24 @@ function updateStatusModal(message, modal_status, slug, success) {
 
         document.body.appendChild(modal);
     } else {
-        // if (message === 'ขออภัย! คุณอับโหลดเอกสารผิดประเภท โปรดอับโหลดเอกสารตามประเภทที่ระบุ') {
-        //     closeModal(message, modalId);
-        //     return; // ออกจากฟังก์ชันทันที ไม่ต้องสร้าง Modal
 
-        // } else {
-            document.getElementById('modal-message').textContent = message;
-        
+        document.getElementById('modal-message').textContent = message;
+
     }
 }
 
 function closeModal(message, modalId, slug, success) { //สำหรับปิด modal
     document.getElementById('modal-message').textContent = message;
     const modalToRemove = document.getElementById(modalId);
-    
+
     // หน่วงเวลา 2 วินาที ก่อนปิด Modal และรีเฟรชหน้าจอ
     setTimeout(() => {
-        if(success){
-            console.log(success);
-            const appUrl = import.meta.env.VITE_APP_URL;
-            window.location.href = appUrl+"/profile?tab="+slug+"::data::tab";
-        } else {
-            modalToRemove.remove();
-            console.log(slug);
-            Livewire.dispatch('document-upload-error', {actionId: slug});
-        }
-            
+        modalToRemove.remove();
+        Livewire.dispatch('openActionModal', { id: slug });
     }, 3000);
 }
 // alert('test');
 // console.log('test')
-
-
 
 
 

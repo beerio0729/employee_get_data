@@ -43,8 +43,10 @@ class SaveResumeToDB
                 $resume->resumeHasmanyWorkExperiences()->create([
                     "company" => $item['company'],
                     "details" =>  $item['details'],
-                    "duration" => $item['duration'],
+                    "start" => $item['start'],
+                    "last" => $item['last'],
                     "position" => $item['position'],
+                    "reason_for_leaving" => $item['reason_for_leaving'],
                     "salary" => $item['salary'],
                 ]);
             }
@@ -69,7 +71,7 @@ class SaveResumeToDB
                 $resume->resumeHasmanyLangSkill()->create([
                     'language' => $item['language'],
                     'speaking' => $item['speaking'],
-                    'reading' => $item['reading'],
+                    'listening' => $item['listening'],
                     'writing' => $item['writing'],
                 ]);
             }

@@ -1,20 +1,22 @@
 <?php
 return [
     'prefix_name' => [
-        'นาย'=>'นาย',
-        'นาง'=>'นาง',
-        'นางสาว'=>'นางสาว',
+        'นาย' => 'นาย',
+        'นาง' => 'นาง',
+        'นางสาว' => 'นางสาว',
     ],
     'prefix_name_en' => [
-        'Mr.'=>'Mr.',
-        'Mrs.'=>'Mrs.',
-        'Miss'=>'Miss',
+        'Mr.' => 'Mr.',
+        'Mrs.' => 'Mrs.',
+        'Miss' => 'Miss',
     ],
 
     'marital_status' => [
-        'โสด'=>'โสด',
-        'สมรส'=>'สมรส',
-        'หย่าร้าง'=>'หย่าร้าง',
+        'single' => 'โสด',
+        'married' => 'สมรส',
+        'divorced' => 'หย่าร้าง',
+        'widowed' => 'เป็นหม้าย',
+        'Separated' => 'แยกกันอยู่'
     ],
 
     'day' => [
@@ -51,27 +53,27 @@ return [
         'อื่นๆ (โปรดระบุ)' => 'อื่นๆ (โปรดระบุ)'
     ],
 
-    'lang'=>[ 
+    'lang' => [
         'ภาษาอังกฤษ' => 'ภาษาอังกฤษ',
         'ภาษาญี่ปุ่น' => 'ภาษาญี่ปุ่น',
         'ภาษาจีน' => 'ภาษาจีน',
         'ภาษาเกาหลี' => 'ภาษาเกาหลี',
     ],
 
-    'office'=>[ 
+    'office' => [
         'Excel' => 'Excel',
         'Power Point' => 'Power Point',
         'Word' => 'Word',
     ],
 
-    'multimedia'=>[ 
+    'multimedia' => [
         'Photoshop' => 'Photoshop',
         'Ilastrator' => 'Ilastrator',
         'Premier Pro' => 'Premier Pro',
         'After Effect' => 'After Effect',
     ],
 
-    'program'=>[ 
+    'program' => [
         'HTML' => 'HTML',
         'CSS' => 'CSS',
         'Javascript' => 'Javascript',
@@ -103,11 +105,17 @@ return [
         6 => 'ฝ่ายบัญชี',
         7 => 'ฝ่ายการตลาด',
     ],
-    
-    'doc_name' => [
-        'resume' => 'เอกสาร Resume',
-        'id_card' => 'สำเนาบัตรประชาชน',
-        'transcript' => 'วุฒิการศึกษา',
+
+    // 'doc_name' => [
+    //     'resume' => 'เอกสาร Resume',
+    //     'id_card' => 'สำเนาบัตรประชาชน',
+    //     'transcript' => 'วุฒิการศึกษา',
+    // ],
+
+    'skill_level' => [
+        'fluent' => 'คล่องแคล่ว',
+        'good' => 'ดี',
+        'fair' => 'พอใช้'
     ],
 
 ];

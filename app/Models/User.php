@@ -18,8 +18,10 @@ use App\Models\Resume\ResumeEducations;
 use App\Models\Resume\ResumeLangSkills;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Resume\ResumeCertificates;
+use App\Models\Resume\ResumeLocationWork;
 use App\Models\Resume\ResumeOtherContacts;
 use App\Models\Resume\ResumeJobPreferences;
+use App\Models\Resume\ResumePositionApplied;
 use App\Models\Resume\ResumeWorkExperiences;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -139,9 +141,9 @@ class User extends Authenticatable
         return $this->hasOne(Idcard::class, 'user_id', 'id');
     }
 
-    public function userHasoneTranscript()
+    public function userHasmanyTranscript()
     {
-        return $this->hasOne(Transcript::class, 'user_id', 'id');
+        return $this->hasMany(Transcript::class, 'user_id', 'id');
     }
 
     public function userHasoneBookbank()
@@ -170,6 +172,18 @@ class User extends Authenticatable
     {
 
         return $this->userHasoneResume->hasOne(ResumeJobPreferences::class, 'resume_id', 'id');
+    }
+    
+    public function userHasOneResumeToPositionApplied()
+    {
+
+        return $this->userHasoneResume->hasOne(ResumePositionApplied::class, 'resume_id', 'id');
+    }
+    
+    public function userHasOneResumeToLocationWork()
+    {
+
+        return $this->userHasoneResume->hasOne(ResumeLocationWork::class, 'resume_id', 'id');
     }
 
     public function userHasManyResumeToEducation()

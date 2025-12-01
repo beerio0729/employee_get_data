@@ -3,6 +3,8 @@
 namespace App\Models\Resume;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Resume\ResumeLocationWork;
+use App\Models\Resume\ResumePositionApplied;
 // use App\Models\Resume\ResumeSkills;
 // use App\Models\Resume\ResumeLocation;
 // use App\Models\Resume\ResumeEducations;
@@ -44,6 +46,16 @@ class Resume extends Model
     public function resumeHasoneJobPreference()
     {
         return $this->hasOne(ResumeJobPreferences::class, 'resume_id', 'id');
+    }
+    
+    public function resumeHasonePositionApplied()
+    {
+        return $this->hasOne(ResumePositionApplied::class, 'resume_id', 'id');
+    }
+    
+    public function resumeHasoneLocationWork()
+    {
+        return $this->hasOne(ResumeLocationWork::class, 'resume_id', 'id');
     }
 
     public function resumeHasmanyEducation()

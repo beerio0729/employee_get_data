@@ -5,6 +5,7 @@ namespace App\Providers;
 use Filament\Support\Assets\Js;
 use Filament\Support\Assets\Css;
 use App\Events\ProcessEmpDocEvent;
+use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Broadcast;
@@ -26,9 +27,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         FilamentAsset::register([
-             Css::make('noto_sans_thai', 'https://fonts.googleapis.com/css?family=Noto Sans Thai'),
-        //     Js::make('pusher', 'https://js.pusher.com/8.4.0/pusher.min.js'),
-        //     Js::make('process_emp_doc_event', asset('/storage/js/process_emp_doc_event.js')),
+            Css::make('noto_sans_thai', 'https://fonts.googleapis.com/css?family=Noto Sans Thai'),
+            Js::make('echo-scripts', Vite::asset('resources/js/echo.js')),
         ]);
     }
 }

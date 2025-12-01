@@ -31,7 +31,7 @@ class ProcessEmpDocEvent implements ShouldBroadcastNow
      * @return void
      */
     public function __construct(
-        string $message, 
+        ?string $message = null, 
         $user, 
         ?string $modal_status = "open",
         ?string $file_name = null,

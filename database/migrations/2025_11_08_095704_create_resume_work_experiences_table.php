@@ -16,8 +16,10 @@ return new class extends Migration
             $table->foreignID('resume_id')->references('id')->on('resumes')->onDelete('cascade'); // (แนะนำสำหรับตารางลูก)
             $table->string('company')->nullable(); // บริษัท
             $table->string('position')->nullable(); // ตำแหน่ง
-            $table->string('duration')->nullable(); // ช่วงเวลา
+            $table->string('start')->nullable(); // ช่วงเวลา
+            $table->string('last')->nullable(); // ช่วงเวลา
             $table->string('salary')->nullable(); // เงินเดือน (ใช้ string ตามการตกลงเพื่อให้ง่ายต่อการจัดการ JSON)
+            $table->string('reason_for_leaving')->nullable(); //เหตุผลที่ลาออก
             $table->text('details')->nullable(); // รายละเอียด (ใช้ text สำหรับ textarea)
             $table->timestamps();
         });

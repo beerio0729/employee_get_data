@@ -39,7 +39,7 @@ class ProcessEmpDocJob implements ShouldQueue
      * สร้าง Job Instance ใหม่
      */
     public function __construct(array|string $data, $user, $file_name, $file_name_th)
-    {   dump($data);
+    {   
         $this->file_name = $file_name; //ถอด key ของ array จะได้ชนิดเอกสาร เพราะเรียงไว้ฟอร์มแรก
         $this->file_name_th = $file_name_th;
         $this->file_Paths = $data;
@@ -51,7 +51,7 @@ class ProcessEmpDocJob implements ShouldQueue
      * เมธอดนี้จะถูกเรียกเมื่อ Worker ดึง Job ออกจากคิว
      */
     public function handle(): void
-    {
+    {   
         if (is_array($this->file_Paths)) {
             // Case 1: Multiple Files (Array)
             $contents = $this->buildMultiContents($this->file_Paths);
@@ -66,7 +66,10 @@ class ProcessEmpDocJob implements ShouldQueue
 
         if ($this->hasOneData['check'] === 'yes') {
             $this->processSaveToDB($this->hasOneData, $this->hasManyData);
-            event(new ProcessEmpDocEvent('กระบวนการเสร็จสิ้น', $this->user, 'close', $this->file_name, true));
+            event(new ProcessEmpDocEvent(
+                'กระบวนการเสร็จสิ้น โปรดตรวจสอบความถูกต้องของข้อมูลอย่างละเอียดอีกครั้ง', 
+                $this->user, 'close', $this->file_name, true)
+            );
         } else {
             $this->deleteFile();
             // 2. โยน Exception เพื่อสั่งให้ Job Worker จัดการ
@@ -98,7 +101,6 @@ class ProcessEmpDocJob implements ShouldQueue
 
         $fileContent = Storage::disk('public')->get($file_Paths);
         $mimeType = Storage::disk('public')->mimeType($file_Paths);
-        //dump($mimeType);
         $parts = [
             [
                 'text' => config("empPromtForAi.{$this->file_name}", [])
@@ -132,7 +134,6 @@ class ProcessEmpDocJob implements ShouldQueue
         foreach ($file_Paths as $filePath) {
             $fileContent = Storage::disk('public')->get($filePath);
             $mimeType = Storage::disk('public')->mimeType($filePath);
-
             $parts[] = [
                 'inline_data' => [
                     'mime_type' => $mimeType,

@@ -14,8 +14,10 @@ class ResumeWorkExperiences extends Model
         "resume_id",
         "company", //บริษัท str
         "position", //ตำแหน่ง str
-        "duration", //ช่วงเวลา str
+        "start", //ช่วงเวลาเริ่มต้น
+        "last",
         "salary", //เงินเดือน int
-        "details" //รายละเอียด textarea
+        "details", //รายละเอียด textarea
+        "reason_for_leaving" //เหตุผลที่ลาออก
     ];
 }

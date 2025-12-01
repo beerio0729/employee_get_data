@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignID('resume_id')->references('id')->on('resumes')->onDelete('cascade'); // (แนะนำสำหรับตารางลูก)
             $table->string('language')->nullable(); // ภาษา
             $table->string('speaking')->nullable(); // ระดับการพูด
-            $table->string('reading')->nullable(); // ระดับการอ่าน
+            $table->string('listening')->nullable(); // ระดับการอ่าน
             $table->string('writing')->nullable(); // ระดับการเขียน
             $table->timestamps();
         });

@@ -11,15 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('resume_locations', function (Blueprint $table) {
+        Schema::create('resume_location_works', function (Blueprint $table) {
             $table->id();
             $table->foreignID('resume_id')->references('id')->on('resumes')->onDelete('cascade');
-            $table->boolean('same_id_card')->nullable();
-            $table->string('address')->nullable();
-            $table->integer('province_id')->nullable();
-            $table->integer('district_id')->nullable();
-            $table->integer('subdistrict_id')->nullable();
-            $table->integer('zipcode')->nullable();
+            $table->string('location')->nullable();
+            $table->json('other_location')->nullable();
             $table->timestamps();
         });
     }
@@ -29,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('resume_locations');
+        Schema::dropIfExists('location_works');
     }
 };
