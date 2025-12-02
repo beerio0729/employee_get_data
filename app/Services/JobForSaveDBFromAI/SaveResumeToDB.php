@@ -14,13 +14,13 @@ class SaveResumeToDB
     public function saveToDB(array $hasOneData, array $hasManyData, $user): void
     {
         $hasOneDataSuccess = $this->saveHasOneResumeLocation($hasOneData);
-        dump($user->userHasoneResume->id);
-        // dump('--------------------'); 
-        // dump('--------------------');
+        // //dump($user->userHasoneResume->id);
+        // // dump('--------------------'); 
+        // dump('----------hasOneDataSuccess----------');
         // dump($hasOneDataSuccess);
         // dump('--------------------'); 
-        // dump('--------------------');
-        // dump($hasManyData);
+        // dump('---------hasManyData-----------');
+        dump($hasManyData['position']);
         $resume = $user->userHasoneResume()->updateOrCreate(
             ['user_id' => $user->id],
             $hasOneDataSuccess
@@ -29,7 +29,13 @@ class SaveResumeToDB
             ['resume_id' => $user->userHasoneResume->id],
             $hasOneDataSuccess
         );
-        $resume->resumeHasoneJobPreference()->create($hasOneDataSuccess);
+        $resume->resumeHasoneJobPreference()->create(
+            [
+                ...$hasOneDataSuccess,
+                'position' => $hasManyData['position'],
+                'location' => $this->getProvinceIds($hasManyData['location'] ?? []),
+            ]
+        );
 
         $workExperiences = $hasManyData['work_experience'] ?? [];
         $educations = $hasManyData['education'] ?? [];
@@ -114,7 +120,7 @@ class SaveResumeToDB
             ->orWhere('name_en', $hasOneData['province'])
             ->value('id') ?? null;
         $data['district_id'] = Districts::where('name_th', $hasOneData['district'])
-            ->where('province_id', $data['province_id'] )
+            ->where('province_id', $data['province_id'])
             ->orWhere('name_en', $hasOneData['district'])
             ->value('id') ?? null;
         $data['subdistrict_id'] = Subdistricts::where('name_th', $hasOneData['subdistrict'])
@@ -130,5 +136,18 @@ class SaveResumeToDB
         unset($data['province'], $data['district'], $data['subdistrict']);
 
         return $data;
+    }
+
+    function getProvinceIds(array $locations): array
+    {
+        $ids = [];
+
+        foreach ($locations as $loc) {
+            $ids[] = Provinces::where('name_th', $loc)
+                ->orWhere('name_en', $loc)
+                ->value('id');
+        }
+
+        return $ids;
     }
 }

@@ -19,11 +19,11 @@ class Register extends BaseRegister
         return $schema->schema($mycomponents);
     }
     
-    protected function handleRegistration(array $data): Model
-    {   $user = parent::handleRegistration($data);
-        DB::transaction(function () use ($user) {   
-        $user->userHasoneResume()->create([]);
-        },attempts: 5);
-        return $user;
-    }
+    // protected function handleRegistration(array $data): Model
+    // {   $user = parent::handleRegistration($data);
+    //     DB::transaction(function () use ($user) {   
+    //     $user->userHasoneResume()->create([]);
+    //     },attempts: 5);
+    //     return $user;
+    // }
 }

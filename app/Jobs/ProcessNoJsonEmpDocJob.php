@@ -57,7 +57,7 @@ class ProcessNoJsonEmpDocJob implements ShouldQueue
         // // dump('-----------------------------------');
         // // dump($this->hasManyData);
         $this->processSaveToDB($this->hasOneData, $this->hasManyData);
-        event(new ProcessEmpDocEvent('กระบวนการเสร็จสิ้น โปรดตรวจสอบข้อมูลโดยละเอียดอีกครั้ง', $this->user, 'close', $this->file_name, true));
+        event(new ProcessEmpDocEvent('กระบวนการเสร็จสิ้น<br>โปรดตรวจสอบข้อมูลโดยละเอียดอีกครั้ง', $this->user, 'close', $this->file_name, true));
     }
 
     public function failed(?Throwable $exception): void
@@ -144,7 +144,7 @@ class ProcessNoJsonEmpDocJob implements ShouldQueue
             if (!$response->successful()) {
                 Log::channel('gemini')->debug("API มีปัญหาซะแล้ว: " . $response->status(), $response->json());
                 // ถ้าเกิด Error ให้ throw Exception เพื่อให้ Job ถูก Retry
-                throw new \Exception('การประมวลผลของ Ai ไม่สำเร็จกำลังลองใหม่อีกครั้ง...');
+                throw new \Exception('การประมวลผลของ Ai ไม่สำเร็จ<br>กำลังลองใหม่อีกครั้ง...');
                 //event(new ProcessEmpDocEvent('การประมวลผลของ Ai ไม่สำเร็จกำลังลองใหม่อีกครั้ง...', $this->user));
             }
         } catch (ConnectionException $e) {
@@ -152,9 +152,9 @@ class ProcessNoJsonEmpDocJob implements ShouldQueue
             Log::channel('gemini')->error("Connection/Timeout Error: " . $e->getMessage());
 
             // โยน Exception เพื่อให้ Job ถูก Retry
-            throw new \Exception('การเชื่อมต่อกับ AI ล้มเหลว โปรดลองใหม่อีกครั้ง');
+            throw new \Exception('การเชื่อมต่อกับ AI ล้มเหลว<br>โปรดลองใหม่อีกครั้ง');
         } catch (\Throwable $e) {
-            throw new \Exception('มีปัญหาที่ไม่คาดคิดเกี่ยวกับ Ai ไม่สำเร็จกำลังลองใหม่อีกครั้ง...');
+            throw new \Exception('มีปัญหาที่ไม่คาดคิดเกี่ยวกับ Ai<br>กำลังลองใหม่อีกครั้ง...');
             // หากเป็น Exception ที่ไม่เกี่ยวข้องกับการเชื่อมต่อโดยตรง (เช่น PHP Error)
             Log::channel('gemini')->error("Uncaught Error in API Call: " . $e->getMessage());
             throw $e;

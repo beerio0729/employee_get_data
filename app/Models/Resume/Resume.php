@@ -47,16 +47,6 @@ class Resume extends Model
     {
         return $this->hasOne(ResumeJobPreferences::class, 'resume_id', 'id');
     }
-    
-    public function resumeHasonePositionApplied()
-    {
-        return $this->hasOne(ResumePositionApplied::class, 'resume_id', 'id');
-    }
-    
-    public function resumeHasoneLocationWork()
-    {
-        return $this->hasOne(ResumeLocationWork::class, 'resume_id', 'id');
-    }
 
     public function resumeHasmanyEducation()
     {

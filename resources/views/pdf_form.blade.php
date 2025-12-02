@@ -1,11 +1,9 @@
 @php
 use Carbon\Carbon;
 
-
-
 $resume = $user->userHasoneResume;
-$salary = $user->userHasoneResume->resumeHasoneJobPreference->expected_salary ?? null;
-$availability_date = $user->userHasoneResume->resumeHasoneJobPreference->availability_date ?? null;
+$salary = $resume->resumeHasoneJobPreference->expected_salary ?? null;
+$availability_date = $resume->resumeHasoneJobPreference->availability_date ?? null;
 
 $resumeSameIdcard = $resume->resumeHasonelocation->same_id_card ?? 0;
 $resumeAddress = $resume->resumeHasonelocation->address ?? null;
@@ -13,9 +11,6 @@ $resumeProvince = $resume->resumeHasonelocation->resumeBelongtoprovince->name_th
 $resumeDistrict = $resume->resumeHasonelocation->resumeBelongtodistrict->name_th ?? null;
 $resumeSubdistrict = $resume->resumeHasonelocation->resumeBelongtosubdistrict->name_th ?? null;
 $resumeZipcode = $resume->resumeHasonelocation->resumeBelongtosubdistrict->zipcode ?? null;
-
-
-
 
 $idcard = $user->userHasoneIdcard;
 $birth_day = date_format($idcard->date_of_birth,"d /m /Y ") ?? null;
@@ -25,7 +20,9 @@ $idcardProvince = $idcard->idcardBelongtoprovince->name_th ?? null;
 $idcardDistrict = $idcard->idcardBelongtodistrict->name_th ?? null;
 $idcardSubdistrict = $idcard->idcardBelongtosubdistrict->name_th ?? null;
 $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
+
 @endphp
+
 
 <!DOCTYPE html>
 <html lang="th">
@@ -110,7 +107,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
         .header-center {
             width: 40%;
             text-align: center;
-            padding-top: 5px;
+            padding-top: 30px;
             /* จัดตำแหน่งหัวข้อให้อยู่กลางตามรูป */
         }
 
@@ -131,15 +128,28 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
 
         .photo-box {
             border: 1px solid #000;
-            width: 100px;
-            /* ขนาดตามรูป */
-            height: 100px;
+            width: 106px;
+            height: 132px;
             text-align: center;
             line-height: 100px;
             font-size: 12pt;
             float: right;
             margin-left: auto;
-            margin-bottom: 20px;
+            /* เพิ่ม */
+            overflow: hidden;
+            /* ซ่อนส่วนเกินของรูป */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .photo-box img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+            /* ครอบรูปเต็ม div โดยไม่บิดสัดส่วน */
+            display: block;
+            /* กำจัด space ขอบล่างของ inline img */
         }
 
         /* SECTION HEADER (CAREER INTERESTS) */
@@ -206,7 +216,9 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
             font-size: 10pt;
             font-weight: bold;
             color: #1a1a1a;
-            /*padding: 0 2px;*/
+            border-right: 2px solid #00000054;
+            padding: 2px 5px;
+            word-wrap: break-word;
             line-height: 1.4;
             background-color: #a6e1fcff;
 
@@ -373,7 +385,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
 
         /**********พิเศษสำหรับ skills***********/
 
-        .con-skill {
+        .con-data-text {
 
             border-left: 1px solid;
             border-right: 1px solid;
@@ -383,16 +395,16 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
             font-weight: bold
         }
 
-        .skill-item {
+        .item-data-text {
             display: inline-block;
             margin-right: 15px;
         }
 
-        .data-skill {
+        /*.data-skill {
             border-right: 2px solid #00000054;
             padding: 2px 5px;
             word-wrap: break-word;
-        }
+        }*/
 
         /*************ตารางทั่วไป**************/
         .normal-table {
@@ -428,24 +440,26 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
 </head>
 
 <body>
-
-
-
     <div id="main_pdf" class="page-container">
         <button id='button' onclick="downloadPdf()"><i class="fa fa-file-pdf-o"></i> Download as PDF</button>
         <div class="header-section">
 
             <div class="header-left">
             </div>
-
             <div class="header-center">
                 <div class="main-title">ใบสมัครงาน</div>
                 <div class="sub-title">APPLICATION FORM</div>
             </div>
-
             <div class="header-right">
                 <div class="photo-box">
-                    Photo 1**
+                    @if ($user->userHasmanyDocEmp()->where('file_name', 'image_profile')->first())
+                        <img src="{{config('app.url')}}/storage/{{
+                        $user->userHasmanyDocEmp()->where('file_name', 'image_profile')
+                        ->first()->path
+                    }}">
+                    @else
+                        Empty Photo
+                    @endif
                 </div>
             </div>
         </div>
@@ -456,59 +470,59 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
         <table class="data-table">
             <tr>
                 <td class="label-col">Position Applied</td>
-                <td class="input-col data-input-col">
-                    <span>1</span>
-                    <span class="data-fill full-line">Computer Engineering</span>
+                <td class="con-data-text">
+                    @if($resume->resumeHasoneJobPreference()->exists())
+                    @foreach ($resume->resumeHasoneJobPreference->position as $index => $item)
+                    <span class="item-data-text">
+                        {{$index+1}}.
+                        <span class="data-fill">
+                            {{$item}}
+                        </span>
+                    </span>
+                    @endforeach
+                    @else
+                    <h4 style="text-align: center;">---------- No Data ----------</h4>
+                    @endif
                 </td>
-                <td class="input-col data-input-col">
-                    <span class="full-line">2</span>
-                    <span class="data-fill full-line">Engineering</span>
-                </td>
-                <td class="input-col data-input-col">
-                    <span class="full-line">3</span>
-                    <span class="data-fill full-line">Engineering</span>
-                </td>
-                <td class="input-col data-input-col">
-                    <span class="full-line">4</span>
-                    <span class="data-fill full-line">Engineering</span>
-                </td>
-
             </tr>
+
             <tr>
                 <td class="label-col">Location</td>
-                <td class="input-col checkbox-col" colspan="4">
-                    <div class="checkbox-group">
-                        <span class="checkbox-item">
-                            <span class="data-checkbox"></span> Bangkok
+                <td class="con-data-text">
+                    @if($resume->resumeHasoneJobPreference()->exists())
+                    @php
+                    $province = \App\Models\Provinces::pluck('name_en', 'id')->toArray();
+                    @endphp
+                    @foreach ($resume->resumeHasoneJobPreference->location as $index => $item)
+                    <span class="item-data-text">
+                        {{$index+1}}.
+                        <span class="data-fill">
+                            {{$province[$item]}}
                         </span>
-                        <span class="checkbox-item">
-                            <span class="data-checkbox"></span> Rayong
-                        </span>
-                        <span class="checkbox-item">
-                            <span class="data-checkbox"></span> Others, please identify
+                    </span>
+                    @endforeach
+                    @if(empty($resume->resumeHasoneJobPreference->location))
+                    <span style="text-align: center;">---------- no data ----------</span>
+                    @endif
+                    @endif
 
-                            <span class="data-fill">dcdffehtehetrgrgrgrgrg5rhethffffffcdcd</span>
-                        </span>
-                    </div>
                 </td>
             </tr>
             <tr>
                 <td class="label-col">Expected Salary</td>
-                <td class="input-col data-input-col" colspan="4">
-                    <span class=" data-fill full-line">{{$salary}}</span> THB
+                <td class="con-data-text">
+                    <span class=" data-fill">{{$salary}}</span> THB
                 </td>
             </tr>
             <tr>
                 <td class="label-col">Commencement Date</td>
-                <td class="input-col data-input-col" colspan="4">
-                    <span class="data-fill full-line">{{$availability_date}}</span>
+                <td class="con-data-text">
+                    <span class="data-fill">{{$availability_date}}</span>
                 </td>
             </tr>
         </table>
 
-
         <!-----------PERSONAL INFORMATION----------->
-
 
         <div class="section-header">
             <span>PERSONAL INFORMATION</span>
@@ -570,13 +584,16 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                     <span class="flex-label-inner">Nationality</span>
                 </div>
                 <div class="flex-cell flex-input-inner">
-                    <span class="data-fill"></span>
+                    @if (!empty($idcard))
+                    <span class="data-fill">Thai</span>
+                    @endif
+
                 </div>
                 <div class="flex-cell cell2">
                     <span class="flex-label-inner">Religion</span>
                 </div>
                 <div class="flex-cell flex-input-inner noborder">
-                    <span class="data-fill"></span>
+                    <span class="data-fill">{{$idcard->religion}}</span>
                 </div>
             </div>
 
@@ -585,7 +602,12 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                     <span class="flex-label-inner">Identification card No. / Passport No.</span>
                 </div>
                 <div class="flex-cell flex-input-inner noborder">
-                    <span class="data-fill">{{$idcard->id_card_number}}</span>
+                    @php
+                    function formatThaiId($id) {
+                    return preg_replace("/(\d)(\d{4})(\d{5})(\d{2})(\d)/", "$1-$2-$3-$4-$5", $id);
+                    }
+                    @endphp
+                    <span class="data-fill">{{formatThaiId($idcard->id_card_number)}}</span>
                 </div>
             </div>
 
@@ -665,7 +687,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                 </div>
             </div>
 
-            <div class="flex-row-container"> <!------ที่อยู่ปัจจุบันอยู่บ้าน หอ หรือ บ้านเช่า----->
+            <!--<div class="flex-row-container"> ----ที่อยู่ปัจจุบันอยู่บ้าน หอ หรือ บ้านเช่า----
                 <div class="flex-cell">
                     <span class="flex-label-inner">Residence</span>
                 </div>
@@ -688,6 +710,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
 
                 </div>
             </div>
+            -->
 
             <div class="flex-row-container"> <!-----------ข้อมูลเบอร์ อีเมล------------>
                 <div class="flex-cell">
@@ -710,7 +733,8 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                 </div>
             </div>
 
-            @if($idcard->prefix_name_th === 'นาย')
+
+            @if(!in_array(trim(strtolower($idcard->prefix_name_en),"."), ['miss', 'mrs']))
             <div class="flex-row-container"> <!------สถานะการเกณฑ์หทหาร----->
                 <div class="flex-cell" style="flex-basis: 10%; flex-grow: 0;">
                     <span class="flex-label-inner">Military Status</span>
@@ -719,29 +743,39 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                     <div class="checkbox-group">
                         <span class="input-col checkbox-item">
                             <span class="data-checkbox">
-                                @if ($user->userHasmanyAnotherDoc()->where('doc_type', 'ใบรับรองผวจเลือกทหาร')->exists())
+                                @if ($user->userHasoneMilitary?->type === 8)
                                 <i class="fa fa-check"></i>
                                 @endif
                             </span> Completed
                         </span>
                         <span class="input-col checkbox-item">
                             <span class="data-checkbox">
-                                @if (!$user->userHasmanyAnotherDoc()->where('doc_type', 'ใบรับรองผวจเลือกทหาร')->exists())
+                                @if (in_array($user->userHasoneMilitary?->result, ["ดำ","ผ่อนผัน", "ยกเว้น"]))
                                 <i class="fa fa-check"></i>
                                 @endif
                             </span> Exemted, because
-
                         </span>
-                        <span class="data-fill">dcdcdcd</span>
+                        @if (in_array($user->userHasoneMilitary?->result, ["ดำ","ผ่อนผัน"]))
+                        <span class="data-fill">{{ config('iconf.marital')[$user->userHasoneMilitary?->result] ?? '' }}</span>
+                        @else
+                        <span class="data-fill">{{$user->userHasoneMilitary?->reason_for_exemption}}</span>
+                        @endif
                         <span class="input-col checkbox-item">
-                            <span class="data-checkbox"></span> I will be drafted in year
+                            <span class="data-checkbox">
+                                @if ($user->userHasoneMilitary?->result === 'แดง')
+                                <i class="fa fa-check"></i>
+                                @endif
+                            </span> I will be drafted in year
                         </span>
-                        <span class="data-fill">dcdcdcd</span>
+                        @if ($user->userHasoneMilitary?->result === 'แดง')
+                        <span class="data-fill">{{date_format($user->userHasoneMilitary?->date_to_army,"d /m /Y ")}}</span>
+                        @endif
                     </div>
 
                 </div>
             </div>
             @endif
+
             <div class="flex-container-multi-row noborder"> <!------สถานะแต่งงาน----->
                 <div class="flex-item-container-multi-row">
                     <div class="flex-cell noborder">
@@ -1155,12 +1189,12 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
             <span>OTHER SKILLS</span>
         </div>
 
-        <div class='con-skill'> <!---------สกิลอื่นๆ------->
+        <div class='con-data-text'> <!---------สกิลอื่นๆ------->
             @if($resume->resumeHasmanySkill()->exists())
             @foreach ($resume->resumeHasmanySkill as $index => $item)
-            <span class="skill-item">
+            <span class="item-data-text">
                 {{$index+1}}.
-                <span class="data-fill data-skill">
+                <span class="data-fill">
                     {{$item['skill_name']}}
                 </span>
             </span>
@@ -1169,7 +1203,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
             <h4 style="text-align: center;">---------- No Data ----------</h4>
             @endif
         </div>
-        <table class="con-skill"> <!-------มีใบขับขี่ไหม--------->
+        <table class="con-data-text"> <!-------มีใบขับขี่ไหม--------->
             <thead>
                 <tr class="text-left" style="border: none;">
                     <th rowspan="2" style="width: 23%; padding-left: 10px;">Vehicles and License</th>

@@ -2,6 +2,7 @@
 
 namespace App\Models\Resume;
 
+use App\Models\Provinces;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
@@ -14,10 +15,16 @@ class ResumeJobPreferences extends Model
         "resume_id",
         "availability_date",
         "expected_salary",
-        "desired_positions", //เป็น array
+        "position",
+        "location",
+        "other_location",
     ];
     
     protected $casts = [
-        'desired_positions' => 'array', 
+        'position' => 'array',
+        'location' => 'array',
+        'other_location' => 'array',
+         
     ];
+
 }

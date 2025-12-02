@@ -14,33 +14,15 @@ window.Echo = new Echo({
 window.Echo.private('user.' + window.App.userId)
     .listen('.ProcessEmpDocEvent', (e) => {
         //alert(e.message);
-        console.log(e.modal_status)
-        console.log(e.message)
         updateStatusModal(e.message, e.modal_status, e.slug, e.success);
     });
 
 function updateStatusModal(message, modal_status, slug, success) {
+
     const modalId = 'simple-status-modal';
 
-    if (modal_status === 'edit') {
-        Livewire.dispatch('document-upload-error', { actionId: slug });
-
-        return; // ออกจากฟังก์ชันทันที ไม่ต้องสร้าง Modal
-    }
-
-    // ** 1. ตรวจสอบเงื่อนไขการเสร็จสิ้นก่อนเริ่มกระบวนการ Modal **
-    if (modal_status === 'close') {
-        closeModal(message, modalId, slug, success);
-
-        return; // ออกจากฟังก์ชันทันที ไม่ต้องสร้าง Modal
-    }
-
-    // 2. ถ้าข้อความไม่ใช่ 'กระบวนการเสร็จสิ้น' ให้ทำงานต่อ
-    let modal = document.getElementById(modalId);
-
-    // โค้ด SVG Spinner อย่างง่าย
     const spinnerSvg = `
-        <svg id="status-spinner" class="animate-spin" style="margin: 0 auto 1rem; width: 3rem; height: 3rem; stroke: #fff;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg id="status-spinner" class="animate-spin" style="margin: 0 auto 1rem; width: 6rem; height: 6rem; stroke: #fff;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <style>
                 /* Animation Keyframes: ต้องกำหนดในโค้ด */
                 @keyframes spin {
@@ -55,7 +37,42 @@ function updateStatusModal(message, modal_status, slug, success) {
             <path d="M12 2C6.477 2 2 6.477 2 12" stroke-width="2" stroke-linecap="round" />
         </svg>
     `;
+    const warningSvg = `
+        <svg id="status-warning" style="margin: 0 auto 1rem; width: 6rem; height: 6rem;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="red" stroke-width="2" fill="rgba(255, 0, 0, 0.1)" />
+            <path d="M12 8v4" stroke="red" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="12" cy="16" r="1" fill="red" />
+        </svg>
+    `;
+    const successSvg = `
+    <svg id="status-success" style="margin: 0 auto 1rem; width: 6rem; height: 6rem;" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="10" stroke="green" stroke-width="2" fill="rgba(0, 128, 0, 0.1)" />
+        <path d="M8 12.5l3 3 5-6" stroke="green" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+`;
 
+    
+    let massagefull =
+        `<p id="modal-message" style="font-weight: 300; font-size: 2.25rem; ">
+            <style>
+                @media (max-width: 768px) {
+                    #modal-message {
+                        font-size: 1.4rem !important;
+                    }
+                }
+            </style>
+            ${message}
+        </p>`;
+    // ** 1. ตรวจสอบเงื่อนไขการเสร็จสิ้นก่อนเริ่มกระบวนการ Modal **
+    console.log(massagefull)
+    if (modal_status === 'close') {
+        closeModal(massagefull, modalId, slug, warningSvg, successSvg, success);
+        return; // ออกจากฟังก์ชันทันที ไม่ต้องสร้าง Modal
+    }
+    let modal = document.getElementById(modalId);
+
+    
+    let svgToUse = success ? spinnerSvg : warningSvg;
     // 3. Logic สร้าง/อัปเดต Modal (เฉพาะเมื่อยังไม่เสร็จสิ้น)
     if (!modal) {
         modal = document.createElement('div');
@@ -68,40 +85,48 @@ function updateStatusModal(message, modal_status, slug, success) {
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: rgba(0, 0, 0, 0.7); /* สีดำทึบ */
+            background-color: rgba(0, 0, 0, 0.9); /* สีดำทึบ */
             display: flex;
             align-items: center; 
             justify-content: center; 
             z-index: 1050;
-            padding: 1rem;
         `;
 
         modal.innerHTML = `
             <div style="padding: 2rem; color: white; text-align: center;">
-                <!-- 1. Spinner ที่ถูกแทรก -->
-                ${spinnerSvg}
-                <!-- 2. ข้อความสถานะจาก Event (ตัวอักษรใหญ่) -->
-                <p id="modal-message" style="font-size: 2.25rem; font-weight: 300;">${message}</p>
+                <div id="svg-status">${svgToUse}</div>
+                ${massagefull}
             </div>
         `;
 
         document.body.appendChild(modal);
     } else {
+        document.getElementById('modal-message').innerHTML = massagefull;
+    }
 
-        document.getElementById('modal-message').textContent = message;
+    if (modal_status === 'popup') {
+        popUpModal(modal);
 
+        return; // ออกจากฟังก์ชันทันที ไม่ต้องสร้าง Modal
     }
 }
 
-function closeModal(message, modalId, slug, success) { //สำหรับปิด modal
-    document.getElementById('modal-message').textContent = message;
-    const modalToRemove = document.getElementById(modalId);
+function closeModal(massagefull, modalId, slug, warningSvg, successSvg, success) { //สำหรับปิด modal
+    
+    document.getElementById('modal-message').innerHTML = massagefull;
+    document.getElementById('svg-status').innerHTML = success ? successSvg : warningSvg;
 
-    // หน่วงเวลา 2 วินาที ก่อนปิด Modal และรีเฟรชหน้าจอ
+    const modalToRemove = document.getElementById(modalId);
     setTimeout(() => {
         modalToRemove.remove();
         Livewire.dispatch('openActionModal', { id: slug });
-    }, 3000);
+    }, 4000);
+}
+
+function popUpModal(modal) { //สำหรับเปิด popup ทั่วไปเพื่อแจ้งเตือน
+    setTimeout(() => {
+        modal.remove();
+    }, 4000);
 }
 // alert('test');
 // console.log('test')

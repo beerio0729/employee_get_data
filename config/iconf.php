@@ -18,6 +18,13 @@ return [
         'widowed' => 'เป็นหม้าย',
         'Separated' => 'แยกกันอยู่'
     ],
+    
+    'marital' => [
+        'ดำ' => 'Exempted from military service',
+        'แดง' => 'Selected for military service',
+        'ยกเว้น' => 'Exempted',
+        'ผ่อนผัน' => 'Deferment granted',
+    ],
 
     'day' => [
         'Saturday' => 'วันเสาร์',

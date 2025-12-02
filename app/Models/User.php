@@ -8,7 +8,9 @@ use Carbon\Carbon;
 use App\Models\DocEmp;
 
 use App\Models\Idcard;
+use App\Models\Marital;
 use App\Models\Bookbank;
+use App\Models\Military;
 use App\Models\AnotherDoc;
 use App\Models\Transcript;
 use App\Models\Resume\Resume;
@@ -131,35 +133,41 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
-    public function userHasoneResume()
+    public function userHasoneResume() //resume
     {
-        return $this->hasOne(Resume::class, 'user_id', 'id');
+        return $this->hasOne(Resume::class, 'user_id', 'id')->withDefault();
     }
 
-    public function userHasoneIdcard()
+    public function userHasoneIdcard() //บัตประชาชน
     {
         return $this->hasOne(Idcard::class, 'user_id', 'id');
     }
 
-    public function userHasmanyTranscript()
+    public function userHasmanyTranscript() //วุฒิ
     {
         return $this->hasMany(Transcript::class, 'user_id', 'id');
     }
 
-    public function userHasoneBookbank()
+    public function userHasoneMilitary() //ทหาร
     {
-        return $this->hasOne(Bookbank::class, 'user_id', 'id');
+        return $this->hasOne(Military::class, 'user_id', 'id');
     }
 
-    public function userHasmanyDocEmp()
+    public function userHasoneMarital() // แต่งงาน
+    {
+        return $this->hasOne(Marital::class, 'user_id', 'id');
+    }
+
+    public function userHasmanyAnotherDoc() //เอกสารเพิ่มเติม
+    {
+        return $this->hasMany(AnotherDoc::class, 'user_id', 'id');
+    }
+
+    public function userHasmanyDocEmp() //ไฟล์เอกสารต่างๆ
     {
         return $this->hasMany(DocEmp::class, 'user_id', 'id');
     }
 
-    public function userHasmanyAnotherDoc()
-    {
-        return $this->hasMany(AnotherDoc::class, 'user_id', 'id');
-    }
 
     //--------------Relation to Resume---------------//
 
@@ -170,75 +178,37 @@ class User extends Authenticatable
 
     public function userHasOneResumeToJobPreference()
     {
-
         return $this->userHasoneResume->hasOne(ResumeJobPreferences::class, 'resume_id', 'id');
-    }
-    
-    public function userHasOneResumeToPositionApplied()
-    {
-
-        return $this->userHasoneResume->hasOne(ResumePositionApplied::class, 'resume_id', 'id');
-    }
-    
-    public function userHasOneResumeToLocationWork()
-    {
-
-        return $this->userHasoneResume->hasOne(ResumeLocationWork::class, 'resume_id', 'id');
     }
 
     public function userHasManyResumeToEducation()
     {
-        if (empty($this->userHasoneResume)) {
-            return null;
-        } else {
-            return $this->userHasoneResume->hasMany(ResumeEducations::class, 'resume_id', 'id');
-        }
+        return $this->userHasoneResume->hasMany(ResumeEducations::class, 'resume_id', 'id');
     }
 
     public function userHasManyResumeToWorkExperiences()
     {
-        if (empty($this->userHasoneResume)) {
-            return null;
-        } else {
-            return $this->userHasoneResume->hasMany(ResumeWorkExperiences::class, 'resume_id', 'id');
-        }
+        return $this->userHasoneResume->hasMany(ResumeWorkExperiences::class, 'resume_id', 'id');
     }
 
     public function userHasManyResumeToLangSkill()
     {
-        if (empty($this->userHasoneResume)) {
-            return null;
-        } else {
-            return $this->userHasoneResume->hasMany(ResumeLangSkills::class, 'resume_id', 'id');
-        }
+        return $this->userHasoneResume->hasMany(ResumeLangSkills::class, 'resume_id', 'id');
     }
 
     public function userHasManyResumeToSkill()
     {
-        if (empty($this->userHasoneResume)) {
-            return null;
-        } else {
-            return $this->userHasoneResume->hasMany(ResumeSkills::class, 'resume_id', 'id');
-        }
+        return $this->userHasoneResume->hasMany(ResumeSkills::class, 'resume_id', 'id');
     }
 
     public function userHasManyResumeToCertificate()
     {
-        if (empty($this->userHasoneResume)) {
-            return null;
-        } else {
-            return $this->userHasoneResume->hasMany(ResumeCertificates::class, 'resume_id', 'id');
-        }
+        return $this->userHasoneResume->hasMany(ResumeCertificates::class, 'resume_id', 'id');
     }
 
     public function userHasManyResumeToOtherContact()
     {
-        if (empty($this->userHasoneResume)) {
-            return null;
-        } else {
-            return $this->userHasoneResume->hasMany(ResumeOtherContacts::class, 'resume_id', 'id');
-        }
+        return $this->userHasoneResume->hasMany(ResumeOtherContacts::class, 'resume_id', 'id');
     }
 
-    /*บัตรประชาชน*/
 }

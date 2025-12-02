@@ -39,7 +39,7 @@ class ProcessEmpDocJob implements ShouldQueue
      * สร้าง Job Instance ใหม่
      */
     public function __construct(array|string $data, $user, $file_name, $file_name_th)
-    {   
+    {
         $this->file_name = $file_name; //ถอด key ของ array จะได้ชนิดเอกสาร เพราะเรียงไว้ฟอร์มแรก
         $this->file_name_th = $file_name_th;
         $this->file_Paths = $data;
@@ -51,7 +51,7 @@ class ProcessEmpDocJob implements ShouldQueue
      * เมธอดนี้จะถูกเรียกเมื่อ Worker ดึง Job ออกจากคิว
      */
     public function handle(): void
-    {   
+    {
         if (is_array($this->file_Paths)) {
             // Case 1: Multiple Files (Array)
             $contents = $this->buildMultiContents($this->file_Paths);
@@ -66,14 +66,19 @@ class ProcessEmpDocJob implements ShouldQueue
 
         if ($this->hasOneData['check'] === 'yes') {
             $this->processSaveToDB($this->hasOneData, $this->hasManyData);
-            event(new ProcessEmpDocEvent(
-                'กระบวนการเสร็จสิ้น โปรดตรวจสอบความถูกต้องของข้อมูลอย่างละเอียดอีกครั้ง', 
-                $this->user, 'close', $this->file_name, true)
+            $msg = 'กระบวนการเสร็จสิ้น<br>โปรดตรวจสอบความถูกต้องของข้อมูลอย่างละเอียดอีกครั้ง';
+            event(
+                new ProcessEmpDocEvent(
+                    $msg,
+                    $this->user,
+                    'close',
+                    $this->file_name,
+                )
             );
         } else {
             $this->deleteFile();
             // 2. โยน Exception เพื่อสั่งให้ Job Worker จัดการ
-            $this->fail('ขออภัย! เอกสารของคุณไม่ใช้ "'.$this->file_name_th.'" โปรดอับโหลดเอกสารให้ถูกประเภท');
+            $this->fail('ขออภัย! เอกสารของคุณไม่ใช้<br>"' . $this->file_name_th . '"<br>โปรดอับโหลดเอกสารให้ถูกประเภท');
         }
     }
 
@@ -85,7 +90,7 @@ class ProcessEmpDocJob implements ShouldQueue
             'close',
             $this->file_name,
             false
-            
+
         ));
         $this->deleteFile();
     }
@@ -323,21 +328,21 @@ class ProcessEmpDocJob implements ShouldQueue
 
 
     public function processSaveToDB(array $hasOneData, array $hasManyData): void
-    {   
+    {
         $className = 'App\\Services\\JobForSaveDBFromAI\\Save' . ucfirst($this->file_name) . 'ToDB';
         $instance = new $className();
         $instance->saveToDB($hasOneData, $hasManyData, $this->user);
     }
-    
-    public function deleteFile()
-        {
-             $doc_file = $this->user->userHasmanyDocEmp()
-                ->where('file_name', $this->file_name)
-                ->first();
 
-            if ($doc_file) {
-                Storage::disk('public')->delete($doc_file->path);
-                $doc_file->delete();
-            }
+    public function deleteFile()
+    {
+        $doc_file = $this->user->userHasmanyDocEmp()
+            ->where('file_name', $this->file_name)
+            ->first();
+
+        if ($doc_file) {
+            Storage::disk('public')->delete($doc_file->path);
+            $doc_file->delete();
         }
+    }
 }

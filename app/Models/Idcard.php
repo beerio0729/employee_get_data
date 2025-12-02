@@ -3,12 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Idcard extends Model
-{   
-    use HasFactory;
-    
+{  
     protected $table = "id_cards"; //ชื่อตาราง
     protected $fillable = [
         'user_id',

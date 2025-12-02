@@ -15,7 +15,4 @@ Route::get('/test', function () {
     return 'Event sent';
 });
 
-
-
 Route::get('pdf', [PDFController::class, 'pdf'])->middleware('auth');
-

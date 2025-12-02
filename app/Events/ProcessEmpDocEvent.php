@@ -35,7 +35,7 @@ class ProcessEmpDocEvent implements ShouldBroadcastNow
         $user, 
         ?string $modal_status = "open",
         ?string $file_name = null,
-        ?bool $success = null
+        ?bool $success = true
         )
     {
         $this->message = $message;

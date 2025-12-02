@@ -7,7 +7,7 @@ return [
         // Contact Info (Keys จาก Simplified Schema)
         'prefix_name' => [
             'type' => 'string',
-            'description' => 'คำนำหน้าชื่อที่ระบุในเอกสาร ภาษาไทยหรืออังกฤษ) เช่น นาย, นางสาว, Mr. Miss'
+            'description' => 'คำนำหน้าชื่อเช่น นาย, นางสาว, Mr. Miss ถ้าไม่มีก็พิจารณาจากรูปโปรไฟล์เอา ถ้าเป็นหญิงให้ใช้ น.ส. หรือ Miss ได้เลย'
         ],
         'name' => [
             'type' => 'string',
@@ -64,8 +64,8 @@ return [
             'items' => ['type' => 'object', 'properties' => [
                 'language' => ['type' => 'string', 'description' => 'ให้เปลี่ยนเป็นภาษาอังกฤษ เช่น thai, japan เป็นต้น'],
                 'speaking' => ['type' => 'string', 'description' => 'ระดับ: fluent, good, fair เท่านั้น'],
-                'listening' => ['type' => 'string' , 'description' => 'ระดับ: fluent, good, fair เท่านั้น'],
-                'writing' => ['type' => 'string' , 'description' => 'ระดับ: fluent, good, fair เท่านั้น'],
+                'listening' => ['type' => 'string', 'description' => 'ระดับ: fluent, good, fair เท่านั้น'],
+                'writing' => ['type' => 'string', 'description' => 'ระดับ: fluent, good, fair เท่านั้น'],
             ]]
         ],
         'skills' => [
@@ -85,10 +85,15 @@ return [
                 'email' => ['type' => 'string', 'description' => 'อีเมล'],
             ]]
         ],
-        'desired_positions' => [
+        'position' => [
             'type' => 'array',
             'description' => 'ตำแหน่งงานที่ผู้สมัครต้องการ',
-            'items' => ['type' => 'string', 'description' => 'ชื่อตำแหน่งงานที่ต้องการ']
+            'items' => ['type' => 'string', 'description' => 'ชื่อตำแหน่งงานที่ต้องการทำงาน']
+        ],
+        'location' => [
+            'type' => 'array',
+            'description' => 'พื้นที่ที่ต้องการไปทำงาน',
+            'items' => ['type' => 'string', 'description' => 'จังหวัดที่ต้องการไปทำงาน (ถ้าเป็นกรุงเทพและปริมณฑลให้ถือว่าเป็นอันเดียวกัน สำหรับภาษาอังกฤษให้ใช้คำว่า "Bangkok Metropolitan Region" เท่านั้น)']
         ],
         'certificates' => [
             'type' => 'array',
@@ -108,7 +113,7 @@ return [
         'prefix_name_en' => ['type' => 'string'],
         'name_en' => ['type' => 'string'],
         'last_name_en' => ['type' => 'string'],
-        'id_card_number' => ['type' => 'string', 'description' => 'รหัสบัตรประชาชน'],
+        'id_card_number' => ['type' => 'string', 'description' => 'รหัสบัตรประชาชน เก็บแค่ตัวเลขอย่างเดียว'],
         'religion' => ['type' => 'string'],
         'date_of_birth' => ['type' => 'string', 'description' => 'วันเกิดในรูปแบบ ค.ศ. YYYY-MM-DD'],
         'address' => ['type' => 'string', 'description' => 'ที่อยู่ตามบัตรประชาชน (ไม่รวม จังหวัด อำเภอ ตำบล รหัสไปรษณีย์)'],
@@ -172,10 +177,33 @@ return [
         'check' => ['type' => 'string', 'description' => 'ตรวจสอบว่าเป็นเอกสารประเภท transcript จริงๆ ตอบกลับมาว่า yes หรือ no']
     ],
 
-    'bookbank' => [
-        'name' => ['type' => 'string', 'description' => 'ชื่อบัญชีถ้ามีภาษาไทยให้เอาภาษาไทย'], // ใช้ Key เดิม
-        'bank_name' => ['type' => 'string', 'description' => 'ชื่อธนาคารถ้ามีภาษาไทยให้เอาภาษาไทย ตัดคำว่าธนาคารออก'],
-        'bank_id' => ['type' => 'string', 'description' => 'เอาแต่ตัวเลขอย่างเดียว'],
-        'check' => ['type' => 'string', 'description' => 'ตรวจสอบว่าเป็นเอกสารประเภท สมุดบัญชีธนาคาร จริงๆ ตอบกลับมาว่า yes หรือ no'],
+    'military' => [
+        'id_card' => ['type' => 'string', 'description' => 'รหัสบัตรประชาชน เก็บแค่ตัวเลขอย่างเดียว'],
+        'type' => ['type' => 'string', 'description' => 'ประเภทเอกสารเอาเช่น สด 9 เก็บเฉพาะตัวเลขเท่านั้น'],
+        'result' => [
+            'type' => 'string',
+            'description' => "อ่านข้อความที่เขียนด้วยลายมือในข้อที่ ๒.๔ ผลการจับฉลาก เฉพาะใบ สด. 43. ค่าที่เก็บต้องเป็นคำในภาษาไทยเท่านั้น ตามเงื่อนไขดังนี้
+                \n- ถ้ามีคำที่ใกล้เคียคำว่า ดำ หรือ ใบดำ ให้รีเทริน 'ดำ', 
+                \n- ถ้ามีคำที่ใกล้เคียงคำว่า แดง, ทบ, ทร, ทอ, ให้รีเทริน 'แดง' 
+                \n- ถ้าไม่มีข้อความเลย ให้รีเทริน 'ยกเว้น'
+            "
+        ],
+        'reason_for_exemption' => [
+            'type' => 'string',
+            'description' => "อ่านข้อความที่เขียนด้วยลายมือในข้อที่ ๒.๑ **หากค่า result ที่ประมวลผลได้คือ 'ยกเว้น' เท่านั้น ให้เอาข้อความที่อ่านได้แปลเป้นภาษาอังกฤษ"
+        ],
+        'category' => [
+            'type' => 'string',
+            'description' => "ข้อมูลจำพวกบุคคลตามข้อ ๒.๓ บน สด. 43 (ผลการตรวจร่างกาย). ค่าที่เก็บต้องเป็นตัวเลข 1 ถึง 4 เท่านั้น (อาจปรากฏเป็นเลขไทย). **หากค่า result ที่ประมวลผลได้คือ 'ดำ' หรือ 'แดง' ให้ตีความ category เป็น '1' เสมอ หากลายมือไม่ชัดเจน** เพราะผู้ที่จับสลากจริงต้องเป็นจำพวกที่ ๑ เท่านั้น."
+        ],
+        'check' => ['type' => 'string', 'description' => 'ตรวจสอบว่าเป็นเอกสารประเภท ใบ สด. จริงๆ ตอบกลับมาว่า yes หรือ no'],
+    ],
+
+    'marital' => [
+        'type' => ['type' => 'string', "description" => "ให้รีเทรินคำว่า 'married' หรือ 'divorced' ตามประเภทเอกสาร"],
+        'registration_number' => ['type' => 'string', "description" => "เลขทะเบียนเอกสาร"],
+        'man' => ['type' => 'string', "description" => "ชื่อฝ่ายชาย"],
+        'woman' => ['type' => 'string', "description" => "ชื่อฝ่ายหญิง"],
+        'issue_date' => ['type' => 'string', 'description' => 'วันออกเอกสาร ค.ศ. YYYY-MM-DD'],
     ],
 ];
