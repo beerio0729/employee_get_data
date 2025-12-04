@@ -28,7 +28,9 @@ class AppServiceProvider extends ServiceProvider
     {
         FilamentAsset::register([
             Css::make('noto_sans_thai', 'https://fonts.googleapis.com/css?family=Noto Sans Thai'),
+            Css::make('filament-overrides', Vite::asset('resources/css/filament-overrides.css')),
             Js::make('echo-scripts', Vite::asset('resources/js/echo.js')),
         ]);
+        
     }
 }

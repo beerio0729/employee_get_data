@@ -1,0 +1,14 @@
+@media (max-width: 640px) {
+
+    /* sm breakpoint ของ Tailwind */
+    :is(.fi-modal>.fi-modal-window-ctn>.fi-modal-window:not(.fi-modal-window-has-icon), .fi-modal>.fi-modal-window-ctn>.fi-modal-window.fi-modal-window-has-sticky-header) .fi-modal-content,
+    :is(.fi-modal>.fi-modal-window-ctn>.fi-modal-window:not(.fi-modal-window-has-icon), .fi-modal>.fi-modal-window-ctn>.fi-modal-window.fi-modal-window-has-sticky-header) .fi-modal-footer
+    {
+        padding-inline: calc(var(--spacing) * 2);
+    }
+    
+    .fi-section:not(.fi-section-not-contained):not(.fi-divided)>.fi-section-content-ctn>.fi-section-content,.fi-section:not(.fi-section-not-contained).fi-divided>.fi-section-content-ctn>.fi-section-content>*
+    {
+        padding-inline: calc(var(--spacing) * 3);
+    }
+}

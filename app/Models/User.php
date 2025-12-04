@@ -6,9 +6,11 @@ namespace App\Models;
 use Carbon\Carbon;
 
 use App\Models\DocEmp;
-
+use App\Models\Father;
 use App\Models\Idcard;
+use App\Models\Mother;
 use App\Models\Marital;
+use App\Models\Sibling;
 use App\Models\Bookbank;
 use App\Models\Military;
 use App\Models\AnotherDoc;
@@ -75,12 +77,12 @@ class User extends Authenticatable
 
     public function getWorkExperienceSummaryAttribute()
     {
-        if (empty($this->userHasManyResume)) {
+        if (empty($this->userHasmanyResume)) {
             return null;
-        } elseif (empty($this->userHasManyResumeToWorkExperiences)) {
+        } elseif (empty($this->userHasmanyResumeToWorkExperiences)) {
             return null;
         }
-        $summary = $this->userHasManyResumeToWorkExperiences
+        $summary = $this->userHasmanyResumeToWorkExperiences
             ->map(function ($experience) {
                 // จัดรูปแบบให้แต่ละ Field ขึ้นบรรทัดใหม่ด้วยแท็ก <br>
                 $output = "<br><B>บริษัท</B>: {$experience->company}<br>";
@@ -102,7 +104,7 @@ class User extends Authenticatable
     {
         return Attribute::make(
             get: function () {
-                $data = $this->userHasOneResume;
+                $data = $this->userHasoneResume;
 
                 if (! $data || ! $data->date_of_birth) {
                     return 'กรุณาระบุวันเกิด'; // หรือ 0, หรือค่า default อื่นๆ ตามต้องการ
@@ -117,7 +119,7 @@ class User extends Authenticatable
     {
         return Attribute::make(
             get: function () {
-                $data = $this->userHasOneIdcard;
+                $data = $this->userHasoneIdcard;
 
                 if (! $data || ! $data->date_of_birth) {
                     return 'กรุณาระบุวันเกิด'; // หรือ 0, หรือค่า default อื่นๆ ตามต้องการ
@@ -140,7 +142,7 @@ class User extends Authenticatable
 
     public function userHasoneIdcard() //บัตประชาชน
     {
-        return $this->hasOne(Idcard::class, 'user_id', 'id');
+        return $this->hasOne(Idcard::class, 'user_id', 'id')->withDefault();
     }
 
     public function userHasmanyTranscript() //วุฒิ
@@ -167,46 +169,63 @@ class User extends Authenticatable
     {
         return $this->hasMany(DocEmp::class, 'user_id', 'id');
     }
+    
+    /***********พ่อ แม่ พี่น้อง**********/
+    
+    public function userHasoneFather() 
+    {
+        return $this->hasOne(Father::class, 'user_id', 'id')->withDefault();
+    }
+    
+    public function userHasoneMother() 
+    {
+        return $this->hasOne(Mother::class, 'user_id', 'id')->withDefault();
+    }
+    
+    public function userHasoneSibling() 
+    {
+        return $this->hasOne(Sibling::class, 'user_id', 'id');
+    }
 
 
     //--------------Relation to Resume---------------//
 
-    public function userHasOneResumeToLocation()
+    public function userHasoneResumeToLocation()
     {
         return $this->userHasoneResume->hasOne(ResumeLocation::class, 'resume_id', 'id');
     }
 
-    public function userHasOneResumeToJobPreference()
+    public function userHasoneResumeToJobPreference()
     {
         return $this->userHasoneResume->hasOne(ResumeJobPreferences::class, 'resume_id', 'id');
     }
 
-    public function userHasManyResumeToEducation()
+    public function userHasmanyResumeToEducation()
     {
         return $this->userHasoneResume->hasMany(ResumeEducations::class, 'resume_id', 'id');
     }
 
-    public function userHasManyResumeToWorkExperiences()
+    public function userHasmanyResumeToWorkExperiences()
     {
         return $this->userHasoneResume->hasMany(ResumeWorkExperiences::class, 'resume_id', 'id');
     }
 
-    public function userHasManyResumeToLangSkill()
+    public function userHasmanyResumeToLangSkill()
     {
         return $this->userHasoneResume->hasMany(ResumeLangSkills::class, 'resume_id', 'id');
     }
 
-    public function userHasManyResumeToSkill()
+    public function userHasmanyResumeToSkill()
     {
         return $this->userHasoneResume->hasMany(ResumeSkills::class, 'resume_id', 'id');
     }
 
-    public function userHasManyResumeToCertificate()
+    public function userHasmanyResumeToCertificate()
     {
         return $this->userHasoneResume->hasMany(ResumeCertificates::class, 'resume_id', 'id');
     }
 
-    public function userHasManyResumeToOtherContact()
+    public function userHasmanyResumeToOtherContact()
     {
         return $this->userHasoneResume->hasMany(ResumeOtherContacts::class, 'resume_id', 'id');
     }

@@ -51,7 +51,7 @@ function updateStatusModal(message, modal_status, slug, success) {
     </svg>
 `;
 
-    
+
     let massagefull =
         `<p id="modal-message" style="font-weight: 300; font-size: 2.25rem; ">
             <style>
@@ -71,7 +71,7 @@ function updateStatusModal(message, modal_status, slug, success) {
     }
     let modal = document.getElementById(modalId);
 
-    
+
     let svgToUse = success ? spinnerSvg : warningSvg;
     // 3. Logic สร้าง/อัปเดต Modal (เฉพาะเมื่อยังไม่เสร็จสิ้น)
     if (!modal) {
@@ -112,7 +112,7 @@ function updateStatusModal(message, modal_status, slug, success) {
 }
 
 function closeModal(massagefull, modalId, slug, warningSvg, successSvg, success) { //สำหรับปิด modal
-    
+
     document.getElementById('modal-message').innerHTML = massagefull;
     document.getElementById('svg-status').innerHTML = success ? successSvg : warningSvg;
 
@@ -120,14 +120,15 @@ function closeModal(massagefull, modalId, slug, warningSvg, successSvg, success)
     setTimeout(() => {
         modalToRemove.remove();
         Livewire.dispatch('openActionModal', { id: slug });
-    }, 4000);
+    }, 5000);
 }
 
-function popUpModal(modal) { //สำหรับเปิด popup ทั่วไปเพื่อแจ้งเตือน
-    setTimeout(() => {
-        modal.remove();
-    }, 4000);
+function popUpModal(modal) {
+    const close = () => modal.remove();
+    document.addEventListener('click', close, { once: true });
+    setTimeout(close, 15000);
 }
+
 // alert('test');
 // console.log('test')
 

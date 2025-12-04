@@ -114,6 +114,7 @@ return [
         'name_en' => ['type' => 'string'],
         'last_name_en' => ['type' => 'string'],
         'id_card_number' => ['type' => 'string', 'description' => 'รหัสบัตรประชาชน เก็บแค่ตัวเลขอย่างเดียว'],
+        'gender' => ['type' => 'string', 'description' => 'ระบุเพศด้วยคำว่า male หรือ female'],
         'religion' => ['type' => 'string'],
         'date_of_birth' => ['type' => 'string', 'description' => 'วันเกิดในรูปแบบ ค.ศ. YYYY-MM-DD'],
         'address' => ['type' => 'string', 'description' => 'ที่อยู่ตามบัตรประชาชน (ไม่รวม จังหวัด อำเภอ ตำบล รหัสไปรษณีย์)'],
@@ -200,10 +201,11 @@ return [
     ],
 
     'marital' => [
-        'type' => ['type' => 'string', "description" => "ให้รีเทรินคำว่า 'married' หรือ 'divorced' ตามประเภทเอกสาร"],
+        'type' => ['type' => 'string', "description" => "ถ้าเป็นทะเบียนสมรสให้รีเทริน 'married' ถ้าเป็นใบหย่าให้รีเทริน 'divorced'"],
         'registration_number' => ['type' => 'string', "description" => "เลขทะเบียนเอกสาร"],
         'man' => ['type' => 'string', "description" => "ชื่อฝ่ายชาย"],
         'woman' => ['type' => 'string', "description" => "ชื่อฝ่ายหญิง"],
         'issue_date' => ['type' => 'string', 'description' => 'วันออกเอกสาร ค.ศ. YYYY-MM-DD'],
+        'check' => ['type' => 'string', 'description' => 'ตรวจสอบว่าเป็นเอกสารประเภท ใบสมรสหรือใบหย่า จริงๆ ตอบกลับมาว่า yes หรือ no'],
     ],
 ];

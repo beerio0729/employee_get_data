@@ -2,10 +2,11 @@
 
 namespace App\Services\JobForSaveDBFromAI;
 
-class SaveMilitaryToDB {
+class SaveMaritalToDB {
     public function saveToDB(array $hasOneData, array $hasManyData, $user): void
-    {   
-        $user->userHasoneMilitary()->updateOrCreate(
+    {   $hasOneData['status'] = $hasOneData['type'];
+        dump($hasOneData);
+        $user->userHasoneMarital()->updateOrCreate(
             ['user_id' => $user->id],
             $hasOneData,
         );

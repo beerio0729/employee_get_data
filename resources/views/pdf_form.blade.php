@@ -2,24 +2,32 @@
 use Carbon\Carbon;
 
 $resume = $user->userHasoneResume;
-$salary = $resume->resumeHasoneJobPreference->expected_salary ?? null;
-$availability_date = $resume->resumeHasoneJobPreference->availability_date ?? null;
+$salary = $resume?->resumeHasoneJobPreference->expected_salary ?? null;
+$availability_date = $resume?->resumeHasoneJobPreference->availability_date ?? null;
 
-$resumeSameIdcard = $resume->resumeHasonelocation->same_id_card ?? 0;
-$resumeAddress = $resume->resumeHasonelocation->address ?? null;
-$resumeProvince = $resume->resumeHasonelocation->resumeBelongtoprovince->name_th ?? null;
-$resumeDistrict = $resume->resumeHasonelocation->resumeBelongtodistrict->name_th ?? null;
-$resumeSubdistrict = $resume->resumeHasonelocation->resumeBelongtosubdistrict->name_th ?? null;
-$resumeZipcode = $resume->resumeHasonelocation->resumeBelongtosubdistrict->zipcode ?? null;
+$resumeLocation = $resume?->resumeHasonelocation;
+$resumeSameIdcard = $resumeLocation?->same_id_card ?? 0;
+$resumeAddress = $resumeLocation?->address ?? null;
+$resumeProvince = $resumeLocation?->resumeBelongtoprovince->name_th ?? null;
+$resumeDistrict = $resumeLocation?->resumeBelongtodistrict->name_th ?? null;
+$resumeSubdistrict = $resumeLocation?->resumeBelongtosubdistrict->name_th ?? null;
+$resumeZipcode = $resumeLocation?->resumeBelongtosubdistrict->zipcode ?? null;
 
 $idcard = $user->userHasoneIdcard;
-$birth_day = date_format($idcard->date_of_birth,"d /m /Y ") ?? null;
-$age = Carbon::parse($idcard->date_of_birth)->age;
-$idcardAddress = $idcard->address ?? null;
-$idcardProvince = $idcard->idcardBelongtoprovince->name_th ?? null;
-$idcardDistrict = $idcard->idcardBelongtodistrict->name_th ?? null;
-$idcardSubdistrict = $idcard->idcardBelongtosubdistrict->name_th ?? null;
-$idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
+$birth_day = date_format($idcard?->date_of_birth,"d /m /Y ") ?? null;
+$age = Carbon::parse($idcard?->date_of_birth)->age;
+$idcardAddress = $idcard?->address ?? null;
+$idcardProvince = $idcard?->idcardBelongtoprovince->name_th ?? null;
+$idcardDistrict = $idcard?->idcardBelongtodistrict->name_th ?? null;
+$idcardSubdistrict = $idcard?->idcardBelongtosubdistrict->name_th ?? null;
+$idcardZipcode = $idcard?->idcardBelongtosubdistrict->zipcode ?? null;
+
+$marital = $user->userHasoneMarital;
+$father = $user->userHasoneFather;
+$mother = $user->userHasoneMother;
+$sibling = $user->userHasoneSibling?->data;
+$maleCount = collect($sibling)->where('gender', 'male')->count();
+$femaleCount = collect($sibling)->where('gender', 'female')->count();
 
 @endphp
 
@@ -32,10 +40,12 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Noto Sans Thai" rel="stylesheet" data-navigate-track="">
     <title>{{$title}}</title>
     <style>
         /* GLOBAL STYLES */
         body {
+            /**font-family: 'Noto Sans Thai'; */
             font-family: Arial, sans-serif;
             font-size: 10pt;
             margin: 0;
@@ -127,7 +137,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
         }
 
         .photo-box {
-            border: 1px solid #000;
+            border: 1px solid #5e5e5e;
             width: 106px;
             height: 132px;
             text-align: center;
@@ -159,7 +169,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
             font-weight: bold;
             padding: 2px 5px;
             margin-top: 5px;
-            border: 1px solid #000;
+            border: 1px solid #5e5e5e;
             text-transform: uppercase;
             font-size: 10pt;
             text-align: center;
@@ -174,7 +184,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
 
         tr {
             height: 30px;
-            border: 1px solid #000;
+            border: 1px solid #5e5e5e;
         }
 
         td {
@@ -197,7 +207,8 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
             font-size: 10pt;
             font-weight: bold;
             overflow-wrap: break-word;
-            border-right: 1px solid #000;
+            border-right: 1px solid #5e5e5e;
+            ;
             /*white-space: nowrap;*/
         }
 
@@ -212,15 +223,15 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
 
         /* INPUT LINE STYLING (The underline part) */
         .data-fill {
-            border-bottom: 2px solid #00000054;
+            border-bottom: 1px solid #5e5e5e;
             font-size: 10pt;
             font-weight: bold;
             color: #1a1a1a;
-            border-right: 2px solid #00000054;
-            padding: 2px 5px;
+            border-right: 1px solid #5e5e5e;
+            padding: 0 5px;
             word-wrap: break-word;
             line-height: 1.4;
-            background-color: #a6e1fcff;
+            background-color: #b9e9ff;
 
         }
 
@@ -263,7 +274,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
             display: inline-block;
             width: 13px;
             height: 13px;
-            border: 1px solid #000;
+            border: 1px solid #5e5e5e;
             vertical-align: middle;
             text-align: center;
             line-height: 8px;
@@ -283,8 +294,10 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
 
         /* Container หลักของส่วน Flexbox เพื่อกำหนดขอบเขต */
         .flex-container-wrapper {
-            border-right: 1px solid #000;
-            border-left: 1px solid #000;
+            border-right: 1px solid #5e5e5e;
+            ;
+            border-left: 1px solid #5e5e5e;
+            ;
         }
 
         /* DIV ที่ทำหน้าที่เป็น TR: จัดเรียง Cell ในแนวนอน */
@@ -293,7 +306,8 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
             align-items: stretch;
             flex-wrap: wrap;
             /* ให้เซลล์มีความสูงเท่ากัน */
-            border-bottom: 1px solid #000;
+            border-bottom: 1px solid #5e5e5e;
+            ;
             min-height: 30px;
         }
 
@@ -305,7 +319,8 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
         .flex-cell {
             padding: 2px 0 2px 5px;
             /* ใช้ padding เดียวกับ data-table td */
-            border-right: 1px solid #000;
+            border-right: 1px solid #5e5e5e;
+            ;
             flex-shrink: 0;
             font-size: 10pt;
             /* ใช้ font-size เดียวกับ label-col */
@@ -347,7 +362,8 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
             flex-direction: row;
             align-items: stretch;
             /* สำคัญ: ทำให้ flex-item ยืดเต็มความสูงของข้อมูลข้างๆ */
-            border-bottom: 1px solid #000;
+            border-bottom: 1px solid #5e5e5e;
+            ;
             /* ขอบล่างของแถวหลัก */
         }
 
@@ -355,7 +371,8 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
         .flex-item-container-multi-row:first-child {
             /* กำหนดความกว้างคงที่สำหรับ Label */
             flex-shrink: 0;
-            border-right: 1px solid #000;
+            border-right: 1px solid #5e5e5e;
+            ;
             /* ขอบขวาของ Label ที่แบ่งกับข้อมูล */
 
             /* จัด Label ให้อยู่กึ่งกลางในแนวตั้ง */
@@ -387,9 +404,9 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
 
         .con-data-text {
 
-            border-left: 1px solid;
-            border-right: 1px solid;
-            border-bottom: 1px solid;
+            border-left: 1px solid #5e5e5e;
+            border-right: 1px solid #5e5e5e;
+            border-bottom: 1px solid #5e5e5e;
             padding: 5px 10px;
             line-height: 2.2;
             font-weight: bold
@@ -411,12 +428,12 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
             border-collapse: collapse;
             width: 100%;
             font-size: 10pt;
-            border: 1px solid black;
+            border: 1px solid #5e5e5e;
         }
 
         .normal-table th,
         .normal-table td {
-            border: 1px solid gray;
+            border: 1px solid #5e5e5e;
             text-align: center;
             /* กำหนดความสูงของเซลล์เพื่อให้ดูคล้ายกับในรูป */
         }
@@ -453,12 +470,12 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
             <div class="header-right">
                 <div class="photo-box">
                     @if ($user->userHasmanyDocEmp()->where('file_name', 'image_profile')->first())
-                        <img src="{{config('app.url')}}/storage/{{
+                    <img src="{{config('app.url')}}/storage/{{
                         $user->userHasmanyDocEmp()->where('file_name', 'image_profile')
                         ->first()->path
                     }}">
                     @else
-                        Empty Photo
+                    Your Photo
                     @endif
                 </div>
             </div>
@@ -471,8 +488,8 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
             <tr>
                 <td class="label-col">Position Applied</td>
                 <td class="con-data-text">
-                    @if($resume->resumeHasoneJobPreference()->exists())
-                    @foreach ($resume->resumeHasoneJobPreference->position as $index => $item)
+                    @if($resume?->resumeHasoneJobPreference()->exists())
+                    @foreach ($resume?->resumeHasoneJobPreference->position as $index => $item)
                     <span class="item-data-text">
                         {{$index+1}}.
                         <span class="data-fill">
@@ -489,11 +506,11 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
             <tr>
                 <td class="label-col">Location</td>
                 <td class="con-data-text">
-                    @if($resume->resumeHasoneJobPreference()->exists())
+                    @if($resume?->resumeHasoneJobPreference()->exists())
                     @php
                     $province = \App\Models\Provinces::pluck('name_en', 'id')->toArray();
                     @endphp
-                    @foreach ($resume->resumeHasoneJobPreference->location as $index => $item)
+                    @foreach ($resume?->resumeHasoneJobPreference->location as $index => $item)
                     <span class="item-data-text">
                         {{$index+1}}.
                         <span class="data-fill">
@@ -501,7 +518,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                         </span>
                     </span>
                     @endforeach
-                    @if(empty($resume->resumeHasoneJobPreference->location))
+                    @if(blank($resume?->resumeHasoneJobPreference->location))
                     <span style="text-align: center;">---------- no data ----------</span>
                     @endif
                     @endif
@@ -535,13 +552,13 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                     <span class="flex-label-inner">คำนำหน้า (นาย / นาง / นางสาว / อื่นๆ)</span>
                 </div>
                 <div class="flex-cell flex-input-inner">
-                    <span class="data-fill">{{$idcard->prefix_name_th}}</span>
+                    <span class="data-fill">{{$idcard?->prefix_name_th}}</span>
                 </div>
                 <div class="flex-cell cell2">
                     <span class="flex-label-inner">ชื่อ - สกุล ไทย</span>
                 </div>
                 <div class="flex-cell flex-input-inner noborder">
-                    <span class="data-fill">{{$idcard->name_th}} {{$idcard->last_name_th}}</span>
+                    <span class="data-fill">{{$idcard?->name_th}} {{$idcard?->last_name_th}}</span>
                 </div>
             </div>
 
@@ -550,13 +567,13 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                     <span class="flex-label-inner">Title (Mr. / Mrs. / Miss / Other)</span>
                 </div>
                 <div class="flex-cell flex-input-inner">
-                    <span class="data-fill">{{$idcard->prefix_name_en}}</span>
+                    <span class="data-fill">{{$idcard?->prefix_name_en}}</span>
                 </div>
                 <div class="flex-cell cell2">
                     <span class="flex-label-inner">Name - Surname</span>
                 </div>
                 <div class="flex-cell flex-input-inner noborder">
-                    <span class="data-fill">{{$idcard->name_en}} {{$idcard->last_name_en}}</span>
+                    <span class="data-fill">{{$idcard?->name_en}} {{$idcard?->last_name_en}}</span>
                 </div>
             </div>
 
@@ -571,10 +588,10 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                         <span class="data-fill" style="display: inline-block;">{{$age}}</span> Years
 
                         <span style="margin-left: 15px;" class="flex-label-inner">Weight</span>
-                        <span class="data-fill" style="display: inline-block;">{{$resume->weight}}</span> Kg.
+                        <span class="data-fill" style="display: inline-block;">{{$resume?->weight}}</span> Kg.
 
                         <span style="margin-left: 15px;" class="flex-label-inner">Height</span>
-                        <span class="data-fill" style="display: inline-block;">{{$resume->height}}</span> Cm.
+                        <span class="data-fill" style="display: inline-block;">{{$resume?->height}}</span> Cm.
                     </div>
                 </div>
             </div>
@@ -584,7 +601,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                     <span class="flex-label-inner">Nationality</span>
                 </div>
                 <div class="flex-cell flex-input-inner">
-                    @if (!empty($idcard))
+                    @if (!blank($idcard))
                     <span class="data-fill">Thai</span>
                     @endif
 
@@ -593,7 +610,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                     <span class="flex-label-inner">Religion</span>
                 </div>
                 <div class="flex-cell flex-input-inner noborder">
-                    <span class="data-fill">{{$idcard->religion}}</span>
+                    <span class="data-fill">{{$idcard?->religion}}</span>
                 </div>
             </div>
 
@@ -607,7 +624,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                     return preg_replace("/(\d)(\d{4})(\d{5})(\d{2})(\d)/", "$1-$2-$3-$4-$5", $id);
                     }
                     @endphp
-                    <span class="data-fill">{{formatThaiId($idcard->id_card_number)}}</span>
+                    <span class="data-fill">{{formatThaiId($idcard?->id_card_number)}}</span>
                 </div>
             </div>
 
@@ -651,7 +668,10 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                 </div>
                 <div class="flex-item-container-multi-row" style="width: 100%;">
 
-                    <div class="flex-row-container">
+                    <div class="flex-row-container"
+                        @if($resumeSameIdcard)
+                        style="border-bottom: none"
+                        @endif>
                         <div class="flex-cell flex-input-inner noborder">
                             <div class="checkbox-group">
                                 <span class="data-checkbox">
@@ -662,7 +682,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                             </div>
                         </div>
                     </div>
-                    @if(!$resumeSameIdcard || empty($resumeSameIdcard ))
+                    @if(!$resumeSameIdcard || blank($resumeSameIdcard ))
                     <div class="flex-row-container" style="border: none">
                         <div class="flex-cell flex-input-inner" style="border-right: none; flex-grow: 1;">
                             <span class="data-fill">{{$resumeAddress}}</span>
@@ -717,7 +737,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                     <span class="flex-label-inner">Mobile No.</span>
                 </div>
                 <div class="flex-cell flex-input-inner">
-                    <span class="data-fill">{{$resume->tel}}</span>
+                    <span class="data-fill">{{$resume?->tel}}</span>
                 </div>
                 <div class="flex-cell cell2">
                     <span class="flex-label-inner">Home Tel No.</span>
@@ -734,7 +754,7 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
             </div>
 
 
-            @if(!in_array(trim(strtolower($idcard->prefix_name_en),"."), ['miss', 'mrs']))
+            @if(!in_array(trim(strtolower($idcard?->prefix_name_en),"."), ['miss', 'mrs']))
             <div class="flex-row-container"> <!------สถานะการเกณฑ์หทหาร----->
                 <div class="flex-cell" style="flex-basis: 10%; flex-grow: 0;">
                     <span class="flex-label-inner">Military Status</span>
@@ -787,83 +807,108 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                         <div class="checkbox-group">
                             <span class="input-col checkbox-item">
                                 <span class="data-checkbox">
+                                    @if ($marital?->status === 'single' || blank($marital))
                                     <i class="fa fa-check"></i>
+                                    @endif
                                 </span> Single
                             </span>
                             <span class="input-col checkbox-item">
                                 <span class="data-checkbox">
+                                    @if ($marital?->status === 'married')
                                     <i class="fa fa-check"></i>
+                                    @endif
                                 </span> Married
 
                             </span>
                             <span class="input-col checkbox-item">
-                                <span class="data-checkbox"></span> Divorced
+                                <span class="data-checkbox">
+                                    @if ($marital?->status === 'divorced')
+                                    <i class="fa fa-check"></i>
+                                    @endif
+                                </span> Divorced
                             </span>
                             <span class="input-col checkbox-item">
-                                <span class="data-checkbox"></span> Widowed
+                                <span class="data-checkbox">
+                                    @if ($marital?->status === 'widowed')
+                                    <i class="fa fa-check"></i>
+                                    @endif</span> Widowed
                             </span>
                             <span class="input-col checkbox-item">
-                                <span class="data-checkbox"></span> Separated
+                                <span class="data-checkbox">
+                                    @if ($marital?->status === 'separated')
+                                    <i class="fa fa-check"></i>
+                                    @endif
+                                </span> Separated
                             </span>
                         </div>
                     </div>
+                    @if ($marital?->status === 'married')
                     <div class="flex-row-container noborder"> <!-----------รายละเอียดคู่สมรส------------>
                         <div class="flex-cell cell2 noborder">
                             <span class="flex-label-inner">Name of Spouse : </span>
-                            <span class="data-fill">Mrs. Warangkana Janjaroen</span>
+                            <span class="data-fill">นาง
+                                @if ($idcard?->gender === 'male')
+                                {{$marital?->woman}}
+                                @else
+                                {{$marital?->man}}
+                                @endif
+                            </span>
                         </div>
                         <div class="flex-cell cell2 noborder">
                             <span class="flex-label-inner cell2">Age : </span>
-                            <span class="data-fill">20 Years</span>
+                            <span class="data-fill">{{$marital?->age}} Years</span>
                         </div>
                         <div class="checkbox-group" style="justify-content: center; gap: 5%; width: 25%">
                             <span class="input-col checkbox-item">
                                 <span class="data-checkbox">
+                                    @if ($marital?->alive)
                                     <i class="fa fa-check"></i>
+                                    @endif
                                 </span> Alive
                             </span>
                             <span class="input-col checkbox-item">
                                 <span class="data-checkbox">
+                                    @if ($marital?->alive === 0)
                                     <i class="fa fa-check"></i>
+                                    @endif
                                 </span> Pass Away
                             </span>
                         </div>
-
-
                     </div>
                     <div class="flex-row-container noborder"> <!-----------อาชีพคู่สมรส------------>
                         <div class="flex-cell cell2 noborder">
                             <span class="flex-label-inner">Occupation : </span>
-                            <span class="data-fill">Computer Engineering </span>
+                            <span class="data-fill">{{$marital?->occupation}}</span>
 
                         </div>
                         <div class="flex-cell cell2 noborder">
                             <span class="flex-label-inner cell2"> Company : </span>
-                            <span class="data-fill">Pro One IT </span>
+                            <span class="data-fill">{{$marital?->company}} </span>
 
                         </div>
                         <div class="flex-cell cell2 noborder">
                             <span class="flex-label-inner cell2"> No . of Children : </span>
-                            <span class="data-fill">Pro One IT </span>
+                            <span class="data-fill">{{$marital?->male + $marital?->female}} Person</span>
 
                         </div>
                         <div class="flex-cell cell2 noborder">
                             <span class="flex-label-inner cell2"> Male : </span>
-                            <span class="data-fill">2 Person</span>
+                            <span class="data-fill">{{$marital?->male}} Person</span>
 
                         </div>
                         <div class="flex-cell cell2 noborder">
                             <span class="flex-label-inner cell2"> Female : </span>
-                            <span class="data-fill">2 Person</span>
+                            <span class="data-fill">{{$marital?->female}} Person</span>
                         </div>
 
 
 
                     </div>
+                    @endif
                 </div>
             </div>
 
-            <div class="flex-container-multi-row" style="border-top: 1px solid"> <!------พ่อแม่----->
+            <div class="flex-container-multi-row" style="@if(!blank($sibling))border-bottom: none;@endif border-top: 1px solid #5e5e5e;"> <!------พ่อแม่----->
                 <div class="flex-item-container-multi-row">
                     <div class="flex-cell noborder">
                         <span class="flex-label-inner">Parent's Information</span>
@@ -873,41 +918,45 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                     <div class="flex-row-container"> <!-----------พ่อ------------>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner">Name of Father : </span>
-                            <span class="data-fill">Mrs. Warangkana Janjaroen</span>
+                            <span class="data-fill">{{$father?->name}}</span>
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner cell2">Age : </span>
-                            <span class="data-fill">20 Years</span>
+                            <span class="data-fill">{{$father?->age}} Years</span>
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner cell2">Nationality : </span>
-                            <span class="data-fill">Thai</span>
+                            <span class="data-fill">{{$father?->nationality}}</span>
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner">Occupation : </span>
-                            <span class="data-fill">Engineering </span>
+                            <span class="data-fill">{{$father?->occupation}}</span>
 
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner cell2"> Company : </span>
-                            <span class="data-fill">Pro One IT </span>
+                            <span class="data-fill">{{$father?->company}}</span>
 
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner cell2"> Tel : </span>
-                            <span class="data-fill">097-095-5262 </span>
+                            <span class="data-fill">{{$father?->tel}}</span>
 
                         </div>
 
                         <div class="checkbox-group" style="justify-content: center; gap: 5%; width: 25%">
                             <span class="input-col checkbox-item">
                                 <span class="data-checkbox">
+                                    @if ($father?->alive)
                                     <i class="fa fa-check"></i>
+                                    @endif
                                 </span> Alive
                             </span>
                             <span class="input-col checkbox-item">
                                 <span class="data-checkbox">
+                                    @if ($father?->alive === 0)
                                     <i class="fa fa-check"></i>
+                                    @endif
                                 </span> Pass Away
                             </span>
                         </div>
@@ -916,42 +965,46 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                     </div>
                     <div class="flex-row-container"> <!-----------แม่------------>
                         <div class="flex-cell cell2 wrap noborder">
-                            <span class="flex-label-inner">Name of Mather : </span>
-                            <span class="data-fill">Mrs. Warangkana Janjaroen</span>
+                            <span class="flex-label-inner">Name of mother : </span>
+                            <span class="data-fill">{{$mother?->name}}</span>
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner cell2">Age : </span>
-                            <span class="data-fill">20 Years</span>
+                            <span class="data-fill">{{$mother?->age}} Years</span>
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner cell2">Nationality : </span>
-                            <span class="data-fill">Thai</span>
+                            <span class="data-fill">{{$mother?->nationality}}</span>
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner">Occupation : </span>
-                            <span class="data-fill">Engineering </span>
+                            <span class="data-fill">{{$mother?->occupation}}</span>
 
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner cell2"> Company : </span>
-                            <span class="data-fill">Pro One IT </span>
+                            <span class="data-fill">{{$mother?->company}}</span>
 
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner cell2"> Tel : </span>
-                            <span class="data-fill">097-095-5262 </span>
+                            <span class="data-fill">{{$mother?->tel}}</span>
 
                         </div>
 
                         <div class="checkbox-group" style="justify-content: center; gap: 5%; width: 25%">
                             <span class="input-col checkbox-item">
                                 <span class="data-checkbox">
+                                    @if ($mother?->alive)
                                     <i class="fa fa-check"></i>
+                                    @endif
                                 </span> Alive
                             </span>
                             <span class="input-col checkbox-item">
                                 <span class="data-checkbox">
+                                    @if ($mother?->alive === 0)
                                     <i class="fa fa-check"></i>
+                                    @endif
                                 </span> Pass Away
                             </span>
                         </div>
@@ -959,27 +1012,69 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
 
                     </div>
                     <div class="flex-row-container noborder"> <!-----------พี่น้อง------------>
+                        @php
+                        $index = collect($sibling)->search(fn($item) => $item['you'] === true);
+                        $order = $index !== false ? $index + 1 : 1;
+                        @endphp
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner">Sibling (including yourself) : </span>
-                            <span class="data-fill">1 Person</span>
+                            <span class="data-fill">{{$maleCount + $femaleCount}} Person</span>
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner">Male : </span>
-                            <span class="data-fill">1 Person</span>
+                            <span class="data-fill">{{$maleCount}} Person</span>
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner">Female : </span>
-                            <span class="data-fill">1 Person</span>
+                            <span class="data-fill">{{$femaleCount}} Person</span>
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner">You are no. : </span>
-                            <span class="data-fill">1</span>
+                            <span class="data-fill">{{$order}}</span>
                         </div>
 
                     </div>
                 </div>
             </div>
         </div>
+        <!----------ข้อมูลพี่น้อง เป็นตาราง---------->
+        @if (!blank($sibling))
+        <table class="normal-table">
+            <thead>
+                <tr>
+                    <th rowspan="2">no</th>
+                    <th rowspan="2">Name - Surname</th>
+                    <th rowspan="2">Age</th>
+                    <th rowspan="2">Occupation</th>
+                    <th rowspan="2">Company/University</th>
+                    <th rowspan="2">Position</th>
+                </tr>
+                <tr></tr>
+            </thead>
+            @foreach ($sibling as $index => $item)
+            @if($item['you'])
+            <tbody>
+                <tr>
+                    <td class="sub-tr">{{$index+1}}</td>
+                    <td colspan="5" class="sub-tr">{{$item['name']}}</td>
+                </tr>
+            </tbody>
+            @else
+            <tbody>
+                <tr>
+                    <td class="sub-tr">{{$index+1}}</td>
+                    <td class="sub-tr">{{$item['name'] ?? '-'}}</td>
+                    <td class="sub-tr">{{$item['age'] ?? '-'}}</td>
+                    <td class="sub-tr">{{$item['occupation'] ?? '-'}}</td>
+                    <td class="sub-tr">{{$item['company'] ?? '-'}}</td>
+                    <td class="sub-tr">{{$item['position'] ?? '-'}}</td>
+                </tr>
+            </tbody>
+            @endif
+            @endforeach
+            @endif
+        </table>
+
 
         <!---------------EDUCATION BACKGROUND--------------->
 
@@ -1047,8 +1142,8 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                     <th>Latest</th>
                 </tr>
             </thead>
-            @if ($resume->resumeHasmanyWorkExperiences()->exists())
-            @foreach ($resume->resumeHasmanyWorkExperiences as $item)
+            @if ($resume?->resumeHasmanyWorkExperiences()->exists())
+            @foreach ($resume?->resumeHasmanyWorkExperiences as $item)
             <tbody>
                 <tr>
                     <td class="sub-tr">{{$item->start}}</td>
@@ -1089,8 +1184,8 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
                 </tr>
                 <tr></tr>
             </thead>
-            @if ($resume->resumeHasmanyLangSkill()->exists())
-            @foreach ($resume->resumeHasmanyLangSkill as $item)
+            @if ($resume?->resumeHasmanyLangSkill()->exists())
+            @foreach ($resume?->resumeHasmanyLangSkill as $item)
             <tbody>
                 <tr>
                     <td>{{ucwords($item->language)}}</td>
@@ -1190,8 +1285,8 @@ $idcardZipcode = $idcard->idcardBelongtosubdistrict->zipcode ?? null;
         </div>
 
         <div class='con-data-text'> <!---------สกิลอื่นๆ------->
-            @if($resume->resumeHasmanySkill()->exists())
-            @foreach ($resume->resumeHasmanySkill as $index => $item)
+            @if($resume?->resumeHasmanySkill()->exists())
+            @foreach ($resume?->resumeHasmanySkill as $index => $item)
             <span class="item-data-text">
                 {{$index+1}}.
                 <span class="data-fill">

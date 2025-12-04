@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Districts;
+use App\Models\Provinces;
+use App\Models\Subdistricts;
 use Illuminate\Database\Eloquent\Model;
 
 class Idcard extends Model
@@ -15,6 +18,7 @@ class Idcard extends Model
         'prefix_name_en',
         'name_en',
         'last_name_en',
+        'gender',
         'id_card_number',
         'religion', //ศาสนา
         'date_of_birth',
@@ -32,6 +36,9 @@ class Idcard extends Model
         'date_of_issue'=> 'date', //วันที่ออกบัตร
         'date_of_expiry'=> 'date',
     ];
+    
+    
+    /***************ที่อยู่ตามบัตร*************** */
     
     public function idcardBelongtoprovince()
     {
