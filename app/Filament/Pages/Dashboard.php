@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use Dom\Text;
 use Carbon\Carbon;
 use App\Models\Districts;
 use App\Models\Provinces;
@@ -10,6 +11,7 @@ use Illuminate\Support\Str;
 use App\Models\Subdistricts;
 use Filament\Actions\Action;
 use Filament\Schemas\Schema;
+use function Termwind\style;
 use App\Jobs\ProcessEmpDocJob;
 use Filament\Actions\ActionGroup;
 use Filament\Support\Enums\Width;
@@ -18,6 +20,8 @@ use Filament\Actions\DeleteAction;
 use Illuminate\Support\HtmlString;
 use App\Jobs\ProcessNoJsonEmpDocJob;
 use Filament\Forms\Components\Radio;
+use Filament\Support\Icons\Heroicon;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Tabs;
@@ -34,11 +38,9 @@ use Asmit\FilamentUpload\Enums\PdfViewFit;
 use Filament\Pages\Dashboard as BaseDashboard;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
-use Asmit\FilamentUpload\Forms\Components\AdvancedFileUpload;
-use Filament\Support\Icons\Heroicon;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
-use function Termwind\style;
+use Asmit\FilamentUpload\Forms\Components\AdvancedFileUpload;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class Dashboard extends BaseDashboard
 {
@@ -134,9 +136,14 @@ class Dashboard extends BaseDashboard
                                                 ? 'คุณยังไม่ได้กรอกข้อมูลของบิดา กรุณากรอกข้อมูลให้ครบถ้วนตามจริง'
                                                 : null
                                         )
+                                        ->collapsed()
                                         ->columns(3)
                                         ->schema([
                                             TextInput::make('name')
+                                                ->required()
+                                                ->validationMessages([
+                                                    'required' => 'คุณยังไม่ได้กรอกชื่อบิดา'
+                                                ])
                                                 ->label('ชื่อ-นามสกุล บิดา')
                                                 ->placeholder('กรอกชื่อ-นามสกุล บิดา'),
                                             TextInput::make('age')
@@ -159,13 +166,17 @@ class Dashboard extends BaseDashboard
                                                 ->tel()
                                                 ->telRegex('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/'),
                                             Radio::make('alive')
+                                                ->required()
+                                                ->validationMessages([
+                                                    'required' => 'คุณยังไม่ได้เลือกตัวเลือกใดตัวเลือกหนึ่ง'
+                                                ])
                                                 ->label('ยังมีชีวิตอยู่หรือไม่?')
                                                 ->options([
                                                     true => 'ยังมีชีวิตอยู่',
                                                     false => 'เสียชีวิตแล้ว',
                                                 ])
                                                 ->inline(),
-                                        ])->collapsed(),
+                                        ]),
                                     Section::make('ข้อมูลมารดา')
                                         ->relationship('userHasoneMother')
                                         ->icon(
@@ -184,6 +195,10 @@ class Dashboard extends BaseDashboard
                                         ->columns(3)
                                         ->schema([
                                             TextInput::make('name')
+                                                ->required()
+                                                ->validationMessages([
+                                                    'required' => 'คุณยังไม่ได้กรอกชื่อมารดา'
+                                                ])
                                                 ->label('ชื่อ-นามสกุล มารดา')
                                                 ->placeholder('กรอกชื่อ-นามสกุล มารดา'),
                                             TextInput::make('age')
@@ -206,6 +221,10 @@ class Dashboard extends BaseDashboard
                                                 ->tel()
                                                 ->telRegex('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/'),
                                             Radio::make('alive')
+                                                ->required()
+                                                ->validationMessages([
+                                                    'required' => 'คุณยังไม่ได้เลือกตัวเลือกใดตัวเลือกหนึ่ง'
+                                                ])
                                                 ->label('ยังมีชีวิตอยู่หรือไม่?')
                                                 ->options([
                                                     true => 'ยังมีชีวิตอยู่',
@@ -228,7 +247,7 @@ class Dashboard extends BaseDashboard
                                                 ->live()
                                                 ->afterStateUpdated(function (array $state, $record) {
                                                     $datas = array_map(fn($item) => $item, $state);
-                                                    if (count($datas) === count($record?->data ?? [])) {
+                                                    if ($datas === $record?->data) {
                                                         $record->updateOrCreate(
                                                             ['user_id' => $record->user_id],            // เงื่อนไขหาแถวเดิม
                                                             ['data' => array_values($datas)]   // ข้อมูลที่จะอัปเดตหรือสร้าง
@@ -285,17 +304,298 @@ class Dashboard extends BaseDashboard
                                                 ]),
                                         ])->collapsed(),
                                 ]),
-                            Tab::make('ข้อมูลเพิ่มเติม')
+                            Tab::make('ข้อมูลผู้ที่ติดต่อได้ยามฉุกเฉิน')
                                 ->extraAttributes(
                                     fn() => ($this->isMobile)
-                                        ? ['style' => 'padding: 24px 15px']
+                                        ? ['style' => 'padding-right: 12px; padding-left: 12px;']
                                         : []
                                 )
                                 ->schema([
-                                    ////////
+                                    Section::make('ข้อมูลผู้ที่ติดต่อยามฉุกเฉิน')
+                                        ->collapsed()
+                                        ->icon(
+                                            fn($state) => blank($state['emergency_name'])
+                                                ? 'heroicon-m-exclamation-triangle'
+                                                : 'heroicon-m-check-circle'
+                                        )
+                                        ->iconColor(fn($state) => blank($state['emergency_name'])
+                                            ? 'warning'
+                                            : 'success')
+                                        ->description(
+                                            fn($state) => blank($state['emergency_name'])
+                                                ? 'คุณยังไม่ได้กรอกข้อมูลผู้ที่ติดต่อยามฉุกเฉิน กรุณากรอกข้อมูลให้ครบถ้วนตามจริง'
+                                                : null
+                                        )
+                                        ->columns(3)
+                                        ->relationship('userHasoneAdditionalInfo')
+                                        ->schema([
+                                            TextInput::make('emergency_name')
+                                                ->required()
+                                                ->validationMessages([
+                                                    'required' => 'คุณยังไม่ได้กรอกชื่อผู้ติดต่อยามฉุกเฉิน'
+                                                ])
+                                                ->label('ชื่อ-นามสกุล ผู้ติดต่อ')
+                                                ->placeholder('กรอกชื่อ-นามสกุล ผู้ที่ติดต่อ'),
+                                            TextInput::make('emergency_relation')
+                                                ->label('ความสัมพันธ์')
+                                                ->placeholder('ระบุความสัมพันธ์กับคุณเช่น "เป็นเพื่อน"'),
+                                            TextInput::make('emergency_tel')
+                                                ->required()
+                                                ->validationMessages([
+                                                    'required' => 'คุณยังไม่ได้กรอกเบอร์โทรศัพท์ของผู้ติดต่อ'
+                                                ])
+                                                ->placeholder('เบอร์โทรศัพท์ (กรอกเฉพาะตัวเลข)')
+                                                ->mask('999-999-9999')
+                                                ->label('เบอร์โทรติดต่อ')
+                                                ->tel()
+                                                ->telRegex('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/'),
+                                            Textarea::make('emergency_address')
+                                                ->label('ที่อยู่ปัจจุบัน')
+                                                ->placeholder('กรอกที่อยู่ของผู้ติดต่อ')
+                                                ->columnSpan(3)
+                                                ->autosize()
+                                                ->trim(),
+                                            Select::make('emergency_province_id')
+                                                ->options(Provinces::pluck('name_th', 'id'))
+                                                ->live()
+                                                ->preload()
+                                                ->hiddenlabel()
+                                                ->placeholder('จังหวัด')
+                                                ->searchable()
+                                                ->afterStateUpdated(function ($state, $set) {
+
+                                                    if ($state == null) {
+                                                        $set('emergency_province_id', null);
+                                                        $set('emergency_district_id', null);
+                                                        $set('emergency_subdistrict_id', null);
+                                                        $set('emergency_zipcode', null);
+                                                    }
+                                                }),
+                                            Select::make('emergency_district_id')
+                                                ->options(function (Get $get) {
+                                                    $data = Districts::where('province_id', $get('emergency_province_id'))
+                                                        ->pluck('name_th', 'id');
+                                                    return $data;
+                                                })
+                                                ->live()
+                                                // ->columnSpan([
+                                                //     'default' => 2,
+                                                //     'md' => 1
+                                                // ])
+                                                ->preload()
+                                                ->hiddenlabel()
+                                                ->placeholder('อำเภอ')
+                                                ->searchable()
+                                                ->afterStateUpdated(function (Set $set) {
+                                                    $set('emergency_subdistrict_id', null);
+                                                    $set('emergency_zipcode', null);
+                                                }),
+                                            Select::make('emergency_subdistrict_id')
+                                                ->options(function (Get $get) {
+                                                    $data = Subdistricts::where('district_id', $get('emergency_district_id'))
+                                                        ->pluck('name_th', 'id');
+                                                    return $data;
+                                                })
+                                                ->hiddenlabel()
+                                                ->preload()
+                                                ->placeholder('ตำบล')
+                                                ->live()
+                                                ->searchable()
+                                                ->afterStateUpdated(function ($state, $set) {
+                                                    //รับค่าปัจจุบันในฟิลด์นี้หลังที่ Input ข้อมูลแล้ว
+                                                    $zipcode = Subdistricts::where('id', $state)->pluck('zipcode'); //ไปที่ Subdistrict โดยที่ id = ปัจจุบันที่เราเลือก
+                                                    $set('emergency_zipcode', Str::slug($zipcode)); //เอาค่าที่ได้ซึ่งเป็นอาเรย์มาถอดให้เหลือค่าอย่างเดียวด้วย Str::slug()แล้วเอาค่าที่ได้มาใส่ และส่งค่าไปยัง ฟิลด์ที่เลือกในที่นี้คือ zipcode
+                                                }),
+                                            TextInput::make('emergency_zipcode')
+                                                ->live()
+                                                ->hiddenlabel()
+                                                ->placeholder('รหัสไปรษณีย์')
+
+                                        ]),
                                 ]),
+                            Tab::make('ข้อมูลสุขภาพ')
+                                ->extraAttributes(
+                                    fn() => ($this->isMobile)
+                                        ? ['style' => 'padding-right: 12px; padding-left: 12px;']
+                                        : []
+                                )
+                                ->schema([
+                                    Section::make('ข้อมูลสุขภาพ')
+                                        ->relationship('userHasoneAdditionalInfo')
+                                        ->icon(
+                                            fn($state) => blank($state['medical_condition'])
+                                                ? 'heroicon-m-exclamation-triangle'
+                                                : 'heroicon-m-check-circle'
+                                        )
+                                        ->iconColor(fn($state) => blank($state['medical_condition'])
+                                            ? 'warning'
+                                            : 'success')
+                                        ->description(
+                                            fn($state) => blank($state['medical_condition'])
+                                                ? 'คุณยังไม่ได้กรอกข้อมูลของบิดา กรุณากรอกข้อมูลให้ครบถ้วนตามจริง'
+                                                : null
+                                        )
+                                        ->collapsed()
+                                        ->columns(2)
+                                        ->schema([
+                                            Fieldset::make('layout_medical')
+                                                ->columns(1)
+                                                ->contained(false)
+                                                ->hiddenLabel()
+                                                ->schema([
+                                                    Radio::make('medical_condition')
+                                                        ->required()
+                                                        ->live()
+                                                        ->validationMessages([
+                                                            'required' => 'คุณยังไม่ได้เลือกตัวเลือกใดตัวเลือกหนึ่ง'
+                                                        ])
+                                                        ->label('คุณมีโรคประจำตัวหรือไม่?')
+                                                        ->options([
+                                                            true => 'มีโรคประจำตัว',
+                                                            false => 'ไม่มีโรคประจำตัว',
+                                                        ])
+                                                        ->inline(),
+                                                    TextInput::make('medical_condition_detail')
+                                                        ->visible(fn($get) => $get('medical_condition') ? 1 : 0)
+                                                        ->prefix('โรค')
+                                                        ->placeholder('ระบุโรคประจำตัวของคุณ')
+                                                        ->label('รายละเอียดโรคประจำตัว'),
+                                                ]),
+                                            Fieldset::make('layout_sso')
+                                                ->columns(1)
+                                                ->contained(false)
+                                                ->hiddenLabel()
+                                                ->schema([
+                                                    Radio::make('has_sso')
+                                                        ->required()
+                                                        ->live()
+                                                        ->validationMessages([
+                                                            'required' => 'คุณยังไม่ได้เลือกตัวเลือกใดตัวเลือกหนึ่ง'
+                                                        ])
+                                                        ->label('คุณยังมีประกันสังคมหรือไม่?')
+                                                        ->options([
+                                                            true => 'ยังมีประกันสังคม',
+                                                            false => 'ไม่มีประกันสังคม',
+                                                        ])
+                                                        ->inline(),
+                                                    TextInput::make('sso_hospital')
+                                                        ->prefix('โรงพยาบาล')
+                                                        ->visible(fn($get) => $get('has_sso') ? 1 : 0)
+                                                        ->placeholder('ระบุโรคพยาบาลที่มีสิทธ์ประกันสังคม')
+                                                        ->label('โรงพยาบาลที่เลือก'),
+                                                ])
+
+                                        ]),
+
+
+                                ]),
+                            Tab::make('คำถามเพิ่มเติม')
+                                ->extraAttributes(
+                                    fn() => ($this->isMobile)
+                                        ? ['style' => 'padding-right: 12px; padding-left: 12px;']
+                                        : []
+                                )
+                                ->schema([
+                                    Section::make('คำถามเพิ่มเติม')
+                                        ->relationship('userHasoneAdditionalInfo')
+                                        ->icon(
+                                            fn($state) => blank($state['worked_company_before'])
+                                                ? 'heroicon-m-exclamation-triangle'
+                                                : 'heroicon-m-check-circle'
+                                        )
+                                        ->iconColor(
+                                            fn($state) => blank($state['worked_company_before'])
+                                                ? 'warning'
+                                                : 'success'
+                                        )
+                                        ->description(
+                                            fn($state) => blank($state['worked_company_before'])
+                                                ? 'คุณยังไม่ได้ตอบคำถามเพิ่มเติม กรุณากรอกข้อมูลให้ครบถ้วนตามจริง'
+                                                : null
+                                        )
+                                        ->collapsed()
+                                        ->columns(2)
+                                        ->schema([
+                                            Fieldset::make('layout_worked')
+                                                ->columns(1)
+                                                ->contained(false)
+                                                ->hiddenLabel()
+                                                ->schema([
+                                                    Radio::make('worked_company_before')
+                                                        ->required()
+                                                        ->live()
+                                                        ->validationMessages([
+                                                            'required' => 'คุณยังไม่ได้เลือกตัวเลือกใดตัวเลือกหนึ่ง'
+                                                        ])
+                                                        ->label('คุณเคยทำงานกับบริษัทนี้หรือบริษัทในเครือมาก่อนหรือไม่?')
+                                                        ->options([
+                                                            true => 'เคย',
+                                                            false => 'ไม่เคย',
+                                                        ])
+                                                        ->inline(),
+                                                    TextInput::make('worked_company_supervisor')
+                                                        ->visible(fn($get) => $get('worked_company_before') ? 1 : 0)
+                                                        ->placeholder('ระบุชื่อของหัวหน้างานที่เคยทำงานด้วย')
+                                                        ->label('ชื่อของหัวหน้า'),
+                                                    Textarea::make('worked_company_detail')
+                                                        ->visible(fn($get) => $get('worked_company_before') ? 1 : 0)
+                                                        ->placeholder('กรอกรายละเอียดเพิ่มเติมเกี่ยวกับงานที่เคยทำ')
+                                                        ->label('รายละเอียดเพิ่มเติม')
+                                                        ->autosize()
+                                                        ->trim(),
+
+                                                ]),
+                                            Fieldset::make('layout_know')
+                                                ->columns(1)
+                                                ->contained(false)
+                                                ->hiddenLabel()
+                                                ->schema([
+                                                    Radio::make('know_someone')
+                                                        ->required()
+                                                        ->live()
+                                                        ->validationMessages([
+                                                            'required' => 'คุณยังไม่ได้เลือกตัวเลือกใดตัวเลือกหนึ่ง'
+                                                        ])
+                                                        ->label('คุณรู้จักพนักงานในบริษัทนี้หรือไม่?')
+                                                        ->options([
+                                                            true => 'รู้จัก',
+                                                            false => 'ไม่รู้จัก',
+                                                        ])
+                                                        ->inline(),
+                                                    TextInput::make('know_someone_name')
+                                                        ->visible(fn($get) => $get('know_someone') ? 1 : 0)
+                                                        ->placeholder('ระบุชื่อของพนักงานที่คุณรู้จักในบริษัทนี้')
+                                                        ->label('ชื่อพนักงานที่รู้จัก'),
+                                                    TextInput::make('know_someone_relation')
+                                                        ->visible(fn($get) => $get('know_someone') ? 1 : 0)
+                                                        ->placeholder('ระบุความสัมพันธ์เช่น เป็นเพื่อน')
+                                                        ->label('ความสัมพันธ์'),
+
+
+                                                ]),
+                                            TextInput::make('how_to_know_job')
+                                                ->columnSpan(2)
+                                                ->label('คุณรู้จักงานนี้ได้อย่างไร')
+                                                ->placeholder('ระบุแหล่งที่มาของการรับสมัครงานในตำแหน่งนี้เช่น Facebook'),
+                                            Textarea::make('additional_info')
+                                                ->columnSpan(2)
+                                                ->placeholder('ข้อมูลเพิ่มเติมใดๆ จากผู้สมัครที่อาจเป็นประโยชน์ในกระบวนการคัดเลือกสำหรับบริษัท')
+                                                ->label('รายละเอียดเพิ่มเติม')
+                                                ->autosize()
+                                                ->trim(),
+                                        ]),
+                                ]),
+
                         ]),
-                ]),
+
+                ])
+                ->action(function ($action) {
+                    $this->dispatch('openActionModal', id: $action->getName());
+                    Notification::make()
+                        ->title('บันทึกข้อมูลเรียบร้อยแล้ว')
+                        ->color('success')
+                        ->send();
+                }),
             Action::make('pdf')
                 ->record(auth()->user())
                 ->label('ดาวน์โหลดใบสมัคร')
@@ -603,8 +903,11 @@ class Dashboard extends BaseDashboard
                         ->relationship('userHasoneIdcard')
                         ->schema([
                             Textarea::make('address')
-                                ->hiddenlabel()->placeholder('กรุณากรอกรายละเอียดที่อยู่ให้ละเอียดที่สุด')
-                                ->columnSpan(3),
+                                ->hiddenlabel()
+                                ->placeholder('กรุณากรอกรายละเอียดที่อยู่ให้ละเอียดที่สุด')
+                                ->columnSpan(3)
+                                ->autosize()
+                                ->trim(),
                             Select::make('province_id')
                                 ->options(Provinces::pluck('name_th', 'id'))
                                 ->live()
@@ -612,8 +915,7 @@ class Dashboard extends BaseDashboard
                                 ->hiddenlabel()
                                 ->placeholder('จังหวัด')
                                 ->searchable()
-                                ->afterStateUpdated(function (Select $column, Set $set) {
-                                    $state = $column->getState();
+                                ->afterStateUpdated(function ($state, $set) {
                                     if ($state == null) {
                                         $set('province_id', null);
                                         $set('district_id', null);
@@ -622,29 +924,23 @@ class Dashboard extends BaseDashboard
                                     }
                                 }),
                             Select::make('district_id')
-                                ->options(function (Get $get) {
-                                    $data = Districts::query()
-                                        ->where('province_id', $get('province_id'))
+                                ->options(function ($get) {
+                                    $data = Districts::where('province_id', $get('province_id'))
                                         ->pluck('name_th', 'id');
                                     return $data;
                                 })
                                 ->live()
-                                // ->columnSpan([
-                                //     'default' => 2,
-                                //     'md' => 1
-                                // ])
                                 ->preload()
                                 ->hiddenlabel()
                                 ->placeholder('อำเภอ')
                                 ->searchable()
-                                ->afterStateUpdated(function (Set $set) {
+                                ->afterStateUpdated(function ($set) {
                                     $set('subdistrict_id', null);
                                     $set('zipcode', null);
                                 }),
                             Select::make('subdistrict_id')
-                                ->options(function (Get $get) {
-                                    $data = Subdistricts::query()
-                                        ->where('district_id', $get('district_id'))
+                                ->options(function ($get) {
+                                    $data = Subdistricts::where('district_id', $get('district_id'))
                                         ->pluck('name_th', 'id');
                                     return $data;
                                 })
@@ -657,17 +953,12 @@ class Dashboard extends BaseDashboard
                                 ->placeholder('ตำบล')
                                 ->live()
                                 ->searchable()
-                                ->afterStateUpdated(function (Select $column, Set $set) {
-                                    $state = $column->getState(); //รับค่าปัจจุบันในฟิลด์นี้หลังที่ Input ข้อมูลแล้ว
+                                ->afterStateUpdated(function ($state, $set) {
                                     $zipcode = Subdistricts::where('id', $state)->pluck('zipcode'); //ไปที่ Subdistrict โดยที่ id = ปัจจุบันที่เราเลือก
                                     $set('zipcode', Str::slug($zipcode)); //เอาค่าที่ได้ซึ่งเป็นอาเรย์มาถอดให้เหลือค่าอย่างเดียวด้วย Str::slug()แล้วเอาค่าที่ได้มาใส่ และส่งค่าไปยัง ฟิลด์ที่เลือกในที่นี้คือ zipcode
                                 }),
                             TextInput::make('zipcode')
                                 ->live()
-                                // ->columnSpan([
-                                //     'default' => 2,
-                                //     'md' => 1
-                                // ])
                                 ->hiddenlabel()
                                 ->placeholder('รหัสไปรษณีย์')
                         ])->collapsed(),
@@ -946,7 +1237,7 @@ class Dashboard extends BaseDashboard
                                             Toggle::make('same_id_card')
                                                 ->label('ใช้ที่อยู่เดียวกับบัตรประชาชน')
                                                 ->live()
-                                                ->afterStateUpdated(function ($state, Set $set) {
+                                                ->afterStateUpdated(function ($state, $set) {
                                                     if ($state) {
                                                         $set('address', null);
                                                         $set('province_id', null);
@@ -958,7 +1249,9 @@ class Dashboard extends BaseDashboard
                                             Textarea::make('address')
                                                 ->label('รายละเอียดที่อยู่')
                                                 ->placeholder('กรุณากรอกรายละเอียดที่อยู่ให้ละเอียดที่สุด')
-                                                ->columnSpan(4),
+                                                ->columnSpan(4)
+                                                ->autosize()
+                                                ->trim(),
                                             Select::make('province_id')
                                                 ->options(Provinces::pluck('name_th', 'id'))
                                                 ->live()
@@ -966,8 +1259,8 @@ class Dashboard extends BaseDashboard
                                                 ->label('จังหวัด')
                                                 ->placeholder('จังหวัด')
                                                 ->searchable()
-                                                ->afterStateUpdated(function (Select $column, Set $set) {
-                                                    $state = $column->getState();
+                                                ->afterStateUpdated(function ($state, $set) {
+
                                                     if ($state == null) {
                                                         $set('province_id', null);
                                                         $set('district_id', null);
@@ -977,8 +1270,7 @@ class Dashboard extends BaseDashboard
                                                 }),
                                             Select::make('district_id')
                                                 ->options(function (Get $get) {
-                                                    $data = Districts::query()
-                                                        ->where('province_id', $get('province_id'))
+                                                    $data = Districts::where('province_id', $get('province_id'))
                                                         ->pluck('name_th', 'id');
                                                     return $data;
                                                 })
@@ -993,8 +1285,7 @@ class Dashboard extends BaseDashboard
                                                 }),
                                             Select::make('subdistrict_id')
                                                 ->options(function (Get $get) {
-                                                    $data = Subdistricts::query()
-                                                        ->where('district_id', $get('district_id'))
+                                                    $data = Subdistricts::where('district_id', $get('district_id'))
                                                         ->pluck('name_th', 'id');
                                                     return $data;
                                                 })
@@ -1003,8 +1294,8 @@ class Dashboard extends BaseDashboard
                                                 ->placeholder('ตำบล')
                                                 ->live()
                                                 ->searchable()
-                                                ->afterStateUpdated(function (Select $column, Set $set) {
-                                                    $state = $column->getState();
+                                                ->afterStateUpdated(function ($state, $set) {
+
                                                     $zipcode = Subdistricts::where('id', $state)->pluck('zipcode');
                                                     $set('zipcode', Str::slug($zipcode));
                                                 }),
@@ -1145,7 +1436,9 @@ class Dashboard extends BaseDashboard
                                                     TextArea::make('details')
                                                         ->label('รายละเอียดเนื้องาน')
                                                         ->placeholder('กรอกรายละเอียดเนื้องานที่รับผิดชอบโดยสรุป')
-                                                        ->columnSpanFull(),
+                                                        ->columnSpanFull()
+                                                        ->autosize()
+                                                        ->trim(),
                                                 ]),
 
                                         ])->collapsed(),
@@ -2166,6 +2459,7 @@ class Dashboard extends BaseDashboard
                             Textarea::make('data')
                                 ->label('รายละเอียด')
                                 ->autosize()
+                                ->trim()
                                 ->columnSpan(3),
                         ]),
                     AdvancedFileUpload::make($action->getName())
@@ -2348,10 +2642,15 @@ class Dashboard extends BaseDashboard
             'บัตรประชาชน'   => $user->userHasoneIdcard()->exists(),
             'วุฒิการศึกษา'   => $user->userHasmanyTranscript()->exists(),
         ];
+        
+        $additional = $user->userHasoneAdditionalInfo;
 
         $errorInput = [ //สำหรับข้อมูลที่ต้องกรอกเอง
             'บิดา' => blank($user->userHasoneFather->name),
             'มารดา' => blank($user->userHasoneMother->name),
+            'ผู้ติดต่อยามฉุกเฉิน' => blank($additional->emergency_name),
+            'คำถามสุขภาพ' => blank($additional->medical_condition),
+            'คำถามเพิ่มเติม' => blank($additional->know_someone),
         ];
 
         // ใส่ใบเกณฑ์ทหารเฉพาะกรณี "ไม่ใช่ผู้หญิง"

@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class AnotherDoc extends Model
-{   
+class Certificate extends Model
+{
     protected $table = "another_docs"; //ชื่อตาราง
     protected $fillable = [
         'doc_type',

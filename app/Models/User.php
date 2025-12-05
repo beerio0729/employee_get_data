@@ -16,6 +16,7 @@ use App\Models\Military;
 use App\Models\AnotherDoc;
 use App\Models\Transcript;
 use App\Models\Resume\Resume;
+use App\Models\AdditionalInfo;
 use App\Models\Resume\ResumeSkills;
 use App\Models\Resume\ResumeLocation;
 use App\Models\Resume\ResumeEducations;
@@ -184,7 +185,12 @@ class User extends Authenticatable
     
     public function userHasoneSibling() 
     {
-        return $this->hasOne(Sibling::class, 'user_id', 'id');
+        return $this->hasOne(Sibling::class, 'user_id', 'id')->withDefault();
+    }
+    
+    public function userHasoneAdditionalInfo() 
+    {
+        return $this->hasOne(AdditionalInfo::class, 'user_id', 'id')->withDefault();
     }
 
 

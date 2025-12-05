@@ -29,6 +29,7 @@ $sibling = $user->userHasoneSibling?->data;
 $maleCount = collect($sibling)->where('gender', 'male')->count();
 $femaleCount = collect($sibling)->where('gender', 'female')->count();
 
+$additional = $user->userHasoneAdditionalInfo;
 @endphp
 
 
@@ -168,7 +169,7 @@ $femaleCount = collect($sibling)->where('gender', 'female')->count();
             /* สีพื้นหลังเทาตามรูป */
             font-weight: bold;
             padding: 2px 5px;
-            margin-top: 5px;
+            /*margin-top: 5px;*/
             border: 1px solid #5e5e5e;
             text-transform: uppercase;
             font-size: 10pt;
@@ -294,10 +295,7 @@ $femaleCount = collect($sibling)->where('gender', 'female')->count();
 
         /* Container หลักของส่วน Flexbox เพื่อกำหนดขอบเขต */
         .flex-container-wrapper {
-            border-right: 1px solid #5e5e5e;
-            ;
-            border-left: 1px solid #5e5e5e;
-            ;
+            border: 1px solid #5e5e5e;
         }
 
         /* DIV ที่ทำหน้าที่เป็น TR: จัดเรียง Cell ในแนวนอน */
@@ -403,13 +401,12 @@ $femaleCount = collect($sibling)->where('gender', 'female')->count();
         /**********พิเศษสำหรับ skills***********/
 
         .con-data-text {
-
             border-left: 1px solid #5e5e5e;
             border-right: 1px solid #5e5e5e;
             border-bottom: 1px solid #5e5e5e;
             padding: 5px 10px;
             line-height: 2.2;
-            font-weight: bold
+            /*font-weight: bold*/
         }
 
         .item-data-text {
@@ -452,6 +449,29 @@ $femaleCount = collect($sibling)->where('gender', 'female')->count();
 
         .sub-tr {
             white-space: nowrap;
+        }
+
+        .additional_info {
+            width: 100%;
+            min-height: 80px;
+            padding: 0 10px;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            font-size: 1.1em;
+            line-height: 2;
+        }
+
+        /***********ลายเซนต์******** */
+
+        .con-sig {
+            position: absolute;
+            bottom: 15px;
+            right: 100px;
+            width: 288px;
+            text-align: end;
+            /* height: 100px; */
+            /*border: 3px solid red;*/
         }
     </style>
 </head>
@@ -1284,7 +1304,7 @@ $femaleCount = collect($sibling)->where('gender', 'female')->count();
             <span>OTHER SKILLS</span>
         </div>
 
-        <div class='con-data-text'> <!---------สกิลอื่นๆ------->
+        <div class='con-data-text' style="border-top: 1px solid #5e5e5e;"> <!---------สกิลอื่นๆ------->
             @if($resume?->resumeHasmanySkill()->exists())
             @foreach ($resume?->resumeHasmanySkill as $index => $item)
             <span class="item-data-text">
@@ -1298,6 +1318,7 @@ $femaleCount = collect($sibling)->where('gender', 'female')->count();
             <h4 style="text-align: center;">---------- No Data ----------</h4>
             @endif
         </div>
+
         <table class="con-data-text"> <!-------มีใบขับขี่ไหม--------->
             <thead>
                 <tr class="text-left" style="border: none;">
@@ -1337,10 +1358,131 @@ $femaleCount = collect($sibling)->where('gender', 'female')->count();
             </thead>
         </table>
 
+        <!-------คำถามเพิ่มเติม--------->
+        <div class='con-data-text'>
+            <div style="border-bottom: 1px solid #00000042;">
+                <span class="flex-label-inner">In case of emergency, please notify : </span>
+                <span class="data-fill">{{$additional?->emergency_name}}</span>
+                <span class="flex-label-inner">&nbsp;Relation : </span>
+                <span class="data-fill">{{$additional?->emergency_relation}}</span>
+                <br>
+                <span class="flex-label-inner">Address information : </span>
+                <span class="data-fill">
+                    &nbsp;{{$additional?->emergency_address}}
+                    &nbsp;{{$additional?->additionalInfoBelongtosubdistrict->name_th}}
+                    &nbsp;{{$additional?->additionalInfoBelongtodistrict->name_th}}
+                    &nbsp;{{$additional?->additionalInfoBelongtoprovince->name_th}}
+                    &nbsp;{{$additional?->zipcode}}
+                </span>
+            </div>
+            <div style="border-bottom: 1px solid #00000042;">
+                <span class="flex-label-inner">Have you ever worked with the company or its subsidiary companies? : </span>
+                <span class="input-col checkbox-item">
+                    <span class="data-checkbox">
+                        @if ($additional?->worked_company_before === 0)
+                        <i class="fa fa-check"></i>
+                        @endif
+                    </span> No
+                </span>
+                <span class="input-col checkbox-item">
+                    <span class="data-checkbox">
+                        @if ($additional?->worked_company_before)
+                        <i class="fa fa-check"></i>
+                        @endif
+                    </span> Yes
+                </span>
+                <br>
+                <span class="flex-label-inner">Immediate supervisor : </span>
+                <span class="data-fill">{{$additional?->worked_company_supervisor}}</span>
+                <span class="flex-label-inner">Please identify : </span>
+                <span class="data-fill">{{$additional?->worked_company_detail}}</span>
+                <span class="flex-label-inner">Do you know anyone in the company? : </span>
+                <span class="input-col checkbox-item">
+                    <span class="data-checkbox">
+                        @if ($additional?->know_someone === 0)
+                        <i class="fa fa-check"></i>
+                        @endif
+                    </span> No
+                </span>
+                <span class="input-col checkbox-item">
+                    <span class="data-checkbox">
+                        @if ($additional?->know_someone)
+                        <i class="fa fa-check"></i>
+                        @endif
+                    </span> Yes
+                </span>
+                <span class="flex-label-inner"> | Name : </span>
+                <span class="data-fill">{{$additional?->know_someone_name}}</span>
+                <span class="flex-label-inner">Relation : </span>
+                <span class="data-fill">{{$additional?->know_someone_relation}}</span>
+                <br>
+                <span class="flex-label-inner">How did you hear about this job opening? : </span>
+                <span class="data-fill">{{$additional?->how_to_know_job}}</span>
+            </div>
+            <div>
+                <span class="flex-label-inner">Do you have any medical condition? : </span>
+                <span class="input-col checkbox-item">
+                    <span class="data-checkbox">
+                        @if ($additional?->medical_condition === 0)
+                        <i class="fa fa-check"></i>
+                        @endif
+                    </span> No
+                </span>
+                <span class="input-col checkbox-item">
+                    <span class="data-checkbox">
+                        @if ($additional?->medical_condition)
+                        <i class="fa fa-check"></i>
+                        @endif
+                    </span> Yes
+                </span>
+                <span class="flex-label-inner"> | Please identify : </span>
+                <span class="data-fill">{{$additional?->medical_condition_detail}}</span>
+                <br>
+                <span class="flex-label-inner">Do you still have valid insurance coverage through the SSO? : </span>
+                <span class="input-col checkbox-item">
+                    <span class="data-checkbox">
+                        @if ($additional?->has_sso === 0)
+                        <i class="fa fa-check"></i>
+                        @endif
+                    </span> No
+                </span>
+                <span class="input-col checkbox-item">
+                    <span class="data-checkbox">
+                        @if ($additional?->has_sso)
+                        <i class="fa fa-check"></i>
+                        @endif
+                    </span> Yes
+                </span>
+                <span class="flex-label-inner"> | Hospital Name : </span>
+                <span class="data-fill">{{$additional?->sso_hospital}}</span>
+            </div>
+            <div>
+            </div>
+        </div>
+        <div class='con-data-text'>
+            <div class="flex-label-inner">Additional applicant information that may support the company’s selection process : </div>
+            <div class="additional_info">{{$additional?->additional_info}}</div>
+            <div style="word-wrap: break-word; margin-top: 15px;">
+                I certify that all statements given in this application form are true. If any is found to be untrue after engagement, the company has the right to terminate my employment
+                without any compensation or severance pay whatsoever.
+            </div>
+            <div style="position: relative; min-height: 155px;">
+                <div class="con-sig">
+                    <p class="flex-label-inner">
+                        Signature..........................................................Applicant
+                    </p>
+                    <p class="flex-label-inner">
+                        (..........................................................)
+                    </p>
+                    <div class="flex-label-inner">
+                        Date..........................................................
+                    </div>
 
+                </div>
+            </div>
+        </div>
 
     </div>
-
 
     <!----------Java Script------------->
     <script>
@@ -1356,61 +1498,3 @@ $femaleCount = collect($sibling)->where('gender', 'female')->count();
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <title>{{ $title }}</title>
-</head>
-
-<body>
-    <h1 id="content">{{ $user->userHasoneIdcard->idcard_number }}</h1>
-    <button id='button' onclick="downloadPdf()">Download as PDF</button>
-    <script>
-        function downloadPdf() {
-            const element = document.getElementById('content'); // Or a specific element, e.g., document.getElementById('content')
-            const options = {
-                margin: 10,
-                filename: '{{ $user->userHasoneIdcard->name_th }}.pdf',
-                image: {
-                    type: 'jpeg',
-                    quality: 0.98
-                },
-                html2canvas: {
-                    scale: 2
-                },
-                jsPDF: {
-                    unit: 'mm',
-                    format: 'a4',
-                    orientation: 'portrait'
-                }
-            };
-            //document.getElementById('button').remove();
-            html2pdf().from(element).set(options).save();
-        }
-    </script>
-</body>
-
-</html> -->
