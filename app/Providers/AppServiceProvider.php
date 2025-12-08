@@ -28,9 +28,13 @@ class AppServiceProvider extends ServiceProvider
     {
         FilamentAsset::register([
             Css::make('noto_sans_thai', 'https://fonts.googleapis.com/css?family=Noto Sans Thai'),
+            //Js::make('font-awesome', 'https://kit.fontawesome.com/22a2f0fe70.js'),
             Css::make('filament-overrides', Vite::asset('resources/css/filament-overrides.css')),
             Js::make('echo-scripts', Vite::asset('resources/js/echo.js')),
         ]);
-        
+
+        Event::listen(function (\SocialiteProviders\Manager\SocialiteWasCalled $event) {
+            $event->extendSocialite('line', \SocialiteProviders\Line\Provider::class);
+        });
     }
 }

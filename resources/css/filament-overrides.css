@@ -2,13 +2,30 @@
 
     /* sm breakpoint ของ Tailwind */
     :is(.fi-modal>.fi-modal-window-ctn>.fi-modal-window:not(.fi-modal-window-has-icon), .fi-modal>.fi-modal-window-ctn>.fi-modal-window.fi-modal-window-has-sticky-header) .fi-modal-content,
-    :is(.fi-modal>.fi-modal-window-ctn>.fi-modal-window:not(.fi-modal-window-has-icon), .fi-modal>.fi-modal-window-ctn>.fi-modal-window.fi-modal-window-has-sticky-header) .fi-modal-footer
-    {
+    :is(.fi-modal>.fi-modal-window-ctn>.fi-modal-window:not(.fi-modal-window-has-icon), .fi-modal>.fi-modal-window-ctn>.fi-modal-window.fi-modal-window-has-sticky-header) .fi-modal-footer {
         padding-inline: calc(var(--spacing) * 2);
     }
-    
-    .fi-section:not(.fi-section-not-contained):not(.fi-divided)>.fi-section-content-ctn>.fi-section-content,.fi-section:not(.fi-section-not-contained).fi-divided>.fi-section-content-ctn>.fi-section-content>*
-    {
+
+    .fi-section:not(.fi-section-not-contained):not(.fi-divided)>.fi-section-content-ctn>.fi-section-content,
+    .fi-section:not(.fi-section-not-contained).fi-divided>.fi-section-content-ctn>.fi-section-content>* {
         padding-inline: calc(var(--spacing) * 3);
     }
+}
+
+input.fi-input:where(.dark, .dark *):disabled,
+.fi-fo-date-time-picker .fi-fo-date-time-picker-display-text-input:where(.dark, .dark *):disabled,
+select.fi-select-input:where(.dark, .dark *):disabled,
+.fi-fo-textarea textarea:where(.dark,.dark *):disabled
+{
+    color: #fff;
+    -webkit-text-fill-color: #fff;
+}
+
+input[type=radio].fi-radio-input:where(.dark,.dark *):disabled:checked {
+    background-color: var(--primary-400);
+}
+
+.fi-select-input .fi-disabled {
+    cursor: not-allowed;
+    opacity: 1;
 }

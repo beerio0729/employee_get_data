@@ -16,7 +16,6 @@ return new class extends Migration
             $table->foreignID('role_id')->references('id')->on('roles')->onDelete('cascade');
             $table->string('name')->nullable();
             $table->string('email')->unique();
-            $table->string('image')->nullable(); // ศาสนา
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();

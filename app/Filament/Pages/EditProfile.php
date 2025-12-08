@@ -72,6 +72,18 @@ class EditProfile extends BaseEditProfile
         $this->isSubmitDisabledFromConfirm = !$value;
     }
 
+    protected function getTelFormComponent(): Component
+    {
+        return
+            TextInput::make('tel')
+            ->columnSpan(1)
+            ->mask('9999999999')
+            ->label(__('filament-panels::auth/pages/edit-profile.form.tel.label'))
+            ->tel()
+            ->required()
+            ->telRegex('/^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\.\/0-9]*$/');
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -81,10 +93,11 @@ class EditProfile extends BaseEditProfile
                     ->hiddenLabel()
                     ->schema([
                         $this->getEmailFormComponent(),
+                        $this->getTelFormComponent(),
                         $this->getPasswordFormComponent(),
                         $this->getPasswordConfirmationFormComponent(),
-                    ])->columns(3)->collapsed(),
-                $this->getDataResume(),
+                    ])->columns(4)->collapsed(),
+                //$this->getDataResume(),
             ]);
     }
 
@@ -1157,62 +1170,3 @@ class EditProfile extends BaseEditProfile
         $this->current_tab = $tabName;
     }
 }
-
-
-
-
-
-// Tab::make('สมุดบัญชีธนาคาร')
-                //     ->statePath('bookbank')
-                //     ->schema([
-                //         Section::make('ข้อมูลทั่วไป')
-                //             ->collapsed()
-                //             //->label('ข้อมูลทั่วไป')
-                //             ->columns(3)
-                //             ->relationship('userHasoneBookbank')
-                //             ->schema([
-                //                 TextInput::make('name')
-                //                     ->placeholder('กรอกหรือแก้ไขชื่อจริงถ้าข้อมูลผิดพลาด')
-                //                     ->label('ชื่อบัญชี'),
-                //                 TextInput::make('bank_name')
-                //                     ->placeholder('กรอกหรือแก้ไข้ชื่อบัญชีธนาคาร')
-                //                     ->label('ชื่อธนาคาร'),
-                //                 TextInput::make('bank_id')
-                //                     ->label('เลขที่บัญชี')
-                //                     ->placeholder('กรอกหรือแก้ไขเลขที่บัญชีธนาคาร'),
-                //             ]),
-                //         FileUpload::make('bookbank')
-                //             //->pdfPreviewHeight(400) // Customize preview height
-                //             // ->pdfDisplayPage(1) // Set default page
-                //             // ->pdfToolbar(true) // Enable toolbar
-                //             // ->pdfZoomLevel(100) // Set zoom level
-                //             // ->pdfFitType(PdfViewFit::FIT) // Set fit type
-                //             // ->pdfNavPanes(true) // Enable navigation panes
-                //             ->label('เลือกไฟล์')
-                //             ->openable()
-                //             ->deletable(false)
-                //             ->multiple()
-                //             ->disabled()
-                //             //->panelLayout('grid')
-                //             //->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
-                //             ->disk('public')
-                //                ->dehydrated(false)
-                //             ->directory('emp_files')
-                //             ->getUploadedFileNameForStorageUsing(function (TemporaryUploadedFile $file, $component, $state) {
-                //
-                //                 $i = mt_rand(1000, 9000);
-                //                 $extension = $file->getClientOriginalExtension();
-                //                 $userEmail = auth()->user()->email;
-                //                 return "{$userEmail}/$component->getName().{$extension}";
-                //             })
-                //             ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
-                //             ->afterStateHydrated(function ($component, $state) {
-                //                 $user = auth()->user();
-                //                 $doc = $user->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
-                //                 $component->state($doc ? $doc->path : null);
-                //             })
-                //             ->hidden(function ($component, $record) {
-                //                 $doc = $record->userHasmanyDocEmp()->where('file_name', $component->getName())->first();
-                //                 return $doc ? 0 : 1;
-                //             })
-                //     ]),

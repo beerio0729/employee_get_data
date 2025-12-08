@@ -15,6 +15,7 @@ use App\Models\Bookbank;
 use App\Models\Military;
 use App\Models\AnotherDoc;
 use App\Models\Transcript;
+use App\Models\Certificate;
 use App\Models\Resume\Resume;
 use App\Models\AdditionalInfo;
 use App\Models\Resume\ResumeSkills;
@@ -48,6 +49,9 @@ class User extends Authenticatable
         'name',
         'role_id',
         'email',
+        'tel',
+        'provider',
+        'provider_id',
         'password',
     ];
 
@@ -160,6 +164,16 @@ class User extends Authenticatable
     {
         return $this->hasOne(Marital::class, 'user_id', 'id');
     }
+    
+    public function userHasoneAdditionalInfo() 
+    {
+        return $this->hasOne(AdditionalInfo::class, 'user_id', 'id')->withDefault();
+    }
+    
+    public function userHasoneCertificate() 
+    {
+        return $this->hasOne(Certificate::class, 'user_id', 'id')->withDefault();
+    }
 
     public function userHasmanyAnotherDoc() //เอกสารเพิ่มเติม
     {
@@ -186,11 +200,6 @@ class User extends Authenticatable
     public function userHasoneSibling() 
     {
         return $this->hasOne(Sibling::class, 'user_id', 'id')->withDefault();
-    }
-    
-    public function userHasoneAdditionalInfo() 
-    {
-        return $this->hasOne(AdditionalInfo::class, 'user_id', 'id')->withDefault();
     }
 
 

@@ -30,6 +30,8 @@ $maleCount = collect($sibling)->where('gender', 'male')->count();
 $femaleCount = collect($sibling)->where('gender', 'female')->count();
 
 $additional = $user->userHasoneAdditionalInfo;
+$cert = $user->userHasoneCertificate?->data;
+
 @endphp
 
 
@@ -53,6 +55,13 @@ $additional = $user->userHasoneAdditionalInfo;
             padding: 0;
             -webkit-print-color-adjust: exact;
             /* รักษาสีพื้นหลังในการพิมพ์ */
+        }
+
+        @media print {
+            .page-break {
+                page-break-after: always;
+                /* หรือ break-after: page; */
+            }
         }
 
         .fa-file-pdf-o {
@@ -757,7 +766,7 @@ $additional = $user->userHasoneAdditionalInfo;
                     <span class="flex-label-inner">Mobile No.</span>
                 </div>
                 <div class="flex-cell flex-input-inner">
-                    <span class="data-fill">{{$resume?->tel}}</span>
+                    <span class="data-fill">{{$user->tel}}</span>
                 </div>
                 <div class="flex-cell cell2">
                     <span class="flex-label-inner">Home Tel No.</span>
@@ -1095,7 +1104,8 @@ $additional = $user->userHasoneAdditionalInfo;
             @endif
         </table>
 
-
+        <div class="page-break"></div>
+        
         <!---------------EDUCATION BACKGROUND--------------->
 
         <div class="section-header">
@@ -1186,6 +1196,35 @@ $additional = $user->userHasoneAdditionalInfo;
                     </td>
                 </tr>
             </tbody>
+            @endif
+        </table>
+
+
+        <!----------TRAINING / SEMINAR------------->
+        @if (!blank($cert))
+        <div class="section-header">
+            <span>TRAINING / SEMINAR</span>
+        </div>
+        <table class="normal-table">
+            <thead>
+                <tr>
+                    <th rowspan="2">Year</th>
+                    <th rowspan="2">Duration</th>
+                    <th rowspan="2">Courses / Seminars</th>
+                    <th rowspan="2">Organizers / Companies / Institutes</th>
+                </tr>
+                <tr></tr>
+            </thead>
+            @foreach ($cert as $item)
+            <tbody>
+                <tr>
+                    <td class="sub-tr">{{ $item['date'] ? Carbon::parse($item['date'])->format('d /m /Y') : '-' }}</td>
+                    <td class="sub-tr">{{$item['duration'] ?? '-'}}</td>
+                    <td class="sub-tr">{{$item['name'] ?? '-'}}</td>
+                    <td class="sub-tr">{{$item['institutes'] ?? '-'}}</td>
+                </tr>
+            </tbody>
+            @endforeach
             @endif
         </table>
 
@@ -1459,7 +1498,8 @@ $additional = $user->userHasoneAdditionalInfo;
             <div>
             </div>
         </div>
-        <div class='con-data-text'>
+        <div class="page-break"></div>
+        <div class='con-data-text' style="border-top: 1px solid #5e5e5e;">
             <div class="flex-label-inner">Additional applicant information that may support the company’s selection process : </div>
             <div class="additional_info">{{$additional?->additional_info}}</div>
             <div style="word-wrap: break-word; margin-top: 15px;">
@@ -1487,11 +1527,8 @@ $additional = $user->userHasoneAdditionalInfo;
     <!----------Java Script------------->
     <script>
         function downloadPdf() {
-
             document.getElementById('button').style.display = "none";
-
             window.print()
-
             window.location.reload();
         }
     </script>

@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\Login;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Pages\Dashboard;
@@ -38,11 +39,9 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->font('Noto Sans Thai')
             ->path('/')
-            ->login()
+            ->login(Login::class)
             ->profile(EditProfile::class)
             ->registration(Register::class)
-            ->databaseNotifications()
-            //->databaseNotificationsPolling('3s')
             ->colors([
                 'primary' => Color::Amber,
             ])

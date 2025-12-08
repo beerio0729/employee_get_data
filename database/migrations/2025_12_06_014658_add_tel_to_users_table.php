@@ -11,11 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('certificates', function (Blueprint $table) {
-            $table->id();
-            $table->foreignID('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->json('data')->nullable();
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('provider')->nullable()->after('tel');
+            $table->string('provider_id')->nullable()->unique()->after('provider');
         });
     }
 
@@ -24,6 +22,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('certificates');
+        Schema::table('users', function (Blueprint $table) {
+        });
     }
 };
