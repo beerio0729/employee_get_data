@@ -102,7 +102,7 @@ $cert = $user->userHasoneCertificate?->data;
             justify-content: space-between;
             align-items: flex-start;
             width: 100%;
-            margin-bottom: 5px;
+            margin-bottom: 30px;
             position: relative;
             /* สำหรับตำแหน่ง "อนุมัติจากบุคคล" */
         }
@@ -1435,6 +1435,7 @@ $cert = $user->userHasoneCertificate?->data;
                 <span class="data-fill">{{$additional?->worked_company_supervisor}}</span>
                 <span class="flex-label-inner">Please identify : </span>
                 <span class="data-fill">{{$additional?->worked_company_detail}}</span>
+                <br>
                 <span class="flex-label-inner">Do you know anyone in the company? : </span>
                 <span class="input-col checkbox-item">
                     <span class="data-checkbox">

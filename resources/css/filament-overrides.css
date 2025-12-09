@@ -15,17 +15,30 @@
 input.fi-input:where(.dark, .dark *):disabled,
 .fi-fo-date-time-picker .fi-fo-date-time-picker-display-text-input:where(.dark, .dark *):disabled,
 select.fi-select-input:where(.dark, .dark *):disabled,
-.fi-fo-textarea textarea:where(.dark,.dark *):disabled
-{
+.fi-fo-textarea textarea:where(.dark, .dark *):disabled {
     color: #fff;
     -webkit-text-fill-color: #fff;
 }
 
-input[type=radio].fi-radio-input:where(.dark,.dark *):disabled:checked {
+input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
     background-color: var(--primary-400);
 }
 
 .fi-select-input .fi-disabled {
     cursor: not-allowed;
     opacity: 1;
+}
+
+.fi-simple-header {
+    flex-direction: column;
+    align-items: center;
+    display: flex;
+    margin-top: 35px;
+}
+
+.fi-sc.fi-inline {
+    flex-wrap: nowrap;
+    flex-grow: 1;
+    align-items: flex-start;
+    display: flex;
 }

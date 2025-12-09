@@ -1,6 +1,6 @@
 <x-filament::widget>
     <x-filament::card>
-        <livewire:user-livewire />
+        <livewire:upload-all-doc-livewire />
     </x-filament::card>
 </x-filament::widget>
 

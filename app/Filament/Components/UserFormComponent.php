@@ -27,11 +27,13 @@ use Filament\Schemas\Components\Utilities\Set;
 class UserFormComponent
 {
     public bool $isMobile;
+    public bool $isAndroidOS;
 
     public function __construct()
     {
         $detect = new MobileDetect();
         $this->isMobile = $detect->isMobile();
+        $this->isAndroidOS = $detect->isAndroidOS();
     }
 
     public function fieldsteLabel($state)
@@ -549,7 +551,7 @@ class UserFormComponent
             Repeater::make('transcripts')
             ->addable(false)
             ->columns(3)
-            ->label('ข้อมูลวุฒิการศึกษาของท่าน คลิกเพื่อเปิดอ่านข้อมูล')
+            ->label('ข้อมูลวุฒิการศึกษาของท่าน')
             ->itemLabel(fn(array $state): ?string => $state['degree'] ?? null)
             ->collapsed()
             ->compact()
