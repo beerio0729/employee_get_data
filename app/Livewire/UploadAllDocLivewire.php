@@ -60,7 +60,7 @@ class UploadAllDocLivewire extends Component implements HasActions, HasSchemas
         return (new ActionFormComponent())->certificateAction();
     }
 
-    public function anotherDoc(): Action
+    public function another(): Action
     {
         return (new ActionFormComponent())->anotherDocAction();
     }

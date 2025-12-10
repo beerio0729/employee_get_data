@@ -10,6 +10,7 @@ use App\Jobs\ProcessEmpDocJob;
 use Filament\Support\Enums\Size;
 use Filament\Actions\ActionGroup;
 use Filament\Support\Enums\Width;
+use App\Events\ProcessEmpDocEvent;
 use Filament\Actions\DeleteAction;
 use Illuminate\Support\HtmlString;
 use App\Jobs\ProcessNoJsonEmpDocJob;
@@ -48,22 +49,11 @@ class ActionFormComponent
     public bool $isSubmitDisabledFromConfirm = true;
     public bool $isMobile;
     public bool $isAndroidOS;
-
     public function __construct()
     {
         $detect = new MobileDetect();
         $this->isMobile = $detect->isMobile();
         $this->isAndroidOS = $detect->isAndroidOS();
-    }
-
-    public function updateStateInFile($value)
-    {
-        $this->isSubmitDisabledFromFile = $value; // Disable if blank
-    }
-
-    public function updateStateInConfirm($value)
-    {   //dump(!$value);
-        $this->isSubmitDisabledFromConfirm = !$value;
     }
 
     public function getDocEmp($record, $action)
@@ -83,9 +73,9 @@ class ActionFormComponent
             ->closeModalByClickingAway(false)
             ->modalSubmitAction(function ($action) {
                 $action->disabled(
-                    fn(): bool => (
-                        $this->isSubmitDisabledFromFile || $this->isSubmitDisabledFromConfirm
-                    )
+                    function () {
+                        return $this->isSubmitDisabledFromFile || $this->isSubmitDisabledFromConfirm;
+                    }
                 );
             })
             ->modalSubmitActionLabel('อับโหลดรูปโปรไฟล์')
@@ -119,12 +109,12 @@ class ActionFormComponent
                             return "{$record->id}/{$action->getName()}_{$i}.{$extension}";
                         })
                         ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
-                        ->afterStateUpdated(function (Set $set, $state) {
+                        ->afterStateUpdated(function ($set, $state, $get) {
                             $set('confirm', 0);
-                            $this->updateStateInFile(blank($state));
+                            $this->isSubmitDisabledFromFile = blank($state);
                         })
                         ->afterStateHydrated(function () {
-                            $this->updateStateInFile(true);
+                            $this->isSubmitDisabledFromFile = true;
                         })
                         ->deleteUploadedFileUsing(function ($record) use ($action) {
                             $doc = $this->getDocEmp($record, $action)->first();
@@ -137,11 +127,11 @@ class ActionFormComponent
                     Toggle::make('confirm')
                         ->label(new HtmlString($this->confirm))
                         ->accepted()
-                        ->live()
+                        ->reactive()
                         ->afterStateHydrated(function () {
-                            $this->updateStateInConfirm(false);
+                            $this->isSubmitDisabledFromConfirm = true;
                         })
-                        ->default(false)
+                        ->default(0)
                         ->validationMessages([
                             'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
                         ])
@@ -150,8 +140,9 @@ class ActionFormComponent
                             $doc = $this->getDocEmp($record, $action)->first();
                             return !blank($doc) ? 1 : 0;
                         })
-                        ->afterStateUpdated(function ($state) {
-                            $this->updateStateInConfirm($state);
+                        ->afterStateUpdated(function ($state, $get) {
+                            $this->isSubmitDisabledFromConfirm = !$state;
+                            $this->isSubmitDisabledFromFile = blank($get('image_profile'));
                         }),
 
                 ];
@@ -266,11 +257,8 @@ class ActionFormComponent
                         ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                         ->afterStateUpdated(function (Set $set, $state) {
                             $set('confirm', 0);
-                            $this->updateStateInFile(blank($state));
                         })
-                        ->afterStateHydrated(function () {
-                            $this->updateStateInFile(true);
-                        })
+
                         ->deleteUploadedFileUsing(function ($record, $livewire) use ($action) {
                             $record->userHasoneIdcard()->delete();
                             $doc = $this->getDocEmp($record, $action)->first();
@@ -285,9 +273,7 @@ class ActionFormComponent
                         ->label(new HtmlString($this->confirm))
                         ->accepted()
                         ->live()
-                        ->afterStateHydrated(function () {
-                            $this->updateStateInConfirm(false);
-                        })
+
                         ->default(false)
                         ->validationMessages([
                             'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
@@ -297,10 +283,6 @@ class ActionFormComponent
                             $doc = $this->getDocEmp($record, $action)->first();
                             return !blank($doc) ? 1 : 0;
                         })
-                        ->afterStateUpdated(function ($state) {
-                            $this->updateStateInConfirm($state);
-                        }),
-
                 ];
             })
             ->fillForm(function ($action, $record): array {
@@ -426,11 +408,8 @@ class ActionFormComponent
                         ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                         ->afterStateUpdated(function (Set $set, $state) {
                             $set('confirm', 0);
-                            $this->updateStateInFile(blank($state));
                         })
-                        ->afterStateHydrated(function () {
-                            $this->updateStateInFile(true);
-                        })
+
                         ->deleteUploadedFileUsing(function ($record, $livewire) use ($action) {
 
                             $doc = $this->getDocEmp($record, $action)->first();
@@ -446,9 +425,7 @@ class ActionFormComponent
                         ->label(new HtmlString($this->confirm))
                         ->accepted()
                         ->live()
-                        ->afterStateHydrated(function () {
-                            $this->updateStateInConfirm(false);
-                        })
+
                         ->default(false)
                         ->validationMessages([
                             'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
@@ -458,9 +435,7 @@ class ActionFormComponent
                             $doc = $this->getDocEmp($record, $action)->first();
                             return !blank($doc) ? 1 : 0;
                         })
-                        ->afterStateUpdated(function ($state) {
-                            $this->updateStateInConfirm($state);
-                        }),
+
                 ];
             })
             ->fillForm(function ($action, $record): array {
@@ -598,11 +573,8 @@ class ActionFormComponent
                         ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                         ->afterStateUpdated(function (Set $set, $state) {
                             $set('confirm', 0);
-                            $this->updateStateInFile(blank($state));
                         })
-                        ->afterStateHydrated(function () {
-                            $this->updateStateInFile(true);
-                        })
+
                         ->deleteUploadedFileUsing(function ($state, $record, $livewire) use ($action) {
 
                             $doc = $this->getDocEmp($record, $action)->first();
@@ -630,24 +602,16 @@ class ActionFormComponent
                                 $doc_transcript->delete();
                             }
                             $livewire->dispatch('refreshActionModal', id: $action->getName());
-                            $this->updateStateInConfirm(true);
                         }),
                     Toggle::make('confirm')
                         ->label(new HtmlString($this->confirm))
                         ->accepted()
                         ->live()
-                        ->afterStateHydrated(function () {
-                            $this->updateStateInConfirm(false);
-                        })
+
                         ->default(false)
                         ->validationMessages([
                             'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
                         ])
-
-                        ->afterStateUpdated(function ($state) {
-                            $this->updateStateInConfirm($state);
-                        }),
-
                 ];
             })
             ->fillForm(function ($action, $record): array {
@@ -779,11 +743,8 @@ class ActionFormComponent
                         ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                         ->afterStateUpdated(function (Set $set, $state) {
                             $set('confirm', 0);
-                            $this->updateStateInFile(blank($state));
                         })
-                        ->afterStateHydrated(function () {
-                            $this->updateStateInFile(true);
-                        })
+
                         ->deleteUploadedFileUsing(function ($record, $livewire) use ($action) {
                             $record->userHasoneMilitary()->delete();
                             $doc = $this->getDocEmp($record, $action)->first();
@@ -798,9 +759,7 @@ class ActionFormComponent
                         ->label(new HtmlString($this->confirm))
                         ->accepted()
                         ->live()
-                        ->afterStateHydrated(function () {
-                            $this->updateStateInConfirm(false);
-                        })
+
                         ->default(false)
                         ->validationMessages([
                             'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
@@ -810,10 +769,6 @@ class ActionFormComponent
                             $doc = $this->getDocEmp($record, $action)->first();
                             return !blank($doc) ? 1 : 0;
                         })
-                        ->afterStateUpdated(function ($state) {
-                            $this->updateStateInConfirm($state);
-                        }),
-
                 ];
             })
             ->fillForm(function ($action, $record): array {
@@ -939,11 +894,8 @@ class ActionFormComponent
                         ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                         ->afterStateUpdated(function (Set $set, $state) {
                             $set('confirm', 0);
-                            $this->updateStateInFile(blank($state));
                         })
-                        ->afterStateHydrated(function () {
-                            $this->updateStateInFile(true);
-                        })
+
                         ->deleteUploadedFileUsing(function ($record, $livewire) use ($action) {
                             $record->userHasoneMarital()->delete();
                             $doc = $this->getDocEmp($record, $action)->first();
@@ -958,9 +910,6 @@ class ActionFormComponent
                         ->label(new HtmlString($this->confirm))
                         ->accepted()
                         ->live()
-                        ->afterStateHydrated(function () {
-                            $this->updateStateInConfirm(false);
-                        })
                         ->default(false)
                         ->validationMessages([
                             'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
@@ -970,10 +919,6 @@ class ActionFormComponent
                             $doc = $this->getDocEmp($record, $action)->first();
                             return !blank($doc) ? 1 : 0;
                         })
-                        ->afterStateUpdated(function ($state) {
-                            $this->updateStateInConfirm($state);
-                        }),
-
                 ];
             })
             ->fillForm(function ($action, $record): array {
@@ -1107,13 +1052,8 @@ class ActionFormComponent
                         ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                         ->afterStateUpdated(function (Set $set, $state) {
                             $set('confirm', 0);
-                            $this->updateStateInFile(blank($state));
-                        })
-                        ->afterStateHydrated(function () {
-                            $this->updateStateInFile(true);
                         })
                         ->deleteUploadedFileUsing(function ($state, $record, $livewire) use ($action) {
-
                             $doc = $this->getDocEmp($record, $action)->first();
                             $path = $doc->path;
 
@@ -1139,24 +1079,16 @@ class ActionFormComponent
                                 $doc_transcript->delete();
                             }
                             $livewire->dispatch('refreshActionModal', id: $action->getName());
-                            $this->updateStateInConfirm(true);
                         }),
                     Toggle::make('confirm')
                         ->label(new HtmlString($this->confirm))
                         ->accepted()
                         ->live()
-                        ->afterStateHydrated(function () {
-                            $this->updateStateInConfirm(false);
-                        })
+
                         ->default(false)
                         ->validationMessages([
                             'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
                         ])
-
-                        ->afterStateUpdated(function ($state) {
-                            $this->updateStateInConfirm($state);
-                        }),
-
                 ];
             })
             ->fillForm(function ($action, $record): array {
@@ -1283,11 +1215,8 @@ class ActionFormComponent
                         ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                         ->afterStateUpdated(function (Set $set, $state) {
                             $set('confirm', 0);
-                            $this->updateStateInFile(blank($state));
                         })
-                        ->afterStateHydrated(function () {
-                            $this->updateStateInFile(true);
-                        })
+
                         ->deleteUploadedFileUsing(function ($state, $record, $livewire) use ($action) {
                             $doc = $this->getDocEmp($record, $action)->first();
                             $path = $doc->path;
@@ -1315,24 +1244,16 @@ class ActionFormComponent
                                 $doc_another->delete();
                             }
                             $livewire->dispatch('refreshActionModal', id: $action->getName());
-                            $this->updateStateInConfirm(true);
                         }),
                     Toggle::make('confirm')
                         ->label(new HtmlString($this->confirm))
                         ->accepted()
                         ->live()
-                        ->afterStateHydrated(function () {
-                            $this->updateStateInConfirm(false);
-                        })
+
                         ->default(false)
                         ->validationMessages([
                             'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
                         ])
-
-                        ->afterStateUpdated(function ($state) {
-                            $this->updateStateInConfirm($state);
-                        }),
-
                 ];
             })
             ->fillForm(function ($action, $record): array {
@@ -1505,6 +1426,56 @@ class ActionFormComponent
             });
     }
 
+    public function downloadPDFAction(): Action
+    {
+        return
+            Action::make('pdf')
+            ->record(auth()->user())
+            ->hidden(fn() => $this->isMobile ? 1 : 0)
+            ->label('ดาวน์โหลดใบสมัคร')
+            ->icon('heroicon-m-document-arrow-down')
+            ->color('info')
+            ->url(fn() =>
+            blank($this->checkDocDownloaded()['upload']) &&
+                blank($this->checkDocDownloaded()['input'])
+                ? '/pdf'
+                : null)
+            ->action(function ($record) {
+                $missing = $this->checkDocDownloaded();
+                $parts = [];
+
+                $hasUpload = !blank($missing['upload']);
+                $hasInput  = !blank($missing['input']);
+
+                if ($hasUpload) {
+                    $parts[] = 'คุณยังไม่ได้อัปโหลดเอกสาร: <br>"' . implode(', ', $missing['upload']) . '"';
+                }
+
+                if ($hasInput) {
+                    $parts[] = 'คุณยังไม่ได้กรอกข้อมูลเพิ่มเติมในหัวข้อ: <br>"' . implode(', ', $missing['input']) . '"';
+                }
+
+                // ประโยคปิดท้าย
+                if ($hasUpload && $hasInput) {
+                    $ending = 'กรุณาอัปโหลดเอกสาร และ กรอกข้อมูลดังกล่าว<br>ก่อนดาวน์โหลดใบสมัคร';
+                    $msg = implode('<br><br>', $parts) . '<br><br>' . $ending;
+                    event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
+                }
+                if ($hasUpload) {
+                    $ending = 'กรุณาอัปโหลดเอกสารก่อนดาวน์โหลดใบสมัคร';
+                    $msg = implode('<br><br>', $parts) . '<br><br>' . $ending;
+                    event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
+                }
+                if ($hasInput) {
+                    $ending = 'กรุณากรอกข้อมูลดังกล่าวก่อนดาวน์โหลดใบสมัคร';
+                    $msg = implode('<br><br>', $parts) . '<br><br>' . $ending;
+                    event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
+                }
+            })
+            ->openUrlInNewTab()
+            ->button();
+    }
+
 
     /**************สำหรับโทรศัพท์************* */
 
@@ -1525,6 +1496,7 @@ class ActionFormComponent
                 "
             ])
             ->icon('heroicon-m-user')
+            ->color('info')
             ->label('กรอกข้อมูลเพิ่มเติม')
             ->tooltip('ท่านจำเป็นต้องกรอกข้อมูลบางอย่างที่ไม่มีในเอกสารที่ท่านอับโหลด')
             ->modalSubmitActionLabel('อับเดตข้อมูล')
@@ -1592,4 +1564,101 @@ class ActionFormComponent
             });
     }
 
+    public function downloadPDFForPhoneAction(): Action
+    {
+        return
+            Action::make('pdf')
+            ->record(auth()->user())
+            ->label('ดาวน์โหลดใบสมัคร')
+            ->icon(new HtmlString('
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="#ffffff" d="M208 48L96 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l80 0 0 48-80 0c-35.3 0-64-28.7-64-64L32 64C32 28.7 60.7 0 96 0L229.5 0c17 0 33.3 6.7 45.3 18.7L397.3 141.3c12 12 18.7 28.3 18.7 45.3l0 149.5-48 0 0-128-88 0c-39.8 0-72-32.2-72-72l0-88zM348.1 160L256 67.9 256 136c0 13.3 10.7 24 24 24l68.1 0zM240 380l32 0c33.1 0 60 26.9 60 60s-26.9 60-60 60l-12 0 0 28c0 11-9 20-20 20s-20-9-20-20l0-128c0-11 9-20 20-20zm32 80c11 0 20-9 20-20s-9-20-20-20l-12 0 0 40 12 0zm96-80l32 0c28.7 0 52 23.3 52 52l0 64c0 28.7-23.3 52-52 52l-32 0c-11 0-20-9-20-20l0-128c0-11 9-20 20-20zm32 128c6.6 0 12-5.4 12-12l0-64c0-6.6-5.4-12-12-12l-12 0 0 88 12 0zm76-108c0-11 9-20 20-20l48 0c11 0 20 9 20 20s-9 20-20 20l-28 0 0 24 28 0c11 0 20 9 20 20s-9 20-20 20l-28 0 0 44c0 11-9 20-20 20s-20-9-20-20l0-128z"/></svg>
+            '))
+            ->size(Size::ExtraLarge)
+            ->iconSize('xl')
+            ->extraAttributes([
+                'style' => "
+                width: 100%;
+                font-size: 1.2rem;
+                "
+            ])
+            ->color('danger')
+            ->url(fn() =>
+            blank($this->checkDocDownloaded()['upload']) &&
+                blank($this->checkDocDownloaded()['input'])
+                ? '/pdf'
+                : null)
+            ->action(function ($record) {
+                $missing = $this->checkDocDownloaded();
+                $parts = [];
+
+                $hasUpload = !blank($missing['upload']);
+                $hasInput  = !blank($missing['input']);
+
+                if ($hasUpload) {
+                    $parts[] = 'คุณยังไม่ได้อัปโหลดเอกสาร: <br>"' . implode(', ', $missing['upload']) . '"';
+                }
+
+                if ($hasInput) {
+                    $parts[] = 'คุณยังไม่ได้กรอกข้อมูลเพิ่มเติมในหัวข้อ: <br>"' . implode(', ', $missing['input']) . '"';
+                }
+
+                // ประโยคปิดท้าย
+                if ($hasUpload && $hasInput) {
+                    $ending = 'กรุณาอัปโหลดเอกสาร และ กรอกข้อมูลดังกล่าว<br>ก่อนดาวน์โหลดใบสมัคร';
+                    $msg = implode('<br><br>', $parts) . '<br><br>' . $ending;
+                    event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
+                }
+                if ($hasUpload) {
+                    $ending = 'กรุณาอัปโหลดเอกสารก่อนดาวน์โหลดใบสมัคร';
+                    $msg = implode('<br><br>', $parts) . '<br><br>' . $ending;
+                    event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
+                }
+                if ($hasInput) {
+                    $ending = 'กรุณากรอกข้อมูลดังกล่าวก่อนดาวน์โหลดใบสมัคร';
+                    $msg = implode('<br><br>', $parts) . '<br><br>' . $ending;
+                    event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
+                }
+            })
+            ->openUrlInNewTab();
+    }
+
+
+    /****************ฟังก์ชั่นพิเศษสำหรับเช็คว่าโหลดเอกสารหรือยัง***************** */
+    public function checkDocDownloaded()
+    {
+        $user = auth()->user();
+
+        // ดึง prefix จากบัตรประชาชน (ถ้ามี)
+        $prefix = $user->userHasoneIdcard?->prefix_name_en;
+        // ตรวจว่าเป็นผู้หญิงหรือไม่
+        $isFemale = in_array(trim(strtolower($prefix), "."), ['miss', 'mrs']);
+        $errorUplaod = [ //สำหรับเอกสารอับโหลด
+            'resume'        => $user->userHasoneResume()->exists(),
+            'บัตรประชาชน'   => $user->userHasoneIdcard()->exists(),
+            'วุฒิการศึกษา'   => $user->userHasmanyTranscript()->exists(),
+        ];
+
+        $additional = $user->userHasoneAdditionalInfo;
+
+        $errorInput = [ //สำหรับข้อมูลที่ต้องกรอกเอง
+            'บิดา' => blank($user->userHasoneFather->name),
+            'มารดา' => blank($user->userHasoneMother->name),
+            'ผู้ติดต่อยามฉุกเฉิน' => blank($additional->emergency_name),
+            'คำถามสุขภาพ' => blank($additional->medical_condition),
+            'คำถามเพิ่มเติม' => blank($additional->know_someone),
+        ];
+
+        // ใส่ใบเกณฑ์ทหารเฉพาะกรณี "ไม่ใช่ผู้หญิง"
+        if (!$isFemale) {
+            $errorUplaod['ใบเกณฑ์ทหาร'] = $user->userHasoneMilitary()->exists();
+        }
+
+        // หาเฉพาะรายการที่ยังไม่มีไฟล์
+        $missingUplaod = array_keys(array_filter($errorUplaod, fn($v) => $v === false));
+        $missingInput = array_keys(array_filter($errorInput, fn($v) => $v === true));
+        return [
+            'upload' => $missingUplaod,
+            'input' => $missingInput,
+        ];
+    }
 }

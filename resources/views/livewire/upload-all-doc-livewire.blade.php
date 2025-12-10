@@ -1,5 +1,6 @@
 @php
 use App\Filament\Components\ActionFormComponent;
+use Filament\Support\Colors\Color;
 @endphp
 
 <div>
@@ -12,12 +13,12 @@ use App\Filament\Components\ActionFormComponent;
             $this->military,
             $this->marital,
             $this->certificate,
-            $this->anotherDoc,
+            $this->another,
             ]"
         label="อับโหลดเอกสาร"
         tooltip="อับโหลดเอกสาร"
         icon="heroicon-m-document-arrow-up"
-        color="success"
+        color="warning"
         size="xl"
         iconSize="xl"
         dropdown-placement="top-start"
