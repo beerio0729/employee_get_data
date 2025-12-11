@@ -545,75 +545,84 @@ class UserFormComponent
             ]);
     }
 
-    public function transcriptComponent()
+    public function transcriptComponent($record, $namedoc)
     {
         return
-            Repeater::make('transcripts')
-            ->addable(false)
-            ->columns(3)
-            ->label('คลิกที่ชื่อวุฒิการศึกษาเพื่อดูข้อมูล')
-            ->itemLabel(fn(array $state): ?string => $state['degree'] ?? null)
+            Section::make('ข้อมูลวุฒิการศึกษา')
+            ->hidden(function () use ($record, $namedoc) {
+                $doc = $this->getDocEmp($record, $namedoc)->first();
+                return blank($doc) ? 1 : 0;
+            })
+            ->description('มีโอกาสที่ Ai จะอ่านข้อมูลผิดพลาด โปรดตรวจสอบข้อมูลให้ถูกต้องตามจริง')
             ->collapsed()
-            ->deletable(false)
-            ->live()
-            ->relationship('userHasmanyTranscript')
             ->schema([
-                TextInput::make('prefix_name')
-                    ->formatStateUsing(fn($state) => ucwords($state ?? ''))
-                    ->placeholder('ระบุคำนำหน้าชื่อ')
-                    ->label('ชื่อ'),
-                TextInput::make('name')
-                    ->formatStateUsing(fn($state) => ucwords($state ?? ''))
-                    ->placeholder('กรอกหรือแก้ไขชื่อจริงถ้าข้อมูลผิดพลาด')
-                    ->label('ชื่อ'),
-                TextInput::make('last_name')
-                    ->formatStateUsing(fn($state) => ucwords($state ?? ''))
-                    ->placeholder('กรอกหรือแก้ไขนามสกุลถ้าข้อมูลผิดพลาด')
-                    ->label('นามสกุล'),
-                TextInput::make('institution')
-                    ->formatStateUsing(fn($state) => ucwords($state ?? ''))
-                    ->label('สถาบัน/มหาวิทยาลัย')
-                    ->placeholder('กรอกชื่อสถาบันการศึกษา'),
-                TextInput::make('degree')
-                    ->formatStateUsing(fn($state) => ucwords($state ?? ''))
-                    ->label('ชื่อวุฒิการศึกษา')
-                    ->placeholder('เช่น วิศวกรรมศาสตรบัณฑิต หรือ ศิลปศาสตรมหาบัณฑิต'),
-                TextInput::make('education_level') // อาจพิจารณาใช้ Select::make() เพื่อให้เลือกจากตัวเลือกที่กำหนด (เช่น ปริญญาตรี, ปริญญาโท)
-                    ->formatStateUsing(fn($state) => ucwords($state ?? ''))
-                    ->label('ระดับการศึกษา')
-                    ->placeholder('เช่น ปริญญาตรี, ปริญญาโท, มัธยมศึกษาปีที่ 6'),
-                TextInput::make('faculty')
-                    ->formatStateUsing(fn($state) => ucwords($state ?? ''))
-                    ->label('คณะ')
-                    ->placeholder('กรอกชื่อคณะ'),
-                TextInput::make('major')
-                    ->formatStateUsing(fn($state) => ucwords($state ?? ''))
-                    ->label('สาขาวิชา')
-                    ->placeholder('กรอกชื่อสาขาวิชา'),
-                TextInput::make('minor')
-                    ->formatStateUsing(fn($state) => ucwords($state ?? ''))
-                    ->label('วิชาโท')
-                    ->placeholder('กรอกชื่อวิชาโท (หากไม่มีให้ว่างไว้)'),
-                DatePicker::make('date_of_admission')
-                    ->label('วันที่เข้ารับการศึกษา')
-                    ->placeholder('วันที่เข้ารับการศึกษา')
-                    ->native(false)
-                    ->displayFormat('d M Y')
-                    ->locale('th')
-                    ->buddhist(),
-                DatePicker::make('date_of_graduation')
-                    ->label('วันสำเร็จการศึกษา')
-                    ->placeholder('วันสำเร็จการศึกษา')
-                    ->native(false)
-                    ->displayFormat('d M Y')
-                    ->locale('th')
-                    ->buddhist(),
-                TextInput::make('gpa') // แนะนำให้ใช้ DecimalInput เพื่อควบคุมรูปแบบทศนิยม
-                    ->label('เกรดเฉลี่ย (GPA)')
-                    ->placeholder('กรอกเกรดเฉลี่ย (เช่น 3.50)')
-                    ->numeric()
-                    ->step(0.01) // ให้รับค่าทศนิยมสองตำแหน่ง
-                    ->maxValue(4.00), // กำหนดค่าสูงสุด
+                Repeater::make('transcripts')
+                    ->addable(false)
+                    ->columns(3)
+                    ->label('คลิกที่ชื่อวุฒิการศึกษาเพื่อดูข้อมูล')
+                    ->itemLabel(fn(array $state): ?string => $state['degree'] ?? null)
+                    ->collapsed()
+                    ->deletable(false)
+                    ->live()
+                    ->relationship('userHasmanyTranscript')
+                    ->schema([
+                        TextInput::make('prefix_name')
+                            ->formatStateUsing(fn($state) => ucwords($state ?? ''))
+                            ->placeholder('ระบุคำนำหน้าชื่อ')
+                            ->label('ชื่อ'),
+                        TextInput::make('name')
+                            ->formatStateUsing(fn($state) => ucwords($state ?? ''))
+                            ->placeholder('กรอกหรือแก้ไขชื่อจริงถ้าข้อมูลผิดพลาด')
+                            ->label('ชื่อ'),
+                        TextInput::make('last_name')
+                            ->formatStateUsing(fn($state) => ucwords($state ?? ''))
+                            ->placeholder('กรอกหรือแก้ไขนามสกุลถ้าข้อมูลผิดพลาด')
+                            ->label('นามสกุล'),
+                        TextInput::make('institution')
+                            ->formatStateUsing(fn($state) => ucwords($state ?? ''))
+                            ->label('สถาบัน/มหาวิทยาลัย')
+                            ->placeholder('กรอกชื่อสถาบันการศึกษา'),
+                        TextInput::make('degree')
+                            ->formatStateUsing(fn($state) => ucwords($state ?? ''))
+                            ->label('ชื่อวุฒิการศึกษา')
+                            ->placeholder('เช่น วิศวกรรมศาสตรบัณฑิต หรือ ศิลปศาสตรมหาบัณฑิต'),
+                        TextInput::make('education_level') // อาจพิจารณาใช้ Select::make() เพื่อให้เลือกจากตัวเลือกที่กำหนด (เช่น ปริญญาตรี, ปริญญาโท)
+                            ->formatStateUsing(fn($state) => ucwords($state ?? ''))
+                            ->label('ระดับการศึกษา')
+                            ->placeholder('เช่น ปริญญาตรี, ปริญญาโท, มัธยมศึกษาปีที่ 6'),
+                        TextInput::make('faculty')
+                            ->formatStateUsing(fn($state) => ucwords($state ?? ''))
+                            ->label('คณะ')
+                            ->placeholder('กรอกชื่อคณะ'),
+                        TextInput::make('major')
+                            ->formatStateUsing(fn($state) => ucwords($state ?? ''))
+                            ->label('สาขาวิชา')
+                            ->placeholder('กรอกชื่อสาขาวิชา'),
+                        TextInput::make('minor')
+                            ->formatStateUsing(fn($state) => ucwords($state ?? ''))
+                            ->label('วิชาโท')
+                            ->placeholder('กรอกชื่อวิชาโท (หากไม่มีให้ว่างไว้)'),
+                        DatePicker::make('date_of_admission')
+                            ->label('วันที่เข้ารับการศึกษา')
+                            ->placeholder('วันที่เข้ารับการศึกษา')
+                            ->native(false)
+                            ->displayFormat('d M Y')
+                            ->locale('th')
+                            ->buddhist(),
+                        DatePicker::make('date_of_graduation')
+                            ->label('วันสำเร็จการศึกษา')
+                            ->placeholder('วันสำเร็จการศึกษา')
+                            ->native(false)
+                            ->displayFormat('d M Y')
+                            ->locale('th')
+                            ->buddhist(),
+                        TextInput::make('gpa') // แนะนำให้ใช้ DecimalInput เพื่อควบคุมรูปแบบทศนิยม
+                            ->label('เกรดเฉลี่ย (GPA)')
+                            ->placeholder('กรอกเกรดเฉลี่ย (เช่น 3.50)')
+                            ->numeric()
+                            ->step(0.01) // ให้รับค่าทศนิยมสองตำแหน่ง
+                            ->maxValue(4.00), // กำหนดค่าสูงสุด
+                    ])
             ]);
     }
 
@@ -796,7 +805,7 @@ class UserFormComponent
                 $doc = $this->getDocEmp($record, $namedoc)->first();
                 return blank($doc) ? 1 : 0;
             })
-            ->description('มีโอกาสที่ Ai จะอ่านข้อมูล โปรดตรวจสอบข้อมูลให้ถูกต้องตามจริง')
+            ->description('มีโอกาสที่ Ai จะอ่านข้อมูลผิดพลาด โปรดตรวจสอบข้อมูลให้ถูกต้องตามจริง')
             ->columns(4)
             ->relationship('userHasoneCertificate')
             ->collapsed()
@@ -806,7 +815,7 @@ class UserFormComponent
                     ->columns(4)
                     ->hiddenLabel()
                     ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
-                    ->collapsible()
+                    ->collapsed()
                     ->columnSpanFull()
                     ->reorderable(false)
                     ->deletable(false)
@@ -832,42 +841,51 @@ class UserFormComponent
             ]);
     }
 
-    public function anotherDocComponent()
+    public function anotherDocComponent($record, $namedoc)
     {
         return
-            Repeater::make('anothers')
-            ->addable(false)
-            ->columns(3)
-            ->label('ข้อมูลเอกสารเพิ่มเติม')
-            ->itemLabel(fn(array $state): ?string => $state['doc_type'] ?? null)
+            Section::make('ข้อมูลเอกสารเพิ่มเติม')
+            ->hidden(function () use ($record, $namedoc) {
+                $doc = $this->getDocEmp($record, $namedoc)->first();
+                return blank($doc) ? 1 : 0;
+            })
+            ->description('มีโอกาสที่ Ai จะอ่านข้อมูลผิดพลาด โปรดตรวจสอบข้อมูลให้ถูกต้องตามจริง')
             ->collapsed()
-            ->compact()
-            ->deletable(false)
-            ->live()
-            ->relationship('userHasmanyAnotherDoc')
             ->schema([
-                TextInput::make('doc_type')
-                    ->label('ประเภทเอกสาร')
-                    ->placeholder('ประเภทเอกสาร'),
-                DatePicker::make('date_of_issue')
-                    ->label('วันออกเอกสาร')
-                    ->placeholder('วันออกเอกสาร')
-                    ->native(false)
-                    ->displayFormat('d M Y')
-                    ->locale('th')
-                    ->buddhist(),
-                DatePicker::make('ate_of_expiry')
-                    ->label('วันเอกสารหมดอายุ')
-                    ->placeholder('วันเอกสารหมดอายุ')
-                    ->native(false)
-                    ->displayFormat('d M Y')
-                    ->locale('th')
-                    ->buddhist(),
-                Textarea::make('data')
-                    ->label('รายละเอียด')
-                    ->autosize()
-                    ->trim()
-                    ->columnSpan(3),
+                Repeater::make('anothers')
+                    ->addable(false)
+                    ->columns(3)
+                    ->label('คลิกดูข้อมูลเอกสารเพิ่มเติม')
+                    ->itemLabel(fn(array $state): ?string => $state['doc_type'] ?? null)
+                    ->collapsed()
+                    ->compact()
+                    ->deletable(false)
+                    ->live()
+                    ->relationship('userHasmanyAnotherDoc')
+                    ->schema([
+                        TextInput::make('doc_type')
+                            ->label('ประเภทเอกสาร')
+                            ->placeholder('ประเภทเอกสาร'),
+                        DatePicker::make('date_of_issue')
+                            ->label('วันออกเอกสาร')
+                            ->placeholder('วันออกเอกสาร')
+                            ->native(false)
+                            ->displayFormat('d M Y')
+                            ->locale('th')
+                            ->buddhist(),
+                        DatePicker::make('ate_of_expiry')
+                            ->label('วันเอกสารหมดอายุ')
+                            ->placeholder('วันเอกสารหมดอายุ')
+                            ->native(false)
+                            ->displayFormat('d M Y')
+                            ->locale('th')
+                            ->buddhist(),
+                        Textarea::make('data')
+                            ->label('รายละเอียด')
+                            ->autosize()
+                            ->trim()
+                            ->columnSpan(3),
+                    ])
             ]);
     }
 

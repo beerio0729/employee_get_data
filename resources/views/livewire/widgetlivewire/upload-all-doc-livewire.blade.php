@@ -21,9 +21,8 @@ use Filament\Support\Colors\Color;
         color="warning"
         size="xl"
         iconSize="xl"
-        dropdown-placement="top-start"
+        dropdown-placement="bottom-end"
         button=true
-        dropdownPlacement='top-start'
         :extraAttributes="['style' => 'font-size: 1.2rem; width: 100%;']"
     />
     <x-filament-actions::modals />

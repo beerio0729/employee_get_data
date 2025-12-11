@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\WidgetLivewire;
 
 use Livewire\Component;
 use Filament\Actions\Action;
@@ -24,6 +24,6 @@ class DownLoadPDFLivewire extends Component implements HasActions, HasSchemas
 
     public function render()
     {
-        return view('livewire.download-pdf-livewire');
+        return view('livewire.widgetlivewire.download-pdf-livewire');
     }
 }

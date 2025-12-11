@@ -92,7 +92,7 @@ class ActionFormComponent
                         ->removeUploadedFileButtonPosition('right')
                         ->openable()
                         ->label('อับโหลด' . $action->getLabel())
-                        ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
+                        ->visibility('public')
                         ->disk('public')
                         ->directory('emp_files')
                         ->required()
@@ -537,7 +537,6 @@ class ActionFormComponent
                     (new UserFormComponent())->transcriptComponent($record, $action->getName()),
                     AdvancedFileUpload::make($action->getName())
                         ->removeUploadedFileButtonPosition('right')
-                        ->appendFiles()
                         ->openable()
                         ->previewable(function () {
                             return $this->isAndroidOS ? 0 : 1;
@@ -550,6 +549,8 @@ class ActionFormComponent
                         ->disk('public')
                         ->directory('emp_files')
                         ->multiple()
+                        ->maxSize(3072)
+                        ->maxParallelUploads(1)
                         ->belowContent([
                             Icon::make(Heroicon::Star),
                             "อับโหลดได้มากกว่า 1 {$action->getLabel()}",
@@ -607,7 +608,6 @@ class ActionFormComponent
                         ->label(new HtmlString($this->confirm))
                         ->accepted()
                         ->live()
-
                         ->default(false)
                         ->validationMessages([
                             'accepted' => 'กรุณากดยืนยันก่อนส่งเอกสาร',
@@ -628,7 +628,7 @@ class ActionFormComponent
                 $user = auth()->user();
                 $doc = $user->userHasmanyDocEmp()->where('file_name', $action->getName())->first();
                 $fileForSend = array_values(array_diff($data[$action->getName()], $doc->path ?? []));
-
+                
                 if ($doc?->path === $data[$action->getName()]) {
                     Notification::make()
                         ->title('แก้ไขข้อมูลเรียบร้อยแล้ว')
@@ -647,7 +647,7 @@ class ActionFormComponent
                     );
 
                     ProcessNoJsonEmpDocJob::dispatch(
-                        $fileForSend,
+                        array_reverse($fileForSend),
                         $user,
                         $action->getName(),
                         $action->getLabel()
@@ -720,7 +720,6 @@ class ActionFormComponent
                     (new UserFormComponent())->militaryComponent($record, $action->getName()),
                     AdvancedFileUpload::make($action->getName())
                         ->removeUploadedFileButtonPosition('right')
-                        ->appendFiles()
                         ->openable()
                         ->previewable(function () {
                             return $this->isAndroidOS ? 0 : 1;
@@ -871,7 +870,6 @@ class ActionFormComponent
                     (new UserFormComponent())->maritalComponent(),
                     AdvancedFileUpload::make($action->getName())
                         ->removeUploadedFileButtonPosition('right')
-                        ->appendFiles()
                         ->openable()
                         ->previewable(function () {
                             return $this->isAndroidOS ? 0 : 1;
@@ -1025,7 +1023,6 @@ class ActionFormComponent
                     (new UserFormComponent())->certificateComponent($record, $action->getName()),
                     AdvancedFileUpload::make($action->getName())
                         ->removeUploadedFileButtonPosition('right')
-                        ->appendFiles()
                         ->openable()
                         ->previewable(function () {
                             return $this->isAndroidOS ? 0 : 1;
@@ -1038,6 +1035,8 @@ class ActionFormComponent
                         ->disk('public')
                         ->directory('emp_files')
                         ->multiple()
+                        ->maxSize(3072)
+                        ->maxParallelUploads(1)
                         ->belowLabel([Icon::make(Heroicon::Star), 'อับโหลดได้มากกว่า 1 ' . $action->getLabel()])
                         ->required()
                         ->validationMessages([
@@ -1072,11 +1071,11 @@ class ActionFormComponent
                                 Storage::disk('public')->delete($path);
                                 $doc->delete();
                             }
-                            $doc_transcript = $record->userHasmanyTranscript()
+                            $doc_certificate = $record->userHasoneCertificate()
                                 ->where('file_path', $fileDelete[0])
                                 ->first();
-                            if (!blank($doc_transcript)) {
-                                $doc_transcript->delete();
+                            if (!blank($doc_certificate)) {
+                                $doc_certificate->delete();
                             }
                             $livewire->dispatch('refreshActionModal', id: $action->getName());
                         }),
@@ -1105,7 +1104,7 @@ class ActionFormComponent
                 $user = auth()->user();
                 $doc = $user->userHasmanyDocEmp()->where('file_name', $action->getName())->first();
                 $fileForSend = array_values(array_diff($data[$action->getName()], $doc->path ?? []));
-
+                
                 if ($doc?->path === $data[$action->getName()]) {
                     Notification::make()
                         ->title('แก้ไขข้อมูลเรียบร้อยแล้ว')
@@ -1124,7 +1123,7 @@ class ActionFormComponent
                     );
 
                     ProcessNoJsonEmpDocJob::dispatch(
-                        $fileForSend,
+                        array_reverse($fileForSend),
                         $user,
                         $action->getName(),
                         $action->getLabel()
@@ -1146,7 +1145,7 @@ class ActionFormComponent
                             ->modalSubmitActionLabel('ยืนยันการเคลียร์ข้อมูล')
                             ->action(function ($record, $action, $livewire) {
                                 $doc = $this->getDocEmp($record, $action)->first();
-                                $record->userHasmanyTranscript()->delete();
+                                $record->userHasoneCertificate()->delete();
                                 if (!blank($doc)) {
                                     Storage::disk('public')->delete($doc->path);
                                     $doc->delete();
@@ -1188,20 +1187,24 @@ class ActionFormComponent
                 : 'warning')
             ->schema(function ($action, $record) {
                 return [
-                    (new UserFormComponent())->AnotherDocComponent(),
+                    (new UserFormComponent())->AnotherDocComponent($record, $action->getName()),
                     AdvancedFileUpload::make($action->getName())
                         ->removeUploadedFileButtonPosition('right')
-                        ->appendFiles()
                         ->openable()
                         ->label('อับโหลด' . $action->getLabel())
                         ->visibility('public') // เพื่อให้โหลดภาพได้ถ้าเก็บใน public
                         ->disk('public')
                         ->directory('emp_files')
                         ->multiple()
+                        ->maxSize(3072)
+                        ->maxParallelUploads(1)
+                        ->required()
                         ->belowLabel([Icon::make(Heroicon::Star), 'อับโหลดได้มากกว่า 1 ' . $action->getLabel()])
-                        ->reorderable()
                         ->panelLayout(function () {
                             return $this->isMobile ? null : 'grid';
+                        })
+                        ->previewable(function () {
+                            return $this->isAndroidOS ? 0 : 1;
                         })
                         ->validationMessages([
                             'required' => 'คุณยังไม่ได้อับโหลดเอกสารใดๆ กรุณาอับโหลดไฟล์ก่อนส่ง',
@@ -1210,7 +1213,7 @@ class ActionFormComponent
                             $extension = $file->getClientOriginalExtension();
                             $name = $file->getClientOriginalName();
 
-                            return "{$record->id}/{$action->getName()}/{$name}.{$extension}";
+                            return "{$record->id}/{$action->getName()}/{$name}";
                         })
                         ->acceptedFileTypes(['application/pdf', 'image/jpeg', 'image/png'])
                         ->afterStateUpdated(function (Set $set, $state) {
@@ -1269,7 +1272,7 @@ class ActionFormComponent
                 $user = auth()->user();
                 $doc = $user->userHasmanyDocEmp()->where('file_name', $action->getName())->first();
                 $fileForSend = array_values(array_diff($data[$action->getName()], $doc->path ?? []));
-
+                
                 if ($doc?->path === $data[$action->getName()]) {
                     Notification::make()
                         ->title('แก้ไขข้อมูลเรียบร้อยแล้ว')
@@ -1286,9 +1289,8 @@ class ActionFormComponent
                             'confirm' => $data['confirm'],
                         ]
                     );
-
                     ProcessNoJsonEmpDocJob::dispatch(
-                        $fileForSend,
+                        array_reverse($fileForSend),
                         $user,
                         $action->getName(),
                         $action->getLabel()
@@ -1345,6 +1347,7 @@ class ActionFormComponent
             ->color('primary')
             ->button()
             ->dropdownWidth(Width::Full)
+            ->dropdownAutoPlacement()
             ->hidden(fn() => $this->isMobile ? 1 : 0)
         ;
     }
@@ -1497,7 +1500,7 @@ class ActionFormComponent
             ])
             ->icon('heroicon-m-user')
             ->color('info')
-            ->label('กรอกข้อมูลเพิ่มเติม')
+            ->label('ข้อมูลเพิ่มเติม')
             ->tooltip('ท่านจำเป็นต้องกรอกข้อมูลบางอย่างที่ไม่มีในเอกสารที่ท่านอับโหลด')
             ->modalSubmitActionLabel('อับเดตข้อมูล')
             ->modalWidth(Width::FiveExtraLarge)

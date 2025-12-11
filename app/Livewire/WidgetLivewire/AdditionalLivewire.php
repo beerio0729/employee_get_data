@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\WidgetLivewire;
 
 use Livewire\Component;
 use Filament\Actions\Action;
@@ -33,7 +33,7 @@ class AdditionalLivewire extends Component implements HasActions, HasSchemas
 
     public function render()
     {
-        return view('livewire.additional-livewire');
+        return view('livewire.widgetlivewire.additional-livewire');
     }
 
     /*****************เกี่ยวกับ Mount Action******************* */

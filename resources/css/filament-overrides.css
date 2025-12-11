@@ -10,7 +10,16 @@
     .fi-section:not(.fi-section-not-contained).fi-divided>.fi-section-content-ctn>.fi-section-content>* {
         padding-inline: calc(var(--spacing) * 3);
     }
+
+    /*******ระยะห่างของ widget******/
+    .fi-sc.fi-sc-has-gap {
+        gap: calc(var(--spacing) * 3);
+    }
 }
+
+
+
+/******************สิ้นสุดสำหรับจอมือถือ*******************/
 
 input.fi-input:where(.dark, .dark *):disabled,
 .fi-fo-date-time-picker .fi-fo-date-time-picker-display-text-input:where(.dark, .dark *):disabled,
@@ -41,4 +50,11 @@ input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
     flex-grow: 1;
     align-items: flex-start;
     display: flex;
+}
+
+.fi-topbar-ctn { /**ปรับให้ menubar ถอย z-index ให้อยู่ตำกว่า actiongroup dropdown**/
+    top: calc(var(--spacing) * 0);
+    z-index: 19;
+    position: sticky;
+    overflow-x: clip;
 }

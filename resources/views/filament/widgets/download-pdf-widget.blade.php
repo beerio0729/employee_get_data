@@ -1,5 +1,3 @@
 <x-filament-widgets::widget>
-    <x-filament::section>
-        <livewire:download-pdf-livewire>
-    </x-filament::section>
+    <livewire:widgetlivewire.download-pdf-livewire>
 </x-filament-widgets::widget>

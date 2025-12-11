@@ -1,5 +1,3 @@
 <x-filament-widgets::widget>
-    <x-filament::section>
-        <livewire:additional-livewire />
-    </x-filament::section>
+    <livewire:widgetlivewire.additional-livewire />
 </x-filament-widgets::widget>

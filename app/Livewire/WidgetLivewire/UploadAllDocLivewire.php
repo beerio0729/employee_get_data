@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\WidgetLivewire;
 
 use Livewire\Component;
 use Filament\Actions\Action;
@@ -82,6 +82,6 @@ class UploadAllDocLivewire extends Component implements HasActions, HasSchemas
     /**********************************************/
     public function render()
     {
-        return view('livewire.upload-all-doc-livewire');
+        return view('livewire.widgetlivewire.upload-all-doc-livewire');
     }
 }
