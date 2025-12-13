@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignID('role_id')->references('id')->on('roles')->onDelete('cascade');
             $table->string('name')->nullable();
-            $table->string('email')->unique();
+            $table->string('email')->nullable()->unique();
+            $table->string('tel')->nullable()->unique();
+            $table->string('provider')->nullable();
+            $table->string('provider_id')->nullable()->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
