@@ -104,8 +104,8 @@ class UserForm
                             ]),
                         Tab::make('วุฒิการศึกษา') //หลายเอกสาร
                             ->tabslug('transcript')
-                            ->schema(fn($component) => [
-                                (new UserFormComponent())->transcriptComponent(),
+                            ->schema(fn($record,$component) => [
+                                (new UserFormComponent())->transcriptComponent($record, $component->getCustomSlug()),
                                 AdvancedFileUpload::make($component->getCustomSlug())
                                     ->label('เลือกไฟล์')
                                     ->multiple()
@@ -224,8 +224,8 @@ class UserForm
                             ]),
                         Tab::make('เอกสารเพิ่มเติม') //หลายเอกสาร
                             ->tabslug('another')
-                            ->schema(fn($component) => [
-                                (new UserFormComponent())->anotherDocComponent(),
+                            ->schema(fn($record, $component) => [
+                                (new UserFormComponent())->anotherDocComponent($record, $component->getCustomSlug()),
                                 AdvancedFileUpload::make($component->getCustomSlug())
                                     ->label('เลือกไฟล์')
                                     ->multiple()
