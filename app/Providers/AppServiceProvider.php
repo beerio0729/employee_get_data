@@ -9,6 +9,8 @@ use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
+use Filament\Schemas\Components\Tabs\Tab;
+use App\Filament\Overrides\Filament\Schemas\Components\Tab as MyTab;
 use Illuminate\Support\Facades\Broadcast;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentColor;
@@ -20,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(Tab::class, MyTab::class);
     }
 
     /**
