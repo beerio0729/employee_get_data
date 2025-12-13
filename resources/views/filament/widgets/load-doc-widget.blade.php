@@ -1,3 +1,3 @@
 <x-filament-widgets::widget>
-    <livewire:widget-livewire.down-load-pdf-livewire>
+    <livewire:widget-livewire.load-doc-livewire />
 </x-filament-widgets::widget>

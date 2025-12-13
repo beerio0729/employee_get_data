@@ -4,9 +4,9 @@ namespace App\Filament\Widgets;
 
 use Filament\Widgets\Widget;
 
-class DownLoadPdfWidget extends Widget
+class LoadDocWidget extends Widget
 {
-    protected string $view = 'filament.widgets.down-load-pdf-widget';
+    protected string $view = 'filament.widgets.load-doc-widget';
     protected static ?int $sort = 3;
     protected int | string | array $columnSpan = 1;
 }
