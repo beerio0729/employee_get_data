@@ -82,6 +82,6 @@ class UploadAllDocLivewire extends Component implements HasActions, HasSchemas
     /**********************************************/
     public function render()
     {
-        return view('livewire.widgetlivewire.upload-all-doc-livewire');
+        return view('livewire.widget-livewire.upload-all-doc-livewire');
     }
 }

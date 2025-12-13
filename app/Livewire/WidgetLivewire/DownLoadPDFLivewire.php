@@ -24,6 +24,6 @@ class DownLoadPDFLivewire extends Component implements HasActions, HasSchemas
 
     public function render()
     {
-        return view('livewire.widgetlivewire.download-pdf-livewire');
+        return view('livewire.widget-livewire.download-pdf-livewire');
     }
 }

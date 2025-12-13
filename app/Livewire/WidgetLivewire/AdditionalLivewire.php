@@ -33,7 +33,7 @@ class AdditionalLivewire extends Component implements HasActions, HasSchemas
 
     public function render()
     {
-        return view('livewire.widgetlivewire.additional-livewire');
+        return view('livewire.widget-livewire.additional-livewire');
     }
 
     /*****************เกี่ยวกับ Mount Action******************* */

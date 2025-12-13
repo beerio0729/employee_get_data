@@ -1,3 +1,3 @@
 <x-filament::widget>
-    <livewire:widgetlivewire.upload-all-doc-livewire />
+    <livewire:widget-livewire.upload-all-doc-livewire />
 </x-filament::widget>
