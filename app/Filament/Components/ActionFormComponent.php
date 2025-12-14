@@ -96,6 +96,8 @@ class ActionFormComponent
                         ->disk('public')
                         ->directory('emp_files')
                         ->required()
+                        ->maxSize(3072)
+                        ->maxParallelUploads(1)
                         ->image()
                         ->imageResizeMode('cover')
                         ->imageCropAspectRatio('2.8:3.5')
@@ -245,6 +247,8 @@ class ActionFormComponent
                         ->disk('public')
                         ->directory('emp_files')
                         ->required()
+                        ->maxSize(3072)
+                        ->maxParallelUploads(1)
                         ->validationMessages([
                             'required' => 'คุณยังไม่ได้อับโหลดเอกสารใดๆ กรุณาอับโหลดไฟล์ก่อนส่ง',
                         ])
@@ -391,6 +395,8 @@ class ActionFormComponent
                         ->live()
                         ->directory('emp_files')
                         ->required()
+                        ->maxSize(3072)
+                        ->maxParallelUploads(1)
                         ->previewable(function ($state) {
                             $name = basename($state);
                             $extension = pathinfo($name, PATHINFO_EXTENSION);
@@ -549,8 +555,6 @@ class ActionFormComponent
                         ->disk('public')
                         ->directory('emp_files')
                         ->multiple()
-                        ->maxSize(3072)
-                        ->maxParallelUploads(1)
                         ->belowContent([
                             Icon::make(Heroicon::Star),
                             "อับโหลดได้มากกว่า 1 {$action->getLabel()}",
@@ -562,6 +566,8 @@ class ActionFormComponent
                         ])
 
                         ->required()
+                        ->maxSize(3072)
+                        ->maxParallelUploads(1)
                         ->validationMessages([
                             'required' => 'คุณยังไม่ได้อับโหลดเอกสารใดๆ กรุณาอับโหลดไฟล์ก่อนส่ง',
                         ])
@@ -628,7 +634,7 @@ class ActionFormComponent
                 $user = auth()->user();
                 $doc = $user->userHasmanyDocEmp()->where('file_name', $action->getName())->first();
                 $fileForSend = array_values(array_diff($data[$action->getName()], $doc->path ?? []));
-                
+
                 if ($doc?->path === $data[$action->getName()]) {
                     Notification::make()
                         ->title('แก้ไขข้อมูลเรียบร้อยแล้ว')
@@ -730,6 +736,8 @@ class ActionFormComponent
                         ->directory('emp_files')
 
                         ->required()
+                        ->maxSize(3072)
+                        ->maxParallelUploads(1)
                         ->validationMessages([
                             'required' => 'คุณยังไม่ได้อับโหลดเอกสารใดๆ กรุณาอับโหลดไฟล์ก่อนส่ง',
                         ])
@@ -880,6 +888,8 @@ class ActionFormComponent
                         ->directory('emp_files')
 
                         ->required()
+                        ->maxSize(3072)
+                        ->maxParallelUploads(1)
                         ->validationMessages([
                             'required' => 'คุณยังไม่ได้อับโหลดเอกสารใดๆ กรุณาอับโหลดไฟล์ก่อนส่ง',
                         ])
@@ -1035,10 +1045,10 @@ class ActionFormComponent
                         ->disk('public')
                         ->directory('emp_files')
                         ->multiple()
-                        ->maxSize(3072)
-                        ->maxParallelUploads(1)
                         ->belowLabel([Icon::make(Heroicon::Star), 'อับโหลดได้มากกว่า 1 ' . $action->getLabel()])
                         ->required()
+                        ->maxSize(3072)
+                        ->maxParallelUploads(1)
                         ->validationMessages([
                             'required' => 'คุณยังไม่ได้อับโหลดเอกสารใดๆ กรุณาอับโหลดไฟล์ก่อนส่ง',
                         ])
@@ -1104,7 +1114,7 @@ class ActionFormComponent
                 $user = auth()->user();
                 $doc = $user->userHasmanyDocEmp()->where('file_name', $action->getName())->first();
                 $fileForSend = array_values(array_diff($data[$action->getName()], $doc->path ?? []));
-                
+
                 if ($doc?->path === $data[$action->getName()]) {
                     Notification::make()
                         ->title('แก้ไขข้อมูลเรียบร้อยแล้ว')
@@ -1196,9 +1206,9 @@ class ActionFormComponent
                         ->disk('public')
                         ->directory('emp_files')
                         ->multiple()
+                        ->required()
                         ->maxSize(3072)
                         ->maxParallelUploads(1)
-                        ->required()
                         ->belowLabel([Icon::make(Heroicon::Star), 'อับโหลดได้มากกว่า 1 ' . $action->getLabel()])
                         ->panelLayout(function () {
                             return $this->isMobile ? null : 'grid';
@@ -1272,7 +1282,7 @@ class ActionFormComponent
                 $user = auth()->user();
                 $doc = $user->userHasmanyDocEmp()->where('file_name', $action->getName())->first();
                 $fileForSend = array_values(array_diff($data[$action->getName()], $doc->path ?? []));
-                
+
                 if ($doc?->path === $data[$action->getName()]) {
                     Notification::make()
                         ->title('แก้ไขข้อมูลเรียบร้อยแล้ว')
