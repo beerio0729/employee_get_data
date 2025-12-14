@@ -19,10 +19,10 @@ return new class extends Migration
             $table->string('emergency_relation')->nullable();
             $table->string('emergency_tel')->nullable();
             $table->text('emergency_address')->nullable();
-            $table->integer('emergency_province_id')->nullable();
-            $table->integer('emergency_district_id')->nullable();
-            $table->integer('emergency_subdistrict_id')->nullable();
-            $table->string('emergency_zipcode')->nullable();
+            $table->integer('province_id')->nullable();
+            $table->integer('district_id')->nullable();
+            $table->integer('subdistrict_id')->nullable();
+            $table->string('zipcode')->nullable();
             
             $table->boolean('worked_company_before')->nullable();
             $table->text('worked_company_detail')->nullable();
