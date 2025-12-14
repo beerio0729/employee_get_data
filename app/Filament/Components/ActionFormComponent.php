@@ -1282,7 +1282,7 @@ class ActionFormComponent
                 $user = auth()->user();
                 $doc = $user->userHasmanyDocEmp()->where('file_name', $action->getName())->first();
                 $fileForSend = array_values(array_diff($data[$action->getName()], $doc->path ?? []));
-
+                dump($fileForSend);
                 if ($doc?->path === $data[$action->getName()]) {
                     Notification::make()
                         ->title('แก้ไขข้อมูลเรียบร้อยแล้ว')
