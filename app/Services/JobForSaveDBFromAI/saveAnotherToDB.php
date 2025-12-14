@@ -2,7 +2,7 @@
 
 namespace App\Services\JobForSaveDBFromAI;
 
-class saveAnotherToDB
+class SaveAnotherToDB
 {
     public function saveToDB(array $hasOneData,array $hasManyData, $user, array $path): void
     {
