@@ -3,15 +3,15 @@
 namespace App\Services\JobForSaveDBFromAI;
 
 class SaveCertificateToDB {
-    public function saveToDB(array $hasOneData, array $hasManyData, $user): void
+    public function saveToDB(array $hasManyData, $user, array $path, $file_name): string
     {   
-        dump($hasOneData);
-        dump('----------------saveToDB---------------');
-        dump('-----------------------------------');
+
         dump($hasManyData);
         $user->userHasoneCertificate()->updateOrCreate(
             ['user_id' => $user->id],
             ['data' => $hasManyData]
         );
+        
+        return 'กระบวนการเสร็จสิ้น<br>โปรดตรวจสอบข้อมูลโดยละเอียดอีกครั้ง ';
     }
 }

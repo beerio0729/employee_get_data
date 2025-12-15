@@ -4,7 +4,7 @@ namespace App\Services\JobForSaveDBFromAI;
 
 class SaveAnotherToDB
 {
-    public function saveToDB(array $hasOneData,array $hasManyData, $user, array $path): void
+    public function saveToDB(array $hasManyData, $user, array $path, $file_name): string
     {
         dump($path);
         dump('----------------saveToDB---------------');
@@ -23,5 +23,7 @@ class SaveAnotherToDB
                 
             ]);
         }
+        
+        return 'กระบวนการเสร็จสิ้น<br>โปรดตรวจสอบข้อมูลโดยละเอียดอีกครั้ง ';
     }
 }

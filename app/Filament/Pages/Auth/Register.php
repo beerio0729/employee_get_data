@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Auth;
 
 use Filament\Schemas\Schema;
+use Filament\Facades\Filament;
 use Illuminate\Support\Facades\DB;
 use Filament\Forms\Components\Hidden;
 use Illuminate\Database\Eloquent\Model;
@@ -33,6 +34,20 @@ class Register extends BaseRegister
             array_slice($mycomponents, 1)
         );
         return $schema->schema($mycomponents);
+    }
+    
+    public function mount(): void
+    {
+        if (Filament::auth()->check()) {
+            dump(Filament::getUrl());
+            redirect()->intended(Filament::getUrl());
+        }
+
+        $this->callHook('beforeFill');
+
+        $this->form->fill();
+
+        $this->callHook('afterFill');
     }
 
     // protected function handleRegistration(array $data): Model

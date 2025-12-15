@@ -334,15 +334,4 @@ class ProcessEmpDocJob implements ShouldQueue
         $instance->saveToDB($hasOneData, $hasManyData, $this->user);
     }
 
-    public function deleteFile()
-    {
-        $doc_file = $this->user->userHasmanyDocEmp()
-            ->where('file_name', $this->file_name)
-            ->first();
-
-        if ($doc_file) {
-            Storage::disk('public')->delete($doc_file->path);
-            $doc_file->delete();
-        }
-    }
 }

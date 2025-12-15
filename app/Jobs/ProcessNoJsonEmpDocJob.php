@@ -23,7 +23,7 @@ class ProcessNoJsonEmpDocJob implements ShouldQueue
     protected $file_name;
     protected $file_name_th;
     protected $file_Paths;
-    public $hasOneData = [];
+    protected $success_msg; //ข้อความที่ return มาจาก Savetodb
     public $hasManyData = [];
     public $user;
 
@@ -48,16 +48,13 @@ class ProcessNoJsonEmpDocJob implements ShouldQueue
      */
     public function handle(): void
     {
-        $contents = $this->buildMultiContents($this->file_Paths);
+        $contents = $this->buildMultiContents();
 
         event(new ProcessEmpDocEvent('เตรียมข้อมูลเสร็จแล้ว Ai กำลังประมวลผล...', $this->user));
         $this->sendJsonToAi($contents);
-        // // dump($this->hasOneData);
-        // // dump('----------------many---------------');
-        // // dump('-----------------------------------');
-        // // dump($this->hasManyData);
-        $this->processSaveToDB($this->hasOneData, $this->hasManyData);
-        event(new ProcessEmpDocEvent('กระบวนการเสร็จสิ้น<br>โปรดตรวจสอบข้อมูลโดยละเอียดอีกครั้ง', $this->user, 'close', $this->file_name, true));
+
+        $this->processSaveToDB();
+        event(new ProcessEmpDocEvent($this->success_msg, $this->user, 'close', $this->file_name, true));
     }
 
     public function failed(?Throwable $exception): void
@@ -73,15 +70,15 @@ class ProcessNoJsonEmpDocJob implements ShouldQueue
         $this->deleteFile();
     }
 
-    protected function buildMultiContents(array $file_Paths): array
-    {
+    protected function buildMultiContents(): array
+    {   
         $parts = [
             [
                 'text' => config("empPromtForAi.{$this->file_name}", [])
             ]
         ];
 
-        foreach ($file_Paths as $filePath) {
+        foreach ($this->file_Paths as $filePath) {
             $fileContent = Storage::disk('public')->get($filePath);
             $mimeType = Storage::disk('public')->mimeType($filePath);
             $parts[] = [
@@ -177,14 +174,8 @@ class ProcessNoJsonEmpDocJob implements ShouldQueue
 
             // 3. ตรวจสอบผลลัพธ์ว่าถูกต้องหรือไม่
             if (is_array($finalJsonArray)) {
-
-                // 3.1. JSON ถูกต้องและเป็น Array: ดำเนินการ Sorting
-                $this->hasOneData = $this->SortingArray($finalJsonArray);
+                $this->hasManyData = $this->cleanArrayFormAi($finalJsonArray);
             } else {
-
-                // 3.2. JSON Decode สำเร็จ แต่ผลลัพธ์ไม่ใช่ Array: จัดการข้อผิดพลาดตาม Flow เดิม
-                // (ส่วนนี้อาจทำให้เกิดปัญหาถ้า $this->hasOneData ถูกใช้ต่อโดยไม่มีการตรวจสอบ)
-                $this->hasOneData = [];
                 $this->hasManyData = [];
             }
         } catch (RuntimeException $e) {
@@ -209,23 +200,10 @@ class ProcessNoJsonEmpDocJob implements ShouldQueue
      * ฟังก์ชันหลักที่วนซ้ำใน Array ทั้งหมดเพื่อทำความสะอาดทุกคีย์/ค่า
      * ฟังก์ชันนี้รับผิดชอบในการเข้าถึงข้อมูลทุกระดับ
      */
-    protected function SortingArray(array $array)
-    {
-        $result = [];
-        foreach ($array as $key => $value) {
-            if (is_array($value)) {
-                // ถ้าเป็น Array ให้เรียกตัวเองซ้ำ (Recursion)
-                $this->hasManyData[$key] = $this->cleanHasMany($value);
-            } else {
-                // ถ้าเป็นค่าเดี่ยว ให้เรียกฟังก์ชันทำความสะอาด
-                $result[$key] = $this->cleanArrayFormAi($value);
-            }
-        }
-        return $result;
-    }
+
 
     protected function cleanHasMany(array $array)
-    {
+    {   
         $result = [];
         foreach ($array as $key => $value) {
             if (is_array($value)) {
@@ -264,22 +242,12 @@ class ProcessNoJsonEmpDocJob implements ShouldQueue
         return $value;
     }
 
-    public function processSaveToDB(array $hasOneData, array $hasManyData): void
-    {
+    public function processSaveToDB(): void
+    {   
         $className = 'App\\Services\\JobForSaveDBFromAI\\Save' . ucfirst($this->file_name) . 'ToDB';
         $instance = new $className();
-        $instance->saveToDB($hasOneData, $hasManyData, $this->user, $this->file_Paths);
+        $msg = $instance->saveToDB($this->hasManyData, $this->user, $this->file_Paths, $this->file_name);
+        $this->success_msg = $msg;
     }
 
-    public function deleteFile()
-    {
-        $doc_file = $this->user->userHasmanyDocEmp()
-            ->where('file_name', $this->file_name)
-            ->first();
-
-        if ($doc_file) {
-            Storage::disk('public')->delete($doc_file->path);
-            $doc_file->delete();
-        }
-    }
 }

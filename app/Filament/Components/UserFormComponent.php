@@ -435,6 +435,8 @@ class UserFormComponent
                             ->contained(false)
                             ->schema([
                                 Repeater::make('experiences')
+                                    ->itemLabel(fn(array $state): ?string => $state['company'] ?? null)
+                                    ->collapsed()   
                                     ->columns(3)
                                     ->hiddenLabel()
                                     ->addActionLabel('เพิ่ม "ประสบการณ์ทำงาน"')
@@ -480,6 +482,8 @@ class UserFormComponent
                             ->description("แสดงข้อมูลทักษะด้านภาษาของท่าน สามารถกรอกข้อมูลเพิ่มเติมได้")
                             ->schema([
                                 Repeater::make('langskill')
+                                    ->itemLabel(fn(array $state): ?string => $state['language'] ?? null)
+                                    ->collapsed()
                                     ->columns(4)
                                     ->hiddenLabel()
                                     ->addActionLabel('เพิ่ม "ความสามารถทางภาษา"')
@@ -519,6 +523,8 @@ class UserFormComponent
                             ->description("แสดงข้อมูลทักษะด้านอื่นๆ ของท่าน สามารถกรอกข้อมูลเพิ่มเติมได้")
                             ->schema([
                                 Repeater::make('skills')
+                                    ->itemLabel(fn(array $state): ?string => $state['skill_name'] ?? null)
+                                    ->collapsed()
                                     ->columns(2)
                                     ->hiddenLabel()
                                     ->addActionLabel('เพิ่ม "ความสามารถอื่นๆ"')
