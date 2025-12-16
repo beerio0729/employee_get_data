@@ -208,8 +208,8 @@ class ActionFormComponent
         return
             Action::make('idcard')
             ->label('บัตรประชาชน')
-            ->mountUsing(function (Schema $form) {
-                $form->fill(auth()->user()->attributesToArray());
+            ->mountUsing(function (Schema $form, $record) {
+                $form->fill($record->attributesToArray());
             })
             ->modalWidth(Width::FiveExtraLarge)
             ->record(auth()->user())
@@ -362,8 +362,8 @@ class ActionFormComponent
         return
             Action::make('resume')
             ->label('เรซูเม่')
-            ->mountUsing(function (Schema $form) {
-                $form->fill(auth()->user()->attributesToArray());
+            ->mountUsing(function (Schema $form, $record) {
+                $form->fill($record->attributesToArray());
             })
             ->modalWidth(Width::FiveExtraLarge)
             ->record(auth()->user())
@@ -515,8 +515,8 @@ class ActionFormComponent
         return
             Action::make('transcript')
             ->label('วุฒิการศึกษา')
-            ->mountUsing(function (Schema $form) {
-                $form->fill(auth()->user()->attributesToArray());
+            ->mountUsing(function (Schema $form, $record) {
+                $form->fill($record->attributesToArray());
             })
             ->modalWidth(Width::FiveExtraLarge)
             ->record(auth()->user())
@@ -695,8 +695,8 @@ class ActionFormComponent
         return
             Action::make('military')
             ->label('ใบเกณฑ์หทาร')
-            ->mountUsing(function (Schema $form) {
-                $form->fill(auth()->user()->attributesToArray());
+            ->mountUsing(function (Schema $form, $record) {
+                $form->fill($record->attributesToArray());
             })
             ->modalWidth(Width::FiveExtraLarge)
             ->record(auth()->user())
@@ -851,8 +851,8 @@ class ActionFormComponent
         return
             Action::make('marital')
             ->label('สถานะการสมรส')
-            ->mountUsing(function (Schema $form) {
-                $form->fill(auth()->user()->attributesToArray());
+            ->mountUsing(function (Schema $form, $record) {
+                $form->fill($record->attributesToArray());
             })
             ->modalWidth(Width::FiveExtraLarge)
             ->record(auth()->user())
@@ -1001,8 +1001,8 @@ class ActionFormComponent
         return
             Action::make('certificate')
             ->label('ใบประกาศนียบัตร')
-            ->mountUsing(function (Schema $form) {
-                $form->fill(auth()->user()->attributesToArray());
+            ->mountUsing(function (Schema $form, $record) {
+                $form->fill($record->attributesToArray());
             })
             ->modalWidth(Width::FiveExtraLarge)
             ->record(auth()->user())
@@ -1174,8 +1174,8 @@ class ActionFormComponent
         return
             Action::make('another')
             ->label('เอกสารเพิ่มเติม')
-            ->mountUsing(function (Schema $form) {
-                $form->fill(auth()->user()->attributesToArray());
+            ->mountUsing(function (Schema $form, $record) {
+                $form->fill($record->attributesToArray());
             })
             ->modalWidth(Width::FiveExtraLarge)
             ->record(auth()->user())
@@ -1369,8 +1369,8 @@ class ActionFormComponent
             Action::make('info')
             ->record(auth()->user())
             ->hidden(fn() => $this->isMobile ? 1 : 0)
-            ->mountUsing(function (Schema $form) {
-                $form->fill(auth()->user()->attributesToArray());
+            ->mountUsing(function (Schema $form, $record) {
+                $form->fill($record->attributesToArray());
             })
             ->icon('heroicon-m-user')
             ->label('กรอกข้อมูลเพิ่มเติม')
@@ -1498,8 +1498,8 @@ class ActionFormComponent
         return
             Action::make('info')
             ->record(auth()->user())
-            ->mountUsing(function (Schema $form) {
-                $form->fill(auth()->user()->attributesToArray());
+            ->mountUsing(function (Schema $form, $record) {
+                $form->fill($record->attributesToArray());
             })
             ->size(Size::ExtraLarge)
             ->iconSize('xl')

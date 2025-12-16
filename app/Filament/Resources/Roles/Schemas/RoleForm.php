@@ -14,10 +14,22 @@ class RoleForm
         return $schema
             ->components([
                 Section::make('role')
+                    ->columns(2)
                     ->schema([
                         TextInput::make('name')
-                            ->hiddenLabel()
-                            ->prefix('สถานะพนักงาน'),
+                            ->validationMessages([
+                                'required' => 'กรุณากรอกสถานะพนักงานภาษาอังกฤษ',
+                            ])
+                            ->required()
+                            ->label('สถานะพนักงานภาษาอังกฤษ')
+                            ->prefix('สถานะพนักงานภาษาอังกฤษ'),
+                        TextInput::make('name_th')
+                            ->validationMessages([
+                                'required' => 'กรุณากรอกสถานะพนักงานภาษาไทย',
+                            ])
+                            ->required()
+                            ->label('สถานะพนักงานภาษาไทย')
+                            ->prefix('สถานะพนักงานภาษไทย'),
                         Toggle::make('active')
                             ->label('ใช้งาน')
                             ->default(true)

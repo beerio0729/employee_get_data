@@ -53,6 +53,7 @@ class User extends Authenticatable
         'provider',
         'provider_id',
         'password',
+        'interview_date', //วันที่สัมภาษณ์
     ];
 
     /**
@@ -75,6 +76,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'interview_date' => 'datetime',
         ];
     }
 

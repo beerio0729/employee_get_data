@@ -58,3 +58,8 @@ input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
     position: sticky;
     overflow-x: clip;
 }
+
+.fi-link.fi-disabled:not(.fi-force-enabled), .fi-link[disabled]:not(.fi-force-enabled) { /** ปรับ style ลิงก์หรือปุ่มที่ถูกปิดการใช้งาน **/
+    cursor: default;
+    opacity: 0.3;
+}

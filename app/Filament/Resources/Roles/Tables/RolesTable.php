@@ -18,6 +18,8 @@ class RolesTable
             ->columns([
                 TextColumn::make('name')
                     ->label('สถานะพนักงาน'),
+                TextColumn::make('name_th')
+                    ->label('สถานะพนักงานภาษาไทย'),
                 ToggleColumn::make('active')
                     ->label('ใช้งาน'),
             ])
