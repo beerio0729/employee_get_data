@@ -558,11 +558,11 @@ class ActionFormComponent
                         ->maxSize(3072)
                         ->maxParallelUploads(1)
                         ->belowContent([
-                            Icon::make(Heroicon::Star),
+                            Icon::make(Heroicon::Star)->color('warning'),
                             "อับโหลดได้มากกว่า 1 {$action->getLabel()}",
                         ])
                         ->belowLabel([
-                            Icon::make(Heroicon::OutlinedExclamationTriangle),
+                            Icon::make(Heroicon::OutlinedExclamationTriangle)->color('warning'),
                             "คำเตือน!!! หาก {$action->getLabel()} มีหลายหน้า ต้องทำให้เป็นไฟล์เดียวกันก่อนค่อยอับโหลด
                                     1 {$action->getLabel()} ต่อ 1 ไฟล์"
                         ])
@@ -1046,7 +1046,7 @@ class ActionFormComponent
                         ->multiple()
                         ->maxSize(3072)
                         ->maxParallelUploads(1)
-                        ->belowLabel([Icon::make(Heroicon::Star), 'อับโหลดได้มากกว่า 1 ' . $action->getLabel()])
+                        ->belowLabel([Icon::make(Heroicon::Star)->color('warning'), 'อับโหลดได้มากกว่า 1 ' . $action->getLabel()])
                         ->required()
                         ->validationMessages([
                             'required' => 'คุณยังไม่ได้อับโหลดเอกสารใดๆ กรุณาอับโหลดไฟล์ก่อนส่ง',
@@ -1209,7 +1209,7 @@ class ActionFormComponent
                         ->maxSize(3072)
                         ->maxParallelUploads(1)
                         ->required()
-                        ->belowLabel([Icon::make(Heroicon::Star), 'อับโหลดได้มากกว่า 1 ' . $action->getLabel()])
+                        ->belowLabel([Icon::make(Heroicon::Star)->color('warning'), 'อับโหลดได้มากกว่า 1 ' . $action->getLabel()])
                         ->panelLayout(function () {
                             return $this->isMobile ? null : 'grid';
                         })

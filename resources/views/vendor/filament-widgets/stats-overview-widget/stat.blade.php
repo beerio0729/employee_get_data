@@ -11,6 +11,7 @@ $descriptionIconPosition = $getDescriptionIconPosition();
 $url = $getUrl();
 $tag = $url ? 'a' : 'div';
 $chartDataChecksum = $generateChartDataChecksum();
+$colorVar = "--{$descriptionColor}-100";
 
 @endphp
 
@@ -19,11 +20,12 @@ $chartDataChecksum = $generateChartDataChecksum();
     {{ \Filament\Support\generate_href_html($url, $shouldOpenUrlInNewTab()) }}
     @endif
     {{
-        $getExtraAttributeBag()
-            ->class([
-                'fi-wi-stats-overview-stat',
-            ])
-    }}>
+         $getExtraAttributeBag()
+        ->class([
+            'fi-wi-stats-overview-stat',
+        ])
+    }}
+    style="background: linear-gradient(to right, var({{ $colorVar }}), transparent, transparent);">
     <div style="display: flex; justify-content: space-between;">
         <div>
             <div class="fi-wi-stats-overview-stat-content">
@@ -36,23 +38,16 @@ $chartDataChecksum = $generateChartDataChecksum();
                     </span>
                 </div>
                 @endif
-                <div class="fi-wi-stats-overview-stat-value">
+                <div style="
+                    font-size: var(--text-3xl);
+                    line-height: var(--tw-leading, var(--text-3xl--line-height));
+                    --tw-font-weight: var(--font-weight-semibold);
+                    font-weight: var(--font-weight-semibold);
+                    --tw-tracking: var(--tracking-tight);
+                    letter-spacing: var(--tracking-tight);
+                    color: var(--{{$descriptionColor}}-700);">
                     {{ $getValue() }}
                 </div>
-
-                @if ($description = $getDescription())
-                <div {{ (new ComponentAttributeBag)->color(DescriptionComponent::class, $descriptionColor)->class(['fi-wi-stats-overview-stat-description']) }}>
-                    @if ($descriptionIcon && in_array($descriptionIconPosition, [IconPosition::Before, 'before']))
-                    {{ \Filament\Support\generate_icon_html($descriptionIcon, attributes: (new \Illuminate\View\ComponentAttributeBag)) }}
-                    @endif
-
-                    <span>
-                        {{ $description }}
-                    </span>
-
-
-                </div>
-                @endif
             </div>
         </div>
         <div style="display: flex; justify-content: flex-end; align-items: flex-start;">
@@ -68,7 +63,17 @@ $chartDataChecksum = $generateChartDataChecksum();
         </div>
 
     </div>
+    @if ($description = $getDescription())
+    <div {{ (new ComponentAttributeBag)->color(DescriptionComponent::class, $descriptionColor)->class(['fi-wi-stats-overview-stat-description']) }}>
+        @if ($descriptionIcon && in_array($descriptionIconPosition, [IconPosition::Before, 'before']))
+        {{ \Filament\Support\generate_icon_html($descriptionIcon, attributes: (new \Illuminate\View\ComponentAttributeBag)) }}
+        @endif
 
+        <span>
+            {{ $description }}
+        </span>
+    </div>
+    @endif
 
     @if ($progress = $getProgress())
     {{-- เพิ่มการใช้ progress bar --}}
