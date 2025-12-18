@@ -56,7 +56,7 @@ $colorVar = "--{$descriptionColor}-100";
                 {{ \Filament\Support\generate_icon_html(
                     $descriptionIcon, 
                     attributes: (new \Illuminate\View\ComponentAttributeBag),
-                    size: Filament\Support\Enums\IconSize::FourExtraLarge,
+                    size: Filament\Support\Enums\IconSize::ThreeExtraLarge,
                 )}}
             </div>
             @endif
