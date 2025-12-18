@@ -25,19 +25,20 @@ class DocCountStateWidget extends StatsOverviewWidget
         $totalFields = $additional['field'] + $father['field'] + $mother['field']+$siblig['field']+8;
         $totalNull =  $additional['null'] + $father['null'] + $mother['null']+$siblig['null']+8-$doc_count;
         $suscess = $totalFields - $totalNull;
-
+        
+        $doc_count_percent = intval(($doc_count / 8) * 100);
         $percent = intval(($suscess / $totalFields) * 100);
-        $icon = $percent === 100 ? 'heroicon-m-check-circle' : 'heroicon-m-exclamation-triangle';
+        $icon_count = $doc_count_percent === 100 ? 'heroicon-m-check-circle' : 'heroicon-m-exclamation-triangle';
+        $icon_percent = $percent === 100 ? 'heroicon-m-check-circle' : 'heroicon-m-exclamation-triangle';
 
         return [
             Stat::make('', $doc_count . '/8')
                 ->color(fn() => $doc_count === 8 ? 'success' : 'warning')
-                ->progress(intval(($doc_count / 8) * 100))
-                ->descriptionIcon($icon)
-                //->chart([100, 100, 100, 100, 100, 100, 100, 0])
+                ->progress($doc_count_percent)
+                ->descriptionIcon($icon_count)
                 ->description('เอกสารที่อับโหลดแล้ว'),
             Stat::make('', $percent . ' %')
-                ->descriptionIcon($icon)
+                ->descriptionIcon($icon_percent)
                 ->color(fn() => $percent === 100 ? 'success' : 'warning')
                 ->progress($percent)
                 ->description('ความสมบูรณ์ของข้อมูล')
