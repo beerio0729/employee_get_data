@@ -4,18 +4,17 @@ namespace App\Providers;
 
 use Filament\Support\Assets\Js;
 use Filament\Support\Assets\Css;
-use App\Events\ProcessEmpDocEvent;
-use Filament\Support\Colors\Color;
 use Illuminate\Support\Facades\Vite;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 use Filament\Schemas\Components\Tabs\Tab;
-use Illuminate\Support\Facades\Broadcast;
 use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use App\Filament\Overrides\Filament\Schemas\Components\Tab as MyTab;
+use App\Filament\Overrides\Filament\Support\Enums\IconSize as MyIconSize;
 use App\Filament\Overrides\Filament\Widgets\StatsOverviewWidget\Stat as MyStat;
+use Filament\Support\Enums\IconSize as BaseIconSize;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,9 +22,10 @@ class AppServiceProvider extends ServiceProvider
      * Register any application services.
      */
     public function register(): void
-    {
+    {   
         $this->app->bind(Tab::class, MyTab::class);
         $this->app->bind(Stat::class, MyStat::class);
+        class_alias(MyIconSize::class, BaseIconSize::class);
     }
 
     /**
