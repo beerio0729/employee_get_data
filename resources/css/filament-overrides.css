@@ -80,7 +80,7 @@ input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
 }
 
 .progress-stat-bar {
-    border-radius: 8px 0 0 8px;
+    border-radius: 8px;
 }
 
 .progress-stat-container {
