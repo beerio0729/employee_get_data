@@ -18,7 +18,7 @@ use Filament\Support\Colors\Color;
         label="อับโหลดเอกสาร"
         tooltip="อับโหลดเอกสาร"
         icon="heroicon-m-document-arrow-up"
-        color="warning"
+        color="mycolor"
         size="xl"
         iconSize="xl"
         dropdown-placement="bottom-end"

@@ -2,19 +2,9 @@
 
 namespace App\Filament\Overrides\Filament\Schemas\Components;
 
-use BackedEnum;
 use Closure;
 
 use Filament\Schemas\Components\Tabs\Tab as BaseTab;
-use Filament\Schemas\Components\Concerns\HasLabel;
-use Filament\Support\Concerns\HasBadge;
-use Filament\Support\Concerns\HasBadgeTooltip;
-use Filament\Support\Concerns\HasIcon;
-use Filament\Support\Concerns\HasIconPosition;
-use Filament\Support\Enums\IconPosition;
-use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Tab extends BaseTab

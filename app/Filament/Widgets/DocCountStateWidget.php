@@ -5,11 +5,11 @@ namespace App\Filament\Widgets;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
-class DocStateWidget extends StatsOverviewWidget
+class DocCountStateWidget extends StatsOverviewWidget
 {
     protected ?string $pollingInterval = '2s';
     protected int | string | array $columnSpan = 'full';
-    protected string $view = 'filament.widgets.doc-state-widget';
+    protected string $view = 'filament.widgets.doc-count-state-widget';
     protected function getStats(): array
     {
         $user = auth()->user();
@@ -31,15 +31,17 @@ class DocStateWidget extends StatsOverviewWidget
 
         return [
             Stat::make('', $doc_count . '/8')
-                ->color(fn() => count($doc) === 8 ? 'success' : 'warning')
+                ->color(fn() => $doc_count === 8 ? 'success' : 'warning')
+                ->progress(intval(($doc_count / 8) * 100))
                 ->descriptionIcon($icon)
-                ->chart([5, 3, 1, 10, 2, 1, 8, 4, 3])
+                //->chart([100, 100, 100, 100, 100, 100, 100, 0])
                 ->description('เอกสารที่อับโหลดแล้ว'),
             Stat::make('', $percent . ' %')
                 ->descriptionIcon($icon)
                 ->color(fn() => $percent === 100 ? 'success' : 'warning')
-                ->chart([17, 12, 20, 3, 25, 14, 50, 1])
-                ->description('ความสมบูรณ์ของข้อมูล'),
+                ->progress($percent)
+                ->description('ความสมบูรณ์ของข้อมูล')
+                ,
         ];
     }
 

@@ -15,6 +15,11 @@
     .fi-sc.fi-sc-has-gap {
         gap: calc(var(--spacing) * 3);
     }
+
+    /********ปรับ padding ของ stat widget เฉพาะโทรศัพท*******/
+    .fi-wi-stats-overview-stat {
+        padding: calc(var(--spacing) * 3);
+    }
 }
 
 
@@ -52,14 +57,61 @@ input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
     display: flex;
 }
 
-.fi-topbar-ctn { /**ปรับให้ menubar ถอย z-index ให้อยู่ตำกว่า actiongroup dropdown**/
+.fi-topbar-ctn {
+    /**ปรับให้ menubar ถอย z-index ให้อยู่ตำกว่า actiongroup dropdown**/
     top: calc(var(--spacing) * 0);
     z-index: 19;
     position: sticky;
     overflow-x: clip;
 }
 
-.fi-link.fi-disabled:not(.fi-force-enabled), .fi-link[disabled]:not(.fi-force-enabled) { /** ปรับ style ลิงก์หรือปุ่มที่ถูกปิดการใช้งาน **/
+.fi-link.fi-disabled:not(.fi-force-enabled),
+.fi-link[disabled]:not(.fi-force-enabled) {
+    /** ปรับ style ลิงก์หรือปุ่มที่ถูกปิดการใช้งาน **/
     cursor: default;
     opacity: 0.3;
+}
+
+
+/***********ปรับ pregrees bar ที่เราสร้างมาเอง****************/
+.w3-container,
+.w3-panel {
+    padding: 0.01em 16px;
+}
+
+.progress-stat-bar {
+    border-radius: 8px 0 0 8px;
+}
+
+.progress-stat-container {
+    background-color: #7a7a7a49 !important;
+    margin-top: 10px;
+    border-radius: 8px;
+}
+
+/***********สีข้อความรวม***************/
+.fi-header-heading,
+.fi-wi-stats-overview-stat-value {
+    color: var(--mycolor-700);
+}
+
+.fi-header-heading:where(.dark,.dark *),
+.fi-wi-stats-overview-stat-value:where(.dark,.dark *) {
+    color: var(--color-white); 
+}
+
+/****************ปรับ ขนาด Icon เพิ่มเติม ******************/
+.fi-size-3xl {
+    width: calc(var(--spacing) * 10);
+    height: calc(var(--spacing) * 10);
+}
+
+.fi-size-4xl {
+    width: calc(var(--spacing) * 12);
+    height: calc(var(--spacing) * 12);
+}
+
+.fi-size-5xl {
+    width: calc(var(--spacing) * 15);
+    height: calc(var(--spacing) * 15);
 }

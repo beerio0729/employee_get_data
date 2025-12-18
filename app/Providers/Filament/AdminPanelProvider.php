@@ -38,15 +38,19 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->plugin(SimpleLightBoxPlugin::make())
             ->id('admin')
+
             ->font('Noto Sans Thai')
             ->path('/')
             ->login(Login::class)
+            ->brandLogo(asset('storage/user.png'))
+            ->brandLogoHeight('3.5rem')
             ->profile(EditProfile::class)
             ->registration(Register::class)
             ->databaseNotifications()
+            ->globalSearch(false)
             //->databaseNotificationsPolling('3s')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => 'oklch(0.55 0.19 259.29)',
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')

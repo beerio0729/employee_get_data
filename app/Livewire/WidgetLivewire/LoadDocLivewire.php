@@ -17,7 +17,7 @@ class LoadDocLivewire extends Component implements HasActions, HasSchemas
 
     public function pdf(): Action
     {
-        return (new ActionFormComponent())->downloadPDFForPhoneAction();
+        return (new ActionFormComponent())->downloadPDFAction();
     }
     public function render()
     {

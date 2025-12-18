@@ -27,7 +27,7 @@ class AdditionalLivewire extends Component implements HasActions, HasSchemas
 
     public function info(): Action
     {
-        return (new ActionFormComponent())->addtionalForPhoneAction();
+        return (new ActionFormComponent())->addtionalAction();
     }
 
 

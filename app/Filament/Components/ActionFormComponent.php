@@ -1355,7 +1355,7 @@ class ActionFormComponent
                 $this->anotherDocAction(),
             ])->label('อับโหลดเอกสาร')
             ->icon('heroicon-m-document-arrow-up')
-            ->color('primary')
+            ->color('mycolor')
             ->button()
             ->dropdownWidth(Width::Full)
             ->dropdownAutoPlacement()
@@ -1368,12 +1368,20 @@ class ActionFormComponent
         return
             Action::make('info')
             ->record(auth()->user())
-            ->hidden(fn() => $this->isMobile ? 1 : 0)
             ->mountUsing(function (Schema $form, $record) {
                 $form->fill($record->attributesToArray());
             })
+            ->size(Size::ExtraLarge)
+            ->iconSize('xl')
+            ->extraAttributes([
+                'style' => "
+                width: 100%;
+                font-size: 1.2rem;
+                "
+            ])
             ->icon('heroicon-m-user')
-            ->label('กรอกข้อมูลเพิ่มเติม')
+            ->color('mycolor')
+            ->label('ข้อมูลเพิ่มเติม')
             ->tooltip('ท่านจำเป็นต้องกรอกข้อมูลบางอย่างที่ไม่มีในเอกสารที่ท่านอับโหลด')
             ->modalSubmitActionLabel('อับเดตข้อมูล')
             ->modalWidth(Width::FiveExtraLarge)
@@ -1445,147 +1453,11 @@ class ActionFormComponent
         return
             Action::make('pdf')
             ->record(auth()->user())
-            ->hidden(fn() => $this->isMobile ? 1 : 0)
-            ->label('ดาวน์โหลดใบสมัคร')
-            ->icon('heroicon-m-document-arrow-down')
-            ->color('info')
-            ->url(fn() =>
-            blank($this->checkDocDownloaded()['upload']) &&
-                blank($this->checkDocDownloaded()['input'])
-                ? '/pdf'
-                : null)
-            ->action(function ($record) {
-                $missing = $this->checkDocDownloaded();
-                $parts = [];
-
-                $hasUpload = !blank($missing['upload']);
-                $hasInput  = !blank($missing['input']);
-
-                if ($hasUpload) {
-                    $parts[] = 'คุณยังไม่ได้อัปโหลดเอกสาร: <br>"' . implode(', ', $missing['upload']) . '"';
-                }
-
-                if ($hasInput) {
-                    $parts[] = 'คุณยังไม่ได้กรอกข้อมูลเพิ่มเติมในหัวข้อ: <br>"' . implode(', ', $missing['input']) . '"';
-                }
-
-                // ประโยคปิดท้าย
-                if ($hasUpload && $hasInput) {
-                    $ending = 'กรุณาอัปโหลดเอกสาร และ กรอกข้อมูลดังกล่าว<br>ก่อนดาวน์โหลดใบสมัคร';
-                    $msg = implode('<br><br>', $parts) . '<br><br>' . $ending;
-                    event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
-                }
-                if ($hasUpload) {
-                    $ending = 'กรุณาอัปโหลดเอกสารก่อนดาวน์โหลดใบสมัคร';
-                    $msg = implode('<br><br>', $parts) . '<br><br>' . $ending;
-                    event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
-                }
-                if ($hasInput) {
-                    $ending = 'กรุณากรอกข้อมูลดังกล่าวก่อนดาวน์โหลดใบสมัคร';
-                    $msg = implode('<br><br>', $parts) . '<br><br>' . $ending;
-                    event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
-                }
-            })
-            ->openUrlInNewTab()
-            ->button();
-    }
-
-
-    /**************สำหรับโทรศัพท์************* */
-
-    public function addtionalForPhoneAction(): Action
-    {
-        return
-            Action::make('info')
-            ->record(auth()->user())
-            ->mountUsing(function (Schema $form, $record) {
-                $form->fill($record->attributesToArray());
-            })
-            ->size(Size::ExtraLarge)
-            ->iconSize('xl')
-            ->extraAttributes([
-                'style' => "
-                width: 100%;
-                font-size: 1.2rem;
-                "
-            ])
-            ->icon('heroicon-m-user')
-            ->color('info')
-            ->label('ข้อมูลเพิ่มเติม')
-            ->tooltip('ท่านจำเป็นต้องกรอกข้อมูลบางอย่างที่ไม่มีในเอกสารที่ท่านอับโหลด')
-            ->modalSubmitActionLabel('อับเดตข้อมูล')
-            ->modalWidth(Width::FiveExtraLarge)
-            ->closeModalByClickingAway(false)
-            ->schema([
-                Tabs::make('Tabs')
-                    ->persistTab()
-                    ->tabs([
-                        Tab::make('ข้อมูลครอบครัว')
-                            ->extraAttributes(
-                                fn() => ($this->isMobile)
-                                    ? ['style' => 'padding: 24px 15px']
-                                    : []
-                            )
-                            ->schema(
-                                function () {
-                                    return [...(new UserFormComponent())->familyComponent()];
-                                }
-                            ),
-                        Tab::make('ข้อมูลผู้ที่ติดต่อได้ยามฉุกเฉิน')
-                            ->extraAttributes(
-                                fn() => ($this->isMobile)
-                                    ? ['style' => 'padding-right: 12px; padding-left: 12px;']
-                                    : []
-                            )
-                            ->schema(
-                                function () {
-                                    return [(new UserFormComponent())->emergencyContactComponent()];
-                                }
-                            ),
-                        Tab::make('ข้อมูลสุขภาพ')
-                            ->extraAttributes(
-                                fn() => ($this->isMobile)
-                                    ? ['style' => 'padding-right: 12px; padding-left: 12px;']
-                                    : []
-                            )
-                            ->schema(
-                                function () {
-                                    return [(new UserFormComponent())->healthInfoComponent()];
-                                }
-                            ),
-
-                        Tab::make('คำถามเพิ่มเติม')
-                            ->extraAttributes(
-                                fn() => ($this->isMobile)
-                                    ? ['style' => 'padding-right: 12px; padding-left: 12px;']
-                                    : []
-                            )
-                            ->schema(
-                                function () {
-                                    return [(new UserFormComponent())->additionalComponent()];
-                                }
-                            ),
-
-                    ]),
-
-            ])
-            ->action(function ($action, $livewire) {
-                $livewire->dispatch('openActionModal', id: $action->getName());
-                Notification::make()
-                    ->title('บันทึกข้อมูลเรียบร้อยแล้ว')
-                    ->color('success')
-                    ->send();
-            });
-    }
-
-    public function downloadPDFForPhoneAction(): Action
-    {
-        return
-            Action::make('pdf')
-            ->record(auth()->user())
             ->label('ดาวน์โหลดใบสมัคร')
             ->icon(new HtmlString('
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--!Font Awesome Free v7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path fill="#ffffff" d="M208 48L96 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l80 0 0 48-80 0c-35.3 0-64-28.7-64-64L32 64C32 28.7 60.7 0 96 0L229.5 0c17 0 33.3 6.7 45.3 18.7L397.3 141.3c12 12 18.7 28.3 18.7 45.3l0 149.5-48 0 0-128-88 0c-39.8 0-72-32.2-72-72l0-88zM348.1 160L256 67.9 256 136c0 13.3 10.7 24 24 24l68.1 0zM240 380l32 0c33.1 0 60 26.9 60 60s-26.9 60-60 60l-12 0 0 28c0 11-9 20-20 20s-20-9-20-20l0-128c0-11 9-20 20-20zm32 80c11 0 20-9 20-20s-9-20-20-20l-12 0 0 40 12 0zm96-80l32 0c28.7 0 52 23.3 52 52l0 64c0 28.7-23.3 52-52 52l-32 0c-11 0-20-9-20-20l0-128c0-11 9-20 20-20zm32 128c6.6 0 12-5.4 12-12l0-64c0-6.6-5.4-12-12-12l-12 0 0 88 12 0zm76-108c0-11 9-20 20-20l48 0c11 0 20 9 20 20s-9 20-20 20l-28 0 0 24 28 0c11 0 20 9 20 20s-9 20-20 20l-28 0 0 44c0 11-9 20-20 20s-20-9-20-20l0-128z"/></svg>
+                <svg fill="currentColor" class="fi-icon fi-size-xl" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512">
+                    <path d="M208 48L96 48c-8.8 0-16 7.2-16 16l0 384c0 8.8 7.2 16 16 16l80 0 0 48-80 0c-35.3 0-64-28.7-64-64L32 64C32 28.7 60.7 0 96 0L229.5 0c17 0 33.3 6.7 45.3 18.7L397.3 141.3c12 12 18.7 28.3 18.7 45.3l0 149.5-48 0 0-128-88 0c-39.8 0-72-32.2-72-72l0-88zM348.1 160L256 67.9 256 136c0 13.3 10.7 24 24 24l68.1 0zM240 380l32 0c33.1 0 60 26.9 60 60s-26.9 60-60 60l-12 0 0 28c0 11-9 20-20 20s-20-9-20-20l0-128c0-11 9-20 20-20zm32 80c11 0 20-9 20-20s-9-20-20-20l-12 0 0 40 12 0zm96-80l32 0c28.7 0 52 23.3 52 52l0 64c0 28.7-23.3 52-52 52l-32 0c-11 0-20-9-20-20l0-128c0-11 9-20 20-20zm32 128c6.6 0 12-5.4 12-12l0-64c0-6.6-5.4-12-12-12l-12 0 0 88 12 0zm76-108c0-11 9-20 20-20l48 0c11 0 20 9 20 20s-9 20-20 20l-28 0 0 24 28 0c11 0 20 9 20 20s-9 20-20 20l-28 0 0 44c0 11-9 20-20 20s-20-9-20-20l0-128z"/>
+                </svg>
             '))
             ->size(Size::ExtraLarge)
             ->iconSize('xl')
@@ -1595,9 +1467,9 @@ class ActionFormComponent
                 font-size: 1.2rem;
                 "
             ])
-            ->color('danger')
+            ->color('mycolor')
             ->url(fn() =>
-            blank($this->checkDocDownloaded()['upload']) &&
+                blank($this->checkDocDownloaded()['upload']) &&
                 blank($this->checkDocDownloaded()['input'])
                 ? '/pdf'
                 : null)
