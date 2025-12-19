@@ -7,12 +7,12 @@ use Filament\Pages\Dashboard as BaseDashboard;
 /*******คือว่าเราเอาปุ่มต่างไปไว้ใน widget ซึ่ง widget จะเรียกใช้ Livewire อีกที ซึ่ง Lirewire จะไปเอา Component มาใช้อีกที*******/
 
 class Dashboard extends BaseDashboard
-{   protected ?string $heading;
+{   protected static ?string $title = null;
     
-    public function __construct()
-    {   $name = auth()->user()->name;
-        $this->heading = "ยินดีต้อนรับ {$name}";
-    }
+    // public function __construct()
+    // {   $name = auth()->user()->name;
+    //     $this->heading = "ยินดีต้อนรับ {$name}";
+    // }
     
 
     public function getColumns(): int | array
@@ -21,6 +21,11 @@ class Dashboard extends BaseDashboard
             'default' => 1,
             'lg' => 3
         ];
+    }
+    
+    public function getHeading(): string
+    {
+        return '';
     }
 
 }

@@ -26,31 +26,25 @@ $colorVar = "--{$descriptionColor}-100";
         ])
     }}
     style="background: linear-gradient(to right, var({{ $colorVar }}), transparent, transparent);">
-    <div style="display: flex; justify-content: space-between;">
-        <div>
-            <div class="fi-wi-stats-overview-stat-content">
-                @if ($label = $getLabel())
-                <div class="fi-wi-stats-overview-stat-label-ctn">
-                    {{ \Filament\Support\generate_icon_html($getIcon()) }}
+    <div class="stat-main-flex">
+        <div class="fi-wi-stats-overview-stat-content">
+            @if ($label = $getLabel())
+            <div class="fi-wi-stats-overview-stat-label-ctn">
+                {{ \Filament\Support\generate_icon_html($getIcon()) }}
 
-                    <span class="fi-wi-stats-overview-stat-label">
-                        {{ $getLabel() }}
-                    </span>
-                </div>
-                @endif
-                <div style="
-                    font-size: var(--text-3xl);
-                    line-height: var(--tw-leading, var(--text-3xl--line-height));
-                    --tw-font-weight: var(--font-weight-semibold);
-                    font-weight: var(--font-weight-semibold);
-                    --tw-tracking: var(--tracking-tight);
-                    letter-spacing: var(--tracking-tight);
-                    color: var(--{{$descriptionColor}}-700);">
-                    {{ $getValue() }}
-                </div>
+                <span class="fi-wi-stats-overview-stat-label">
+                    {{ $getLabel() }}
+                </span>
             </div>
+            @endif
+            <{!! $tag !!}
+                class="stat-value"
+                style="color: var(--{{$descriptionColor}}-700);">
+                {{ $getValue() }}
+            </{!! $tag !!}>
         </div>
-        <div style="display: flex; justify-content: flex-end; align-items: flex-start;">
+
+        <div class="stat-icon">
             <div {{ (new ComponentAttributeBag)->color(DescriptionComponent::class, $descriptionColor)->class(['fi-wi-stats-overview-stat-description']) }}>
                 @if ($descriptionIcon && in_array($descriptionIconPosition, [IconPosition::After, 'after']))
                 {{ \Filament\Support\generate_icon_html(
@@ -78,7 +72,44 @@ $colorVar = "--{$descriptionColor}-100";
     @if ($progress = $getProgress())
     {{-- เพิ่มการใช้ progress bar --}}
     <div class="progress-stat-container">
-        <div class="progress-stat-bar" style="width:{{ $progress }}%; background-color: var(--{{$descriptionColor}}-500); height:10px;"></div>
+        <{!! $tag !!}
+            class="progress-stat-bar"
+            style="width:{{ $progress }}%; background-color: var(--{{$descriptionColor}}-500); height:10px;"
+        >
+        </{!! $tag !!}>
     </div>
     @endif
 </{!! $tag !!}>
+
+<style>
+    /***********ปรับ pregrees bar ที่เราสร้างมาเอง****************/
+    .stat-main-flex {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .stat-icon {
+        display: flex;
+        justify-content: flex-end;
+        align-items: flex-start;
+    }
+
+    .stat-value {
+        font-size: var(--text-3xl);
+        line-height: var(--tw-leading, var(--text-3xl--line-height));
+        --tw-font-weight: var(--font-weight-semibold);
+        font-weight: var(--font-weight-semibold);
+        --tw-tracking: var(--tracking-tight);
+        letter-spacing: var(--tracking-tight);
+    }
+
+    .progress-stat-bar {
+        border-radius: 8px;
+    }
+
+    .progress-stat-container {
+        background-color: #7a7a7a49 !important;
+        margin-top: 10px;
+        border-radius: 8px;
+    }
+</style>

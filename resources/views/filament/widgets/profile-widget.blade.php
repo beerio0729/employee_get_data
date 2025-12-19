@@ -12,13 +12,18 @@
                 </div>
 
                 <div class="employee-position">
-                    <span class="position">{{ $position }}</span>
-                    @if($position === 'ผู้สมัครงาน')
-                    <span class="status status-warning">สถานะ : กำลังพิจารณา</span>
-                    @else
-                    <span class="status status-success">ตำแหน่ง : Network Engineer</span>
-                    @endif
+                    {{ $position }}
                 </div>
+
+                @if($position === 'ผู้สมัครงาน')
+                <div class="status">สถานะ : 
+                <span class="status-container status-warning">กำลังพิจารณา</span>
+                </div>
+                @else
+                <div class="status">ตำแหน่ง : 
+                <span class="status-container status-success">Network Engineer</span>
+                </div>
+                @endif
             </div>
         </div>
     </x-filament::section>
@@ -27,13 +32,13 @@
         .employee-header {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 10px;
         }
 
         .employee-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
+            width: 65px;
+            height: 65px;
+            border-radius: 10px;
             object-fit: cover;
             background: #F3F4F6;
         }
@@ -41,37 +46,43 @@
         .employee-info {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
         }
 
         .employee-name {
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 600;
-            color: var(--mycolor-900);
+            color: var(--mycolor-500);
+            /*line-height: 1.1;*/
         }
 
         .employee-position {
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 500;
-        }
-
-        .position {
             color: var(--mycolor-500);
         }
-        .status {
-            margin-left: 5px;
-            padding: 1px 10px;
-            border-radius: 8px;
-        }
         
-        .status-success {
+        .status {
+            display: flex;
+            align-items: center;    
+            gap: 6px;
             font-size: 12px;
+            font-weight: 500;
+            color: var(--mycolor-500);
+        }
+
+        .status-container {
+            padding: 1px 5px;
+            border-radius: 5px;
+            font-size: 10px;
+        }
+
+        .status-success {
             background-color: var(--success-100);
             color: var(--success-800);
         }
 
         .status-warning {
-            font-size: 12px;
             background-color: var(--warning-100);
             color: var(--warning-800);
         }
