@@ -58,7 +58,7 @@ class UsersTable
                         ->extraAttributes(['style' => 'width:20px']),
                     ImageColumn::make('userHasoneResume.image')
                         ->disk('public')
-                        ->simpleLightbox()
+                        //->simpleLightbox()
                         ->circular()
                         ->grow(false)
                         ->state((function ($component, $record) {
@@ -122,15 +122,36 @@ class UsersTable
                             ->buddhist(),
                     ])
                     ->action(function ($record, array $data) {
+                        $view_notification = 'view_interview_' . Date::now()->timestamp;
                         $record->update([
                             'interview_date' => $data['interview_date'],
                         ]);
-                        LineSendMessageService::send($record->provider_id, [
-                            "เรียน คุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th} \n\n"
-                                . "ทางบริษัทฯ ขอแจ้งนัดหมายวันสัมภาษณ์งานของท่าน\n\nในวันที่ " 
+                        Notification::make()
+                            ->title('แจ้งวันนัดสัมภาษณ์')
+                            ->body("เรียน คุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th} \n\n"
+                                . "ทางบริษัทฯ ขอแจ้งนัดหมายวันสัมภาษณ์งานของท่าน\n\nในวันที่
+                                <B>"
                                 . Carbon::parse($data['interview_date'])->locale('th')->translatedFormat('d M ')
                                 . (Carbon::parse($data['interview_date'])->year + 543)
-                                ."\nเวลา "
+                                . "\nเวลา "
+                                . Carbon::parse($data['interview_date'])->format(' H:i')
+                                . " น.\n\n"
+                                . "</B>"
+                                . "โปรดเตรียมเอกสารที่เกี่ยวข้องและมาถึงก่อนเวลานัดหมาย 10 นาที \n\n"
+                                . "ขอบคุณค่ะ")
+                            ->actions([
+                                Action::make($view_notification)
+                                    ->button()
+                                    ->label('ทำเครื่องหมายว่าอ่านแล้ว')
+                                    ->markAsRead(),
+                            ])
+                            ->sendToDatabase($record, isEventDispatched: true);
+                        LineSendMessageService::send($record->provider_id, [
+                            "เรียน คุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th} \n\n"
+                                . "ทางบริษัทฯ ขอแจ้งนัดหมายวันสัมภาษณ์งานของท่าน\n\nในวันที่ "
+                                . Carbon::parse($data['interview_date'])->locale('th')->translatedFormat('d M ')
+                                . (Carbon::parse($data['interview_date'])->year + 543)
+                                . "\nเวลา "
                                 . Carbon::parse($data['interview_date'])->format(' H:i')
                                 . " น.\n\n"
                                 . "โปรดเตรียมเอกสารที่เกี่ยวข้องและมาถึงก่อนเวลานัดหมาย 10 นาที \n\n"
@@ -156,9 +177,16 @@ class UsersTable
     {
         return [
             Stack::make([
-                TextColumn::make('email')->icon('heroicon-m-envelope')->iconColor('warning')->copyable()
+                TextColumn::make('email')
+                    ->icon('heroicon-m-envelope')
+                    ->iconColor('warning')
+                    ->copyable()
                     ->copyMessage('คัดลอกแล้ว')->copyMessageDuration(1500)->searchable()->sortable(),
-                TextColumn::make('userHasoneResume.tel')->icon('heroicon-m-phone')->iconColor('primary')->default('ไม่ได้ระบุ'),
+                TextColumn::make('userHasoneResume.tel')
+                    ->icon('heroicon-m-phone')
+                    ->iconColor('primary')
+                    ->default('ไม่ได้ระบุ')
+                    ->url(fn($record) => 'tel:' . $record->userHasoneResume->tel),
             ])->space(1),
             TextColumn::make('interview_date')->buddhistDate('d M Y h:i')
                 ->prefix(new HtmlString('<div><strong>วันที่นัดสัมภาษณ์: </strong></div>')),

@@ -20,6 +20,11 @@
     .fi-wi-stats-overview-stat {
         padding: calc(var(--spacing) * 3);
     }
+
+    /********ปรับ padding ของ ข้อความแจ้งเตือนในเมนู notification เฉพาะโทรศัพท*******/
+    .fi-no-notification {
+        padding: 10px 30px;
+    }
 }
 
 
@@ -77,9 +82,9 @@ input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
     color: var(--mycolor-700);
 }
 
-.fi-header-heading:where(.dark,.dark *),
-.fi-wi-stats-overview-stat-value:where(.dark,.dark *) {
-    color: var(--color-white); 
+.fi-header-heading:where(.dark, .dark *),
+.fi-wi-stats-overview-stat-value:where(.dark, .dark *) {
+    color: var(--color-white);
 }
 
 /****************ปรับ ขนาด Icon เพิ่มเติม ******************/

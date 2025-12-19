@@ -36,7 +36,7 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->plugin(SimpleLightBoxPlugin::make())
+            // ->plugin(SimpleLightBoxPlugin::make())
             ->id('admin')
             ->darkMode(false)
             ->font('Noto Sans Thai')
@@ -46,9 +46,9 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('3.5rem')
             ->profile(EditProfile::class)
             ->registration(Register::class)
-            ->databaseNotifications()
             ->globalSearch(false)
-            //->databaseNotificationsPolling('3s')
+            ->databaseNotifications()
+            ->databaseNotificationsPolling('5s')
             ->colors([
                 'primary' => 'oklch(0.55 0.19 259.29)',
             ])
