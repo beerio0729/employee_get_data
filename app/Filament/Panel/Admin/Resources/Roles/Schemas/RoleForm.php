@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Roles\Schemas;
+namespace App\Filament\Panel\Admin\Resources\Roles\Schemas;
 
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;

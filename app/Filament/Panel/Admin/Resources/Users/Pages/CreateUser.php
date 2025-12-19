@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\Users\Pages;
+namespace App\Filament\Panel\Admin\Resources\Users\Pages;
 
-use App\Filament\Resources\Users\UserResource;
 use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Panel\Admin\Resources\Users\UserResource;
 
 class CreateUser extends CreateRecord
 {

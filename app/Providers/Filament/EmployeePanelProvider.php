@@ -20,19 +20,16 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use SolutionForest\FilamentSimpleLightBox\SimpleLightBoxPlugin;
 
-class AdminPanelProvider extends PanelProvider
+class EmployeePanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
     {
         return $panel
-            ->default()
-            // ->plugin(SimpleLightBoxPlugin::make())
-            ->id('admin')
+            ->id('employee')
             ->darkMode(false)
             ->font('Noto Sans Thai')
-            ->path('/admin')
+            ->path('/')
             ->login(Login::class)
             ->brandLogo(asset('storage/user.png'))
             ->brandLogoHeight('3.5rem')
@@ -42,22 +39,28 @@ class AdminPanelProvider extends PanelProvider
             ->topNavigation()
             ->userMenuItems([
                 Action::make('switchmode')
-                ->icon('heroicon-o-arrows-right-left')
-                ->color('warning')
-                ->label('ไปโหมดพนักงาน')
-                ->url('/'),
+                    ->icon('heroicon-o-arrows-right-left')
+                    ->hidden(function () {
+                        $role_name = auth()->user()->userBelongToRole?->name;
+                        if (in_array($role_name, ['admin', 'super_admin'], true)) {
+                            return 0;
+                        } else {
+                            return 1;
+                        }
+                    })
+                    ->color('warning')
+                    ->label('ไปโหมดแอดมิน')
+                    ->url('/admin'),
             ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('5s')
             ->colors([
                 'primary' => 'oklch(0.55 0.19 259.29)',
             ])
-            //->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
-            ->discoverResources(in: app_path('Filament/Panel/Admin/Resources'),for: 'App\Filament\Panel\Admin\Resources')
-            //->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
-            ->discoverPages(in: app_path('Filament/Panel/Admin/Pages'),for: 'App\Filament\Panel\Admin\Pages')
+            ->discoverResources(in: app_path('Filament/Panel/Employee/Resources'), for: 'App\Filament\Panel\Employee\Resources')
+            ->discoverPages(in: app_path('Filament/Panel/Employee/Pages'), for: 'App\Filament\Panel\Employee\Pages')
             ->pages([])
-            ->discoverWidgets(in: app_path('Filament/Panel/Admin/Widgets'), for: 'App\Filament\Panel\Admin\Widgets')
+            ->discoverWidgets(in: app_path('Filament/Panel/Employee/Widgets'), for: 'App\Filament\Panel\Employee\Widgets')
             ->widgets([])
             ->middleware([
                 EncryptCookies::class,

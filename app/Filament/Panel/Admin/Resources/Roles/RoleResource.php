@@ -1,18 +1,19 @@
 <?php
 
-namespace App\Filament\Resources\Roles;
+namespace App\Filament\Panel\Admin\Resources\Roles;
 
-use App\Filament\Resources\Roles\Pages\CreateRole;
-use App\Filament\Resources\Roles\Pages\EditRole;
-use App\Filament\Resources\Roles\Pages\ListRoles;
-use App\Filament\Resources\Roles\Schemas\RoleForm;
-use App\Filament\Resources\Roles\Tables\RolesTable;
-use App\Models\Role;
+
 use BackedEnum;
-use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
+use App\Models\Role;
 use Filament\Tables\Table;
+use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
+use Filament\Support\Icons\Heroicon;
+use App\Filament\Panel\Admin\Resources\Roles\Pages\EditRole;
+use App\Filament\Panel\Admin\Resources\Roles\Pages\ListRoles;
+use App\Filament\Panel\Admin\Resources\Roles\Pages\CreateRole;
+use App\Filament\Panel\Admin\Resources\Roles\Schemas\RoleForm;
+use App\Filament\Panel\Admin\Resources\Roles\Tables\RolesTable;
 
 class RoleResource extends Resource
 {

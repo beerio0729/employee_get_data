@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Carbon\Carbon;
 
+use Filament\Panel;
 use App\Models\DocEmp;
 use App\Models\Father;
 use App\Models\Idcard;
@@ -27,6 +28,8 @@ use App\Models\Resume\ResumeCertificates;
 use App\Models\Resume\ResumeLocationWork;
 use App\Models\Resume\ResumeOtherContacts;
 use App\Models\Resume\ResumeJobPreferences;
+
+use Filament\Models\Contracts\FilamentUser;
 use App\Models\Resume\ResumePositionApplied;
 use App\Models\Resume\ResumeWorkExperiences;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -35,7 +38,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -79,6 +82,18 @@ class User extends Authenticatable
             'interview_date' => 'datetime',
         ];
     }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        $role_name = $this->userBelongToRole->name;
+
+        return match ($panel->getId()) {
+            'admin' => in_array($role_name, ['admin', 'super_admin'], true),
+            'employee' => in_array($role_name, ['admin', 'super_admin', 'employee', 'applicants'], true),
+            default => false,
+        };
+    }
+
 
     /*เอาค่าของประสบการณ์มาเรียงเป็น HTML */
 
@@ -166,13 +181,13 @@ class User extends Authenticatable
     {
         return $this->hasOne(Marital::class, 'user_id', 'id');
     }
-    
-    public function userHasoneAdditionalInfo() 
+
+    public function userHasoneAdditionalInfo()
     {
         return $this->hasOne(AdditionalInfo::class, 'user_id', 'id')->withDefault();
     }
-    
-    public function userHasoneCertificate() 
+
+    public function userHasoneCertificate()
     {
         return $this->hasOne(Certificate::class, 'user_id', 'id')->withDefault();
     }
@@ -186,20 +201,20 @@ class User extends Authenticatable
     {
         return $this->hasMany(DocEmp::class, 'user_id', 'id');
     }
-    
+
     /***********พ่อ แม่ พี่น้อง**********/
-    
-    public function userHasoneFather() 
+
+    public function userHasoneFather()
     {
         return $this->hasOne(Father::class, 'user_id', 'id')->withDefault();
     }
-    
-    public function userHasoneMother() 
+
+    public function userHasoneMother()
     {
         return $this->hasOne(Mother::class, 'user_id', 'id')->withDefault();
     }
-    
-    public function userHasoneSibling() 
+
+    public function userHasoneSibling()
     {
         return $this->hasOne(Sibling::class, 'user_id', 'id')->withDefault();
     }
@@ -246,5 +261,4 @@ class User extends Authenticatable
     {
         return $this->userHasoneResume->hasMany(ResumeOtherContacts::class, 'resume_id', 'id');
     }
-
 }

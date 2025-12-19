@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Users\Tables;
+namespace App\Filament\Panel\Admin\Resources\Users\Tables;
 
 use Dom\Text;
 use Carbon\Carbon;

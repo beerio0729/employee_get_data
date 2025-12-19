@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Filament\Resources\Roles\Pages;
+namespace App\Filament\Panel\Admin\Resources\Roles\Pages;
 
-use App\Filament\Resources\Roles\RoleResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
+use App\Filament\Panel\Admin\Resources\Roles\RoleResource;
 
 class EditRole extends EditRecord
 {

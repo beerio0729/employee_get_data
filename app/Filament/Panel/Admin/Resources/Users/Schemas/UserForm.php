@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Users\Schemas;
+namespace App\Filament\Panel\Admin\Resources\Users\Schemas;
 
 use Carbon\Carbon;
 use App\Models\Role;

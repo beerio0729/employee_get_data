@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Roles\Tables;
+namespace App\Filament\Panel\Admin\Resources\Roles\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;

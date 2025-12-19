@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Widgets;
+namespace App\Filament\Panel\Employee\Widgets;
 
 use Filament\Widgets\Widget;
 

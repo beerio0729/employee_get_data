@@ -9,9 +9,9 @@ use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\Auth\SocialAuthController;
 
 
-Route::fallback(function () {
-    return redirect('/');
-});
+// Route::fallback(function () {
+//     return redirect('/');
+// });
 
 Route::get('/test', function () {
     $user = auth()->user(); // user 

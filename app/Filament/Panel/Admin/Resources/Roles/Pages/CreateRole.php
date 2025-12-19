@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Filament\Resources\Roles\Pages;
+namespace App\Filament\Panel\Admin\Resources\Roles\Pages;
 
-use App\Filament\Resources\Roles\RoleResource;
 use Filament\Resources\Pages\CreateRecord;
+use App\Filament\Panel\Admin\Resources\Roles\RoleResource;
 
 class CreateRole extends CreateRecord
 {
