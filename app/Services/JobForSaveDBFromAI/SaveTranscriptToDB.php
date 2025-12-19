@@ -9,7 +9,6 @@ class SaveTranscriptToDB
     public function saveToDB(array $hasManyData, $user, array $path, $file_name): string
     {
         $notTranscriptCount = 0; // ตัวนับฝั่ง else
-
         if (!empty($hasManyData)) {
             foreach ($hasManyData as $index => $item) {
                 if ($item['check'] === 'yes') {
