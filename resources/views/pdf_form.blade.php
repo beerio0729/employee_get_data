@@ -1529,8 +1529,8 @@ $cert = $user->userHasoneCertificate?->data;
     <script>
         function downloadPdf() {
             document.getElementById('button').style.display = "none";
-            window.print()
-            window.location.reload();
+            window.print();
+            location.replace('/');
         }
     </script>
 </body>

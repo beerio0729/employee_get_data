@@ -17,9 +17,7 @@ class PDFController extends Controller
         ];
         
         $title = "ใบสมัครของ_{$user->userHasoneIdcard->name_th}";
-        //$pdf = Pdf::loadView('pdf_form', $data);
         return view('pdf_form',compact('user','title'));
-        //return $pdf->download($title);
 
 
 

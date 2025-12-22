@@ -19,9 +19,15 @@ class RoleResource extends Resource
 {
     protected static ?string $model = Role::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::UserGroup;
+    
+    protected static ?int $navigationSort = 3;
 
     protected static ?string $recordTitleAttribute = 'กำหนดสถานะพนักงาน';
+    
+    protected static ?string $modelLabel = 'สิทธิ์การเข้าถึง';
+    
+    protected static ?string $navigationLabel = 'สิทธิ์การเข้าถึง';
 
     public static function form(Schema $schema): Schema
     {

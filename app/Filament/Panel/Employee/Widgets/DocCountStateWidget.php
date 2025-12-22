@@ -10,7 +10,7 @@ class DocCountStateWidget extends StatsOverviewWidget
     protected ?string $pollingInterval = '2s';
     protected static ?int $sort = 2;
     protected int | string | array $columnSpan = 'full';
-    protected string $view = 'filament.widgets.doc-count-state-widget';
+    protected string $view = 'filament.panel.employee.widgets.doc-count-state-widget';
     protected function getStats(): array
     {
         $user = auth()->user();

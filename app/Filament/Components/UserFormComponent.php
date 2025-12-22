@@ -36,7 +36,7 @@ class UserFormComponent
         $this->isAndroidOS = $detect->isAndroidOS();
     }
 
-    public function fieldsteLabel($state)
+    public function fieldsetMalitalLabel($state)
     {
         $text = "ข้อมูลคู่สมรส";
         $icon = "⚠️"; // หรือ SVG icon
@@ -46,7 +46,7 @@ class UserFormComponent
 
     public function getDocEmp($record, $namedoc)
     {
-        return $record->userHasmanyDocEmp()->where('file_name', $namedoc);
+        return blank($record) ? null : $record->userHasmanyDocEmp()->where('file_name', $namedoc);
     }
 
     /**********ส่วนของ Components************/
@@ -56,8 +56,12 @@ class UserFormComponent
         return [
             Section::make('ข้อมูลจากบัตรประชาชน')
                 ->hidden(function () use ($record, $namedoc) {
-                    $doc = $this->getDocEmp($record, $namedoc)->first();
-                    return blank($doc) ? 1 : 0;
+                    if (blank($record)) {
+                        return 0;
+                    } else {
+                        $doc = $this->getDocEmp($record, $namedoc);
+                        return $doc->exists() ? 0 : 1;
+                    }
                 })
                 ->columns(3)
                 ->relationship('userHasoneIdcard')
@@ -124,8 +128,12 @@ class UserFormComponent
                 ]),
             Section::make('ที่อยู่ตามบัตรประชาชน')
                 ->hidden(function () use ($record, $namedoc) {
-                    $doc = $this->getDocEmp($record, $namedoc)->first();
-                    return blank($doc) ? 1 : 0;
+                    if (blank($record)) {
+                        return 0;
+                    } else {
+                        $doc = $this->getDocEmp($record, $namedoc);
+                        return $doc->exists() ? 0 : 1;
+                    }
                 })
                 ->collapsed()
                 ->columns(3)
@@ -197,8 +205,12 @@ class UserFormComponent
             Tabs::make('Tabs')
             ->persistTab()
             ->hidden(function () use ($record, $namedoc) {
-                $doc = $this->getDocEmp($record, $namedoc)->first();
-                return blank($doc) ? 1 : 0;
+                if (blank($record)) {
+                    return 0;
+                } else {
+                    $doc = $this->getDocEmp($record, $namedoc);
+                    return $doc->exists() ? 0 : 1;
+                }
             })
             ->tabs([
                 Tab::make('ข้อมูลเรซูเม่ทั่วไป')
@@ -436,7 +448,7 @@ class UserFormComponent
                             ->schema([
                                 Repeater::make('experiences')
                                     ->itemLabel(fn(array $state): ?string => $state['company'] ?? null)
-                                    ->collapsed()   
+                                    ->collapsed()
                                     ->columns(3)
                                     ->hiddenLabel()
                                     ->addActionLabel('เพิ่ม "ประสบการณ์ทำงาน"')
@@ -556,8 +568,12 @@ class UserFormComponent
         return
             Section::make('ข้อมูลวุฒิการศึกษา')
             ->hidden(function () use ($record, $namedoc) {
-                $doc = $this->getDocEmp($record, $namedoc)->first();
-                return blank($doc) ? 1 : 0;
+                if (blank($record)) {
+                    return 0;
+                } else {
+                    $doc = $this->getDocEmp($record, $namedoc);
+                    return $doc->exists() ? 0 : 1;
+                }
             })
             ->description('มีโอกาสที่ Ai จะอ่านข้อมูลผิดพลาด โปรดตรวจสอบข้อมูลให้ถูกต้องตามจริง')
             ->collapsed()
@@ -637,8 +653,12 @@ class UserFormComponent
         return
             Section::make('ข้อมูลใบเกณฑ์หทาร')
             ->hidden(function () use ($record, $namedoc) {
-                $doc = $this->getDocEmp($record, $namedoc)->first();
-                return blank($doc) ? 1 : 0;
+                if (blank($record)) {
+                    return 0;
+                } else {
+                    $doc = $this->getDocEmp($record, $namedoc);
+                    return $doc->exists() ? 0 : 1;
+                }
             })
             ->description('มีโอกาสที่ Ai จะอ่านข้อมูลผิดพลาดสูงมากเนื่องจากเป็นตัวอักษรเขียน โปรดตรวจสอบข้อมูลให้ถูกต้องตามจริง')
             ->columns(4)
@@ -754,7 +774,7 @@ class UserFormComponent
                     ]),
                 Fieldset::make('info_of_spouse')
                     ->visible(fn($get) => $get('status') === 'married' ? 1 : 0)
-                    ->label(fn($state) => new HtmlString($this->fieldsteLabel($state)))
+                    ->label(fn($state) => new HtmlString($this->fieldsetMalitalLabel($state)))
                     ->extraAttributes(
                         fn() => $this->isMobile
                             ? ['style' => 'padding: 24px 10px']
@@ -808,8 +828,12 @@ class UserFormComponent
         return
             Section::make('ใบ Certificate')
             ->hidden(function () use ($record, $namedoc) {
-                $doc = $this->getDocEmp($record, $namedoc)->first();
-                return blank($doc) ? 1 : 0;
+                if (blank($record)) {
+                    return 0;
+                } else {
+                    $doc = $this->getDocEmp($record, $namedoc);
+                    return $doc->exists() ? 0 : 1;
+                }
             })
             ->description('มีโอกาสที่ Ai จะอ่านข้อมูลผิดพลาด โปรดตรวจสอบข้อมูลให้ถูกต้องตามจริง')
             ->columns(4)
@@ -852,8 +876,12 @@ class UserFormComponent
         return
             Section::make('ข้อมูลเอกสารเพิ่มเติม')
             ->hidden(function () use ($record, $namedoc) {
-                $doc = $this->getDocEmp($record, $namedoc)->first();
-                return blank($doc) ? 1 : 0;
+                if (blank($record)) {
+                    return 0;
+                } else {
+                    $doc = $this->getDocEmp($record, $namedoc);
+                    return $doc->exists() ? 0 : 1;
+                }
             })
             ->description('มีโอกาสที่ Ai จะอ่านข้อมูลผิดพลาด โปรดตรวจสอบข้อมูลให้ถูกต้องตามจริง')
             ->collapsed()

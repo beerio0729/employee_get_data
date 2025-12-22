@@ -3,6 +3,7 @@
 return [
 
     'title' => 'แก้ไข:label',
+    'noedit_title' => 'ดูข้อมูล:label',
 
     'breadcrumb' => 'แก้ไข',
 

@@ -6,6 +6,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Actions\Action;
 use App\Filament\Pages\Auth\Login;
+use Filament\Support\Colors\Color;
 use App\Filament\Pages\EditProfile;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Auth;
@@ -50,7 +51,7 @@ class AdminPanelProvider extends PanelProvider
             ->databaseNotifications()
             ->databaseNotificationsPolling('5s')
             ->colors([
-                'primary' => 'oklch(0.55 0.19 259.29)',
+                'primary' => Color::Blue,
             ])
             //->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverResources(in: app_path('Filament/Panel/Admin/Resources'),for: 'App\Filament\Panel\Admin\Resources')

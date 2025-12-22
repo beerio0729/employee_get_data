@@ -1,3 +1,3 @@
 <x-filament-widgets::widget>
-    <livewire:widget-livewire.additional-livewire />
+    <livewire:panel.employee.widgets.load-doc-livewire />
 </x-filament-widgets::widget>

@@ -78,8 +78,9 @@ input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
 }
 
 /***********สีข้อความรวม***************/
-.fi-header-heading {
-    color: var(--mycolor-700);
+.fi-header-heading,
+.fi-ta-text-item {
+    color: var(--primary-800);
 }
 
 .fi-header-heading:where(.dark, .dark *),

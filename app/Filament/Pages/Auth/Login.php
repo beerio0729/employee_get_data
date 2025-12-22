@@ -95,7 +95,7 @@ class Login extends BaseLogin
                     ->alignment($this->getFormActionsAlignment())
                     ->fullWidth($this->hasFullWidthFormActions())
                     ->key('form-login')
-                    ->view("filament.actions.line-login"),
+                    ->view("filament.actions.my-login-page"), //Overide จาก Schema/component/Actions.php เพราะอยากให้ปุ่มมันเต็มความกว้าง
             ])
             ->visible(fn(): bool => blank($this->userUndertakingMultiFactorAuthentication));
     }

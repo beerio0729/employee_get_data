@@ -27,33 +27,18 @@ class SocialAuthController extends Controller
             ->where('provider_id', $socialUser->getId())
             ->first();
         $email = $socialUser->getEmail();
-        
-        if (!$user) 
-        {
-            // สร้าง user ใหม่
-            if (blank($email)) {
-                // ถ้าไม่มี email → สร้าง user ใหม่ *เสมอ*
-                $user = User::create([
-                    'name'        => $socialUser->getName() ?? $socialUser->getNickname(),
-                    'email'       => null,
-                    'provider'    => $provider,
-                    'provider_id' => $socialUser->getId(),
-                    'password'    => bcrypt(Str::random(16)),
-                    'role_id'     => 4,
-                ]);
-            } else {
-                // ถ้า provider ส่ง email → ใช้อัปเดต/สร้างแบบยึด email
-                $user = User::updateOrCreate(
-                    ['email' => $email],
-                    [
-                        'name'        => $socialUser->getName() ?? $socialUser->getNickname(),
-                        'provider'    => $provider,
-                        'provider_id' => $socialUser->getId(),
-                        'password'    => bcrypt(Str::random(16)),
-                        'role_id'     => 4,
-                    ]
-                );
-            }
+
+        if (!$user) {
+
+            $user = User::create([
+                'name'        => $socialUser->getName() ?? $socialUser->getNickname(),
+                'email'       => $socialUser->getEmail(),
+                'provider'    => $provider,
+                'provider_id' => $socialUser->getId(),
+                'password'    => bcrypt(Str::random(16)),
+                'role_id'     => 3,
+            ]);
+            $user->userHasoneApplicant()->create([]);
 
             Auth::login($user);
             LineSendMessageService::send($socialUser->getId(), ['ยินดีต้อนรับสู่เว็บอับโหลดเรซูเม่', 'กรุณาอับเดตข้อมูลโปรไฟล์ให้ครบถ้วน']);

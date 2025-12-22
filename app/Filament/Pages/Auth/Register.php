@@ -17,7 +17,7 @@ class Register extends BaseRegister
         $parentForm = parent::form($schema);
         $mycomponents = $parentForm->getComponents();
         $newcomponenets = [
-            Hidden::make('role_id')->default(4),
+            Hidden::make('role_id')->default(3),
             TextInput::make('tel')
                 ->columnSpan(1)
                 ->placeholder(__('filament-panels::auth/pages/register.form.tel.placeholder'))
@@ -35,26 +35,12 @@ class Register extends BaseRegister
         );
         return $schema->schema($mycomponents);
     }
-    
-    public function mount(): void
-    {
-        if (Filament::auth()->check()) {
-            dump(Filament::getUrl());
-            redirect()->intended(Filament::getUrl());
-        }
 
-        $this->callHook('beforeFill');
-
-        $this->form->fill();
-
-        $this->callHook('afterFill');
+    protected function handleRegistration(array $data): Model
+    {   $user = parent::handleRegistration($data);
+        DB::transaction(function () use ($user) {   
+            $user->userHasoneApplicant()->create([]);
+        },attempts: 5);
+        return $user;
     }
-
-    // protected function handleRegistration(array $data): Model
-    // {   $user = parent::handleRegistration($data);
-    //     DB::transaction(function () use ($user) {   
-    //     $user->userHasoneResume()->create([]);
-    //     },attempts: 5);
-    //     return $user;
-    // }
 }

@@ -1,15 +1,5 @@
 <?php
 return [
-    'prefix_name' => [
-        'นาย' => 'นาย',
-        'นาง' => 'นาง',
-        'นางสาว' => 'นางสาว',
-    ],
-    'prefix_name_en' => [
-        'Mr.' => 'Mr.',
-        'Mrs.' => 'Mrs.',
-        'Miss' => 'Miss',
-    ],
 
     'marital_status' => [
         'single' => 'โสด',
@@ -18,7 +8,7 @@ return [
         'widowed' => 'เป็นหม้าย',
         'Separated' => 'แยกกันอยู่'
     ],
-    
+
     'marital' => [
         'ดำ' => 'Exempted from military service',
         'แดง' => 'Selected for military service',
@@ -27,65 +17,13 @@ return [
     ],
 
     'day' => [
-        'Saturday' => 'วันเสาร์',
-        'Sunday' => 'วันอาทิตย์',
+        'saturday' => 'วันเสาร์',
+        'sunday' => 'วันอาทิตย์',
         'monday' => 'วันจันทร์',
-        'Tuesday' => 'วันอังคาร',
-        'Wednesday' => 'วันพุธ',
-        'Thursday' => 'วันพฤหัส',
-        'Friday' => 'วันศุกร์',
-    ],
-
-    'job_status' => [
-        'ปกติ' => 'ปกติ',
-        'ยังไม่อนุมัติ' => 'ยังไม่อนุมัติ',
-        'ถูกพักงาน' => 'ถูกพักงาน',
-        'ออกแล้ว' => 'ออกแล้ว',
-    ],
-
-    'row' => [
-        '1' => 'Admin',
-        '2' => 'Officer',
-        '3' => 'Employee',
-    ],
-
-    'education_level' => [
-        'มัธยมศึกษาปีที่3' => 'มัธยมศึกษาปีที่3',
-        'มัธยมศึกษาปีที่6' => 'มัธยมศึกษาปีที่6',
-        'ปวช.' => 'ปวช.',
-        'ปวส.' => 'ปวส.',
-        'ปริญญาตรี' => 'ปริญญาตรี',
-        'ปริญญาโท' => 'ปริญญาโท',
-        'ปริญญาเอก' => 'ปริญญาเอก',
-        'อื่นๆ (โปรดระบุ)' => 'อื่นๆ (โปรดระบุ)'
-    ],
-
-    'lang' => [
-        'ภาษาอังกฤษ' => 'ภาษาอังกฤษ',
-        'ภาษาญี่ปุ่น' => 'ภาษาญี่ปุ่น',
-        'ภาษาจีน' => 'ภาษาจีน',
-        'ภาษาเกาหลี' => 'ภาษาเกาหลี',
-    ],
-
-    'office' => [
-        'Excel' => 'Excel',
-        'Power Point' => 'Power Point',
-        'Word' => 'Word',
-    ],
-
-    'multimedia' => [
-        'Photoshop' => 'Photoshop',
-        'Ilastrator' => 'Ilastrator',
-        'Premier Pro' => 'Premier Pro',
-        'After Effect' => 'After Effect',
-    ],
-
-    'program' => [
-        'HTML' => 'HTML',
-        'CSS' => 'CSS',
-        'Javascript' => 'Javascript',
-        'PHP' => 'PHP',
-        'Python' => 'Python',
+        'tuesday' => 'วันอังคาร',
+        'wednesday' => 'วันพุธ',
+        'thursday' => 'วันพฤหัส',
+        'friday' => 'วันศุกร์',
     ],
 
     'month' => [
@@ -103,26 +41,19 @@ return [
         12 => 'ธันวาคม',
     ],
 
-    'time_policy' => [
-        1 => 'ฝ่ายบริหาร',
-        2 => 'ฝ่ายบุคคล',
-        3 => 'ฝ่ายผลิต',
-        4 => 'ฝ่าย IT',
-        5 => 'ฝ่ายขาย',
-        6 => 'ฝ่ายบัญชี',
-        7 => 'ฝ่ายการตลาด',
-    ],
-
-    // 'doc_name' => [
-    //     'resume' => 'เอกสาร Resume',
-    //     'id_card' => 'สำเนาบัตรประชาชน',
-    //     'transcript' => 'วุฒิการศึกษา',
-    // ],
-
     'skill_level' => [
         'fluent' => 'คล่องแคล่ว',
         'good' => 'ดี',
         'fair' => 'พอใช้'
+    ],
+
+    'applicant_status' => [
+        'new' => 'ข้อมูลยังไม่เพียงพอ',
+        'doc_passed' => 'เอกสารผ่านแล้ว',
+        'interview_scheduled' => 'นัดสัมภาษณ์แล้ว',
+        'interviewed' => 'สัมภาษณ์แล้ว',
+        'passed' => 'ผ่านการคัดเลือก',
+        'rejected' => 'ไม่ผ่านการคัดเลือก',
     ],
 
 ];

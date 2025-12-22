@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire\WidgetLivewire;
+namespace App\Livewire\Panel\Employee\Widgets;
 
 use Livewire\Component;
 use Filament\Actions\Action;
@@ -21,6 +21,6 @@ class LoadDocLivewire extends Component implements HasActions, HasSchemas
     }
     public function render()
     {
-        return view('livewire.widget-livewire.load-doc-livewire');
+        return view('livewire.panel.employee.widgets.load-doc-livewire');
     }
 }

@@ -12,8 +12,9 @@ use App\Models\Idcard;
 use App\Models\Mother;
 use App\Models\Marital;
 use App\Models\Sibling;
-use App\Models\Bookbank;
+use App\Models\Employee;
 use App\Models\Military;
+use App\Models\Applicant;
 use App\Models\AnotherDoc;
 use App\Models\Transcript;
 use App\Models\Certificate;
@@ -25,16 +26,11 @@ use App\Models\Resume\ResumeEducations;
 use App\Models\Resume\ResumeLangSkills;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Resume\ResumeCertificates;
-use App\Models\Resume\ResumeLocationWork;
 use App\Models\Resume\ResumeOtherContacts;
 use App\Models\Resume\ResumeJobPreferences;
-
 use Filament\Models\Contracts\FilamentUser;
-use App\Models\Resume\ResumePositionApplied;
 use App\Models\Resume\ResumeWorkExperiences;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -56,7 +52,6 @@ class User extends Authenticatable implements FilamentUser
         'provider',
         'provider_id',
         'password',
-        'interview_date', //วันที่สัมภาษณ์
     ];
 
     /**
@@ -89,7 +84,7 @@ class User extends Authenticatable implements FilamentUser
 
         return match ($panel->getId()) {
             'admin' => in_array($role_name, ['admin', 'super_admin'], true),
-            'employee' => in_array($role_name, ['admin', 'super_admin', 'employee', 'applicants'], true),
+            'employee' => in_array($role_name, ['admin', 'super_admin', 'employee'], true),
             default => false,
         };
     }
@@ -156,6 +151,20 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
+    
+    /********User Hasone ไปสถานะต่างๆ********/
+    
+    public function userHasoneApplicant() //ผู้สมัคร
+    {
+        return $this->hasOne(Applicant::class, 'user_id', 'id')->withDefault();
+    }
+    
+    public function userHasoneEmployee() //พนักงาน
+    {
+        return $this->hasOne(Employee::class, 'user_id', 'id')->withDefault();
+    }
+    
+    /**************User HasOne ไปที่เอกสาร*************/
 
     public function userHasoneResume() //resume
     {

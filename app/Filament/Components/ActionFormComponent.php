@@ -1355,7 +1355,7 @@ class ActionFormComponent
                 $this->anotherDocAction(),
             ])->label('อับโหลดเอกสาร')
             ->icon('heroicon-m-document-arrow-up')
-            ->color('mycolor')
+            ->color('primary')
             ->button()
             ->dropdownWidth(Width::Full)
             ->dropdownAutoPlacement()
@@ -1380,7 +1380,7 @@ class ActionFormComponent
                 "
             ])
             ->icon('heroicon-m-user')
-            ->color('mycolor')
+            ->color('primary')
             ->label('ข้อมูลเพิ่มเติม')
             ->tooltip('ท่านจำเป็นต้องกรอกข้อมูลบางอย่างที่ไม่มีในเอกสารที่ท่านอับโหลด')
             ->modalSubmitActionLabel('อับเดตข้อมูล')
@@ -1467,21 +1467,17 @@ class ActionFormComponent
                 font-size: 1.2rem;
                 "
             ])
-            ->color('mycolor')
-            ->url(fn() =>
-                blank($this->checkDocDownloaded()['upload']) &&
-                blank($this->checkDocDownloaded()['input'])
-                ? '/pdf'
-                : null)
+            ->color('primary')
             ->action(function ($record) {
                 $missing = $this->checkDocDownloaded();
                 $parts = [];
 
-                $hasUpload = !blank($missing['upload']);
-                $hasInput  = !blank($missing['input']);
+                $hasUpload = filled($missing['upload']);
+                $hasInput  = filled($missing['input']);
+
 
                 if ($hasUpload) {
-                    $parts[] = 'คุณยังไม่ได้อัปโหลดเอกสาร: <br>"' . implode(', ', $missing['upload']) . '"';
+                    $parts[] = 'คุณยังไม่ได้อัปโหลด: <br>"' . implode(', ', $missing['upload']) . '"';
                 }
 
                 if ($hasInput) {
@@ -1489,23 +1485,25 @@ class ActionFormComponent
                 }
 
                 // ประโยคปิดท้าย
-                if ($hasUpload && $hasInput) {
-                    $ending = 'กรุณาอัปโหลดเอกสาร และ กรอกข้อมูลดังกล่าว<br>ก่อนดาวน์โหลดใบสมัคร';
+                if ($hasUpload || $hasInput) {
+                    if ($hasUpload && $hasInput) {
+                        $ending = 'กรุณาอัปโหลดเอกสาร และ กรอกข้อมูลดังกล่าว<br>ก่อนดาวน์โหลดใบสมัคร';
+                    } elseif ($hasUpload) {
+                        $ending = 'กรุณาอัปโหลดเอกสารก่อนดาวน์โหลดใบสมัคร';
+                    } else {
+                        $ending = 'กรุณากรอกข้อมูลดังกล่าวก่อนดาวน์โหลดใบสมัคร';
+                    }
+
                     $msg = implode('<br><br>', $parts) . '<br><br>' . $ending;
+
                     event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
+                } else {
+                    $record->userHasoneApplicant()->update([
+                        'status' => 'doc_passed',
+                    ]);
+                    return redirect('/pdf');
                 }
-                if ($hasUpload) {
-                    $ending = 'กรุณาอัปโหลดเอกสารก่อนดาวน์โหลดใบสมัคร';
-                    $msg = implode('<br><br>', $parts) . '<br><br>' . $ending;
-                    event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
-                }
-                if ($hasInput) {
-                    $ending = 'กรุณากรอกข้อมูลดังกล่าวก่อนดาวน์โหลดใบสมัคร';
-                    $msg = implode('<br><br>', $parts) . '<br><br>' . $ending;
-                    event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
-                }
-            })
-            ->openUrlInNewTab();
+            });
     }
 
 
@@ -1519,6 +1517,7 @@ class ActionFormComponent
         // ตรวจว่าเป็นผู้หญิงหรือไม่
         $isFemale = in_array(trim(strtolower($prefix), "."), ['miss', 'mrs']);
         $errorUplaod = [ //สำหรับเอกสารอับโหลด
+            'รูปโปรไฟล์' => $user->userHasmanyDocEmp()->where('file_name', 'image_profile')->exists(),
             'resume'        => $user->userHasoneResume()->exists(),
             'บัตรประชาชน'   => $user->userHasoneIdcard()->exists(),
             'วุฒิการศึกษา'   => $user->userHasmanyTranscript()->exists(),
