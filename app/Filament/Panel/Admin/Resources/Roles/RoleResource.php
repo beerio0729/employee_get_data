@@ -4,6 +4,7 @@ namespace App\Filament\Panel\Admin\Resources\Roles;
 
 
 use BackedEnum;
+use UnitEnum;
 use App\Models\Role;
 use Filament\Tables\Table;
 use Filament\Schemas\Schema;
@@ -21,13 +22,15 @@ class RoleResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::UserGroup;
     
+    protected static string | UnitEnum | null $navigationGroup = 'Settings';
+    
     protected static ?int $navigationSort = 3;
 
-    protected static ?string $recordTitleAttribute = 'กำหนดสถานะพนักงาน';
+    protected static ?string $recordTitleAttribute = 'กำหนดสิทธิ์การเข้าถึง';
     
-    protected static ?string $modelLabel = 'สิทธิ์การเข้าถึง';
+    protected static ?string $modelLabel = 'กำหนดสิทธิ์การเข้าถึง';
     
-    protected static ?string $navigationLabel = 'สิทธิ์การเข้าถึง';
+    protected static ?string $navigationLabel = 'กำหนดสิทธิ์การเข้าถึง';
 
     public static function form(Schema $schema): Schema
     {
@@ -65,33 +68,33 @@ class RoleResource extends Resource
         }
     }
 
-    public static function canCreate(): bool
-    {
-        $user = auth()->user();
-        if ($user->role_id === 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    // public static function canCreate(): bool
+    // {
+    //     $user = auth()->user();
+    //     if ($user->role_id === 1) {
+    //         return true;
+    //     } else {
+    //         return false;
+    //     }
+    // }
 
-    public static function canEdit($record): bool
-    {
-        $user = auth()->user();
-        if ($user->role_id === 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    // public static function canEdit($record): bool
+    // {
+    //     $user = auth()->user();
+    //     if ($user->role_id === 1) {
+    //         return true;
+    //     } else {
+    //         return false;
+    //     }
+    // }
 
-    public static function canDelete($record): bool
-    {
-        $user = auth()->user();
-        if ($user->role_id === 1) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+    // public static function canDelete($record): bool
+    // {
+    //     $user = auth()->user();
+    //     if ($user->role_id === 1) {
+    //         return true;
+    //     } else {
+    //         return false;
+    //     }
+    // }
 }

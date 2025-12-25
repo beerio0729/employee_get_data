@@ -65,7 +65,8 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Bangkok',
+    'schedule_timezone' => 'Asia/Bangkok',
 
     /*
     |--------------------------------------------------------------------------

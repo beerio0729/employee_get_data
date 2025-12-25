@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Filament\Panel\Admin\Resources\PostEmploymentStatusDefinations;
+
+use UnitEnum;
+use BackedEnum;
+use Filament\Tables\Table;
+use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
+use Filament\Support\Icons\Heroicon;
+use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
+use App\Filament\Panel\Admin\Resources\PostEmploymentStatusDefinations\Pages\EditPostEmploymentStatusDefination;
+use App\Filament\Panel\Admin\Resources\PostEmploymentStatusDefinations\Pages\ListPostEmploymentStatusDefinations;
+use App\Filament\Panel\Admin\Resources\PostEmploymentStatusDefinations\Pages\CreatePostEmploymentStatusDefination;
+use App\Filament\Panel\Admin\Resources\PostEmploymentStatusDefinations\Schemas\PostEmploymentStatusDefinationForm;
+use App\Filament\Panel\Admin\Resources\PostEmploymentStatusDefinations\Tables\PostEmploymentStatusDefinationsTable;
+
+class PostEmploymentStatusDefinationResource extends Resource
+{
+    protected static ?string $model = WorkStatusDefinationDetail::class;
+
+    protected static string | UnitEnum | null $navigationGroup = 'Settings';
+    
+    protected static ?int $navigationSort = 3;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::UserPlus;
+
+    protected static ?string $recordTitleAttribute = 'สถานะหลังอนุมัติจ้างงาน';
+
+    protected static ?string $modelLabel = 'สถานะหลังอนุมัติจ้างงาน';
+
+    protected static ?string $navigationLabel = 'กำหนดสถานะหลังอนุมัติจ้างงาน';
+
+    public static function form(Schema $schema): Schema
+    {
+        return PostEmploymentStatusDefinationForm::configure($schema);
+    }
+
+    public static function table(Table $table): Table
+    {
+        return PostEmploymentStatusDefinationsTable::configure($table);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListPostEmploymentStatusDefinations::route('/'),
+            'create' => CreatePostEmploymentStatusDefination::route('/create'),
+            'edit' => EditPostEmploymentStatusDefination::route('/{record}/edit'),
+        ];
+    }
+}

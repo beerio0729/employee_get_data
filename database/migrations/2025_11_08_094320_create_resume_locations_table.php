@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('resume_locations', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('resume_id')->references('id')->on('resumes')->onDelete('cascade');
+            $table->foreignID('resume_id')->constrained('resumes')->onDelete('cascade');
             $table->boolean('same_id_card')->nullable();
             $table->string('address')->nullable();
             $table->integer('province_id')->nullable();

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('applicants', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignID('user_id')->constrained('users')->onDelete('cascade');
             $table->string('status')->default('new'); // ไม่ควร null
             $table->timestamp('applied_at');          // วันที่สมัคร (ต้องมี)
             $table->timestamp('interview_at')->nullable(); // วันสัมภาษณ์ (อาจยังไม่มี)

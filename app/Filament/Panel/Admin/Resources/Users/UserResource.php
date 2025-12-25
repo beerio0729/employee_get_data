@@ -22,9 +22,9 @@ class UserResource extends Resource
     protected static string|BackedEnum|null $navigationIcon = Heroicon::User;
 
     protected static ?string $recordTitleAttribute = 'พนักงาน';
-    
+
     protected static ?string $modelLabel = 'พนักงาน';
-    
+
     protected static ?string $navigationLabel = 'พนักงาน';
 
     public static function form(Schema $schema): Schema
@@ -33,7 +33,7 @@ class UserResource extends Resource
     }
 
     public static function table(Table $table): Table
-    {
+    {   
         return UsersTable::configure($table);
     }
 
@@ -54,42 +54,44 @@ class UserResource extends Resource
     }
 
     // ป้องกันไม่ให้ผู้ใช้ทั่วไปเข้าถึง Resource
-    // public static function canViewAny(): bool
-    // {   $user = auth()->user();
-    //     if (in_array($user->role_id, [1, 2])) {
-    //         return true;
-    //     } else {
-    //         return false;
-    //     }
-    // }
+    /* 
+    public static function canViewAny(): bool
+    {   $user = auth()->user();
+        if (in_array($user->role_id, [1, 2])) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-    // public static function canCreate(): bool
-    // {
-    //     $user = auth()->user();
-    //     if (in_array($user->role_id, [1, 2])) {
-    //         return true;
-    //     } else {
-    //         return false;
-    //     }
-    // }
+    public static function canCreate(): bool
+    {
+        $user = auth()->user();
+        if (in_array($user->role_id, [1, 2])) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-    // public static function canEdit($record): bool
-    // {
-    //     $user = auth()->user();
-    //     if (in_array($user->role_id, [1, 2])) {
-    //         return true;
-    //     } else {
-    //         return false;
-    //     }
-    // }
+    public static function canEdit($record): bool
+    {
+        $user = auth()->user();
+        if (in_array($user->role_id, [1, 2])) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-    // public static function canDelete($record): bool
-    // {
-    //     $user = auth()->user();
-    //     if (in_array($user->role_id, [1, 2])) {
-    //         return true;
-    //     } else {
-    //         return false;
-    //     }
-    // }
+    public static function canDelete($record): bool
+    {
+        $user = auth()->user();
+        if (in_array($user->role_id, [1, 2])) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+    */
 }

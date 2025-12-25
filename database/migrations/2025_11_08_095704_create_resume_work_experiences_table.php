@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('resume_work_experiences', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('resume_id')->references('id')->on('resumes')->onDelete('cascade'); // (แนะนำสำหรับตารางลูก)
+            $table->foreignID('resume_id')->constrained('resumes')->onDelete('cascade'); // (แนะนำสำหรับตารางลูก)
             $table->string('company')->nullable(); // บริษัท
             $table->string('position')->nullable(); // ตำแหน่ง
             $table->string('start')->nullable(); // ช่วงเวลา

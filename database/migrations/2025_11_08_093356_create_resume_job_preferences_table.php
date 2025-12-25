@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('resume_job_preferences', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('resume_id')->references('id')->on('resumes')->onDelete('cascade'); // เชื่อมกับตาราง employees
+            $table->foreignID('resume_id')->constrained('resumes')->onDelete('cascade'); // เชื่อมกับตาราง employees
             $table->string('availability_date')->nullable(); // วันที่สะดวกเริ่มทำงาน (ใช้ string เพื่อความยืดหยุ่นตาม JSON)
             $table->string('expected_salary')->nullable(); // เงินเดือนที่คาดหวัง (ใช้ string เพื่อความยืดหยุ่นตาม JSON)
             $table->json('position')->nullable();

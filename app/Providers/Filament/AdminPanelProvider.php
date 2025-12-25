@@ -11,6 +11,7 @@ use App\Filament\Pages\EditProfile;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Auth;
 use App\Filament\Pages\Auth\Register;
+use Filament\Navigation\NavigationGroup;
 use Filament\Http\Middleware\Authenticate;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -43,10 +44,16 @@ class AdminPanelProvider extends PanelProvider
             ->topNavigation()
             ->userMenuItems([
                 Action::make('switchmode')
-                ->icon('heroicon-o-arrows-right-left')
-                ->color('warning')
-                ->label('ไปโหมดพนักงาน')
-                ->url('/'),
+                    ->icon('heroicon-o-arrows-right-left')
+                    ->color('warning')
+                    ->label('ไปโหมดพนักงาน')
+                    ->url('/'),
+            ])
+            ->navigationGroups([
+                NavigationGroup::make()
+                    ->label('Setting')
+                    ->icon('heroicon-o-cog-6-tooth')
+                    ->collapsed(),
             ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('5s')
@@ -54,9 +61,9 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Blue,
             ])
             //->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
-            ->discoverResources(in: app_path('Filament/Panel/Admin/Resources'),for: 'App\Filament\Panel\Admin\Resources')
+            ->discoverResources(in: app_path('Filament/Panel/Admin/Resources'), for: 'App\Filament\Panel\Admin\Resources')
             //->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
-            ->discoverPages(in: app_path('Filament/Panel/Admin/Pages'),for: 'App\Filament\Panel\Admin\Pages')
+            ->discoverPages(in: app_path('Filament/Panel/Admin/Pages'), for: 'App\Filament\Panel\Admin\Pages')
             ->pages([])
             ->discoverWidgets(in: app_path('Filament/Panel/Admin/Widgets'), for: 'App\Filament\Panel\Admin\Widgets')
             ->widgets([])

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('maritals', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignID('user_id')->constrained('users')->onDelete('cascade');
             $table->string('status')->nullable();
             $table->string('type')->nullable();
             $table->string('registration_number')->nullable();

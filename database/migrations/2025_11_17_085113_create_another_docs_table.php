@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('another_docs', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignID('user_id')->constrained('users')->onDelete('cascade');
             $table->string('doc_type');
             $table->text('data'); // ถ้าเก็บข้อมูลหลายค่าแบบ array หรือ object
             $table->string('file_path');

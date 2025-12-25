@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('doc_emps', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignID('user_id')->constrained('users')->onDelete('cascade');
             $table->string('file_name')->nullable();
             $table->string('file_name_th')->nullable();
             $table->string('path')->nullable();

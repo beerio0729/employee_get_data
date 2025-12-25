@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('resume_lang_skills', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('resume_id')->references('id')->on('resumes')->onDelete('cascade'); // (แนะนำสำหรับตารางลูก)
+            $table->foreignID('resume_id')->constrained('resumes')->onDelete('cascade'); // (แนะนำสำหรับตารางลูก)
             $table->string('language')->nullable(); // ภาษา
             $table->string('speaking')->nullable(); // ระดับการพูด
             $table->string('listening')->nullable(); // ระดับการอ่าน

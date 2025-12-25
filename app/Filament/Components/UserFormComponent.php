@@ -3,11 +3,11 @@
 namespace App\Filament\Components;
 
 use Carbon\Carbon;
-use App\Models\Districts;
-use App\Models\Provinces;
+use App\Models\Geography\Districts;
+use App\Models\Geography\Provinces;
 use Detection\MobileDetect;
 use Illuminate\Support\Str;
-use App\Models\Subdistricts;
+use App\Models\Geography\Subdistricts;
 use Illuminate\Support\HtmlString;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;

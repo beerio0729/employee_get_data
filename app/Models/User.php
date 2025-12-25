@@ -2,34 +2,32 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Carbon\Carbon;
-
 use Filament\Panel;
-use App\Models\DocEmp;
-use App\Models\Father;
-use App\Models\Idcard;
-use App\Models\Mother;
-use App\Models\Marital;
-use App\Models\Sibling;
-use App\Models\Employee;
-use App\Models\Military;
-use App\Models\Applicant;
-use App\Models\AnotherDoc;
-use App\Models\Transcript;
-use App\Models\Certificate;
-use App\Models\Resume\Resume;
-use App\Models\AdditionalInfo;
-use App\Models\Resume\ResumeSkills;
-use App\Models\Resume\ResumeLocation;
-use App\Models\Resume\ResumeEducations;
-use App\Models\Resume\ResumeLangSkills;
-use Illuminate\Notifications\Notifiable;
-use App\Models\Resume\ResumeCertificates;
-use App\Models\Resume\ResumeOtherContacts;
-use App\Models\Resume\ResumeJobPreferences;
 use Filament\Models\Contracts\FilamentUser;
-use App\Models\Resume\ResumeWorkExperiences;
+use Illuminate\Notifications\Notifiable;
+
+use App\Models\Document\DocEmp;
+use App\Models\Document\Idcard;
+use App\Models\Document\Marital;
+use App\Models\Document\Military;
+use App\Models\Document\AnotherDoc;
+use App\Models\Document\Transcript;
+use App\Models\Document\Certificate;
+use App\Models\Document\Resume\Resume;
+use App\Models\Document\Resume\ResumeSkills;
+use App\Models\Document\Resume\ResumeLocation;
+use App\Models\Document\Resume\ResumeEducations;
+use App\Models\Document\Resume\ResumeLangSkills;
+use App\Models\Document\Resume\ResumeCertificates;
+use App\Models\Document\Resume\ResumeOtherContacts;
+use App\Models\Document\Resume\ResumeJobPreferences;
+use App\Models\Document\Resume\ResumeWorkExperiences;
+use App\Models\Additional\AdditionalInfo;
+use App\Models\Additional\Father;
+use App\Models\Additional\Mother;
+use App\Models\Additional\Sibling; //พี่น้อง
+
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -47,6 +45,7 @@ class User extends Authenticatable implements FilamentUser
     protected $fillable = [
         'name',
         'role_id',
+        'work_status',
         'email',
         'tel',
         'provider',

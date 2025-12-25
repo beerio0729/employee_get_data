@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->foreignId('role_id')->nullable();
+            $table->string('work_status')->default('applicant');
             $table->string('name')->nullable();
             $table->string('email')->nullable()->unique();
             $table->string('tel')->nullable()->unique();

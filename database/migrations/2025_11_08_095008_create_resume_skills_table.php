@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('resume_skills', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('resume_id')->references('id')->on('resumes')->onDelete('cascade');
+            $table->foreignID('resume_id')->constrained('resumes')->onDelete('cascade');
             $table->string('skill_name')->nullable(); // ชื่อทักษะหรือเครื่องมือ (เปลี่ยนจาก 'name' เพื่อความชัดเจน)
             $table->string('level')->nullable(); // ระดับความชำนาญ (สูง, กลาง, พื้นฐาน)
             $table->timestamps();

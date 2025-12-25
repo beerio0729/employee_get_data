@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('positions', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('department_id')->references('id')->on('departments')->onDelete('cascade');
+            $table->foreignID('department_id')->constrained('departments')->onDelete('cascade');
             $table->string('name'); // ชื่อตำแหน่ง
             $table->unsignedInteger('sort_order')->default(0); // ลำดับการแสดงผลภายในแผนก
             $table->boolean('is_active')->default(true); // ใช้งาน / ไม่ใช้งาน

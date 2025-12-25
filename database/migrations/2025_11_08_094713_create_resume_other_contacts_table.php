@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('resume_other_contacts', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('resume_id')->references('id')->on('resumes')->onDelete('cascade');
+            $table->foreignID('resume_id')->constrained('resumes')->onDelete('cascade');
             $table->string('name')->nullable(); // ชื่อบุคคลอ้างอิง/ผู้ติดต่อ
             $table->string('email')->nullable(); // อีเมลติดต่อ
             $table->string('tel')->nullable(); // เบอร์โทรศัพท์

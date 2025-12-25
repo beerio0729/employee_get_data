@@ -103,3 +103,8 @@ input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
     width: calc(var(--spacing) * 15);
     height: calc(var(--spacing) * 15);
 }
+
+/********ความกว้างของ Drop Dwon Top Menu**********/
+.fi-dropdown-panel {
+    max-width: 16rem !important;
+}

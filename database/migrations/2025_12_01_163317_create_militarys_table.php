@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('militarys', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignID('user_id')->constrained('users')->onDelete('cascade');
             $table->string('id_card')->nullable();
             $table->integer('type')->comment('ประเภทเอกสาร สด. เช่น 43, 8, 35');
             $table->string('result')->nullable()->comment('ผลการคัดเลือก เช่น ใบดำ, ใบแดง, ผ่อนผัน, ยกเว้น');

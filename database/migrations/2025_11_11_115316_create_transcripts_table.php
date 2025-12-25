@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('transcripts', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignID('user_id')->constrained('users')->onDelete('cascade');
             $table->string('prefix_name', 50)->nullable()->comment('คำนำหน้าชื่อ');
             $table->string('name', 100)->nullable()->comment('ชื่อ');
             $table->string('last_name', 100)->nullable()->comment('นามสกุล');

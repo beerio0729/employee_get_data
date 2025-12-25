@@ -2,7 +2,6 @@
 
 namespace App\Filament\Components;
 
-use Livewire\Component;
 use Detection\MobileDetect;
 use Filament\Actions\Action;
 use Filament\Schemas\Schema;
@@ -21,12 +20,8 @@ use Filament\Schemas\Components\Tabs;
 use Illuminate\Support\Facades\Storage;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Schemas\Contracts\HasSchemas;
 use App\Filament\Components\UserFormComponent;
 use Filament\Schemas\Components\Utilities\Set;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Asmit\FilamentUpload\Forms\Components\AdvancedFileUpload;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
