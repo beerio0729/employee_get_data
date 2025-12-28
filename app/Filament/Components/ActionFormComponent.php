@@ -1493,7 +1493,7 @@ class ActionFormComponent
 
                     event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
                 } else {
-                    $record->userHasoneApplicant()->update([
+                    $record->userHasonePreEmployment()->update([
                         'status_id' => 2,
                     ]);
                     return redirect('/pdf');
