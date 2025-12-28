@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignID('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('status_id')->nullable()->constrained('work_status_defination_details')->nullOnDelete();
-            $table->timestamp('applied_at');  // วันที่สมัคร (ต้องมี)
+            $table->timestamp('applied_at')->useCurrent();  // วันที่สมัคร (ต้องมี)
             $table->timestamp('interview_at')->nullable(); // วันสัมภาษณ์ (อาจยังไม่มี)
             $table->timestamp('result_at')->nullable();  // วันที่สรุปผล (อาจยังไม่มี)
             $table->timestamps();
