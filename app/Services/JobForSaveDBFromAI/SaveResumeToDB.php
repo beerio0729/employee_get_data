@@ -2,11 +2,9 @@
 
 namespace App\Services\JobForSaveDBFromAI;
 
-use App\Models\Districts;
-use App\Models\Provinces;
-use App\Models\Subdistricts;
-use Filament\Facades\Filament;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Geography\Districts;
+use App\Models\Geography\Provinces;
+use App\Models\Geography\Subdistricts;
 
 class SaveResumeToDB
 {

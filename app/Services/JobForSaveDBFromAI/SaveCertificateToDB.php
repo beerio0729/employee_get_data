@@ -5,8 +5,6 @@ namespace App\Services\JobForSaveDBFromAI;
 class SaveCertificateToDB {
     public function saveToDB(array $hasManyData, $user, array $path, $file_name): string
     {   
-
-        dump($hasManyData);
         $user->userHasoneCertificate()->updateOrCreate(
             ['user_id' => $user->id],
             ['data' => $hasManyData]

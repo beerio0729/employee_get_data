@@ -6,12 +6,6 @@ class SaveAnotherToDB
 {
     public function saveToDB(array $hasManyData, $user, array $path, $file_name): string
     {
-        dump($path);
-        dump('----------------saveToDB---------------');
-        dump('-----------------------------------');
-        dump($hasManyData);
-
-
         foreach ($hasManyData as $index => $item) {
             //dump($item['data']);
             $user->userHasmanyAnotherDoc()->create([

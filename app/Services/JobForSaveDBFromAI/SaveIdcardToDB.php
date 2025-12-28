@@ -2,10 +2,9 @@
 
 namespace App\Services\JobForSaveDBFromAI;
 
-use App\Models\Districts;
-use App\Models\Provinces;
-use App\Models\Subdistricts;
-
+use App\Models\Geography\Districts;
+use App\Models\Geography\Provinces;
+use App\Models\Geography\Subdistricts;
 
 class SaveIdcardToDB
 {
