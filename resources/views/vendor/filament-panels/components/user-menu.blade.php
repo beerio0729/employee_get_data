@@ -8,7 +8,7 @@ use Filament\Enums\UserMenuPosition;
 use Illuminate\Support\Arr;
 
 $user = filament()->auth()->user();
-$image = $user->userHasmanyDocEmp()?->where('file_name', 'image_profile')->first();
+$image = $user->userHasmanyDocEmp()?->where('file_name', 'image_profile');
 
 $items = $this->getUserMenuItems();
 
@@ -47,7 +47,7 @@ $itemsBeforeAndAfterThemeSwitcher = collect($items)
                 type="button"
                 class="fi-user-menu-trigger">@if ($image->exists())
                 <x-filament-panels::avatar.user
-                    src="{{Storage::disk('public')->url($image->path)}}"
+                    src="{{Storage::disk('public')->url($image->first()->path)}}"
                     style="width: 40px; height: 40px;"
                     :user="$user"
                     loading="lazy" />
