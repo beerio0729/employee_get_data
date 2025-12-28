@@ -1,7 +1,7 @@
 @php
 $span = 'span';
-$pre_status_detail = $pre_employment->first()->preEmploymentBelongToWorkStatusDefinationDetail; //ไปตารางสถานะย่อย
-$pre_state = $pre_status_detail->workStatusDefinationDetailBelongsToWorkStatusDefination; //ไปตารางสถานะหลัก
+$pre_status_detail = $pre_employment->first()?->preEmploymentBelongToWorkStatusDefinationDetail; //ไปตารางสถานะย่อย
+$pre_state = $pre_status_detail?->workStatusDefinationDetailBelongsToWorkStatusDefination; //ไปตารางสถานะหลัก
 @endphp
 
 <x-filament-widgets::widget>
@@ -25,11 +25,11 @@ $pre_state = $pre_status_detail->workStatusDefinationDetailBelongsToWorkStatusDe
                 </div>
                 @else
                 <div class="profile-position">
-                    {{$pre_state->name_th}}
+                    {{$pre_state?->name_th}}
                 </div>
                 <div class="status">สถานะ :
-                    <{!! $span !!} class="status-container {{$pre_status_detail->color}}">
-                        {{$pre_status_detail->name_th}}
+                    <{!! $span !!} class="status-container {{$pre_status_detail?->color}}">
+                        {{$pre_status_detail?->name_th}}
                     </{!! $span !!}>
                 </div>
                 @endif
