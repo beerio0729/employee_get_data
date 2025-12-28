@@ -2,9 +2,9 @@
 
 namespace App\Models\Document\Resume;
 
-use App\Models\Districts;
-use App\Models\Provinces;
-use App\Models\Subdistricts;
+use App\Models\Geography\Districts;
+use App\Models\Geography\Provinces;
+use App\Models\Geography\Subdistricts;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
