@@ -3,6 +3,7 @@
 namespace App\Filament\Panel\Admin\Components\Resources\Tables;
 
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\ToggleColumn;
 
 class WorkStatusDefinationTableComponent
@@ -24,6 +25,16 @@ class WorkStatusDefinationTableComponent
                 ->grow(false)
                 ->searchable()
                 ->sortable(),
+            ColorColumn::make('color')
+                ->label('สีสถานะ')
+                ->getStateUsing(function ($record) {
+                    return match ($record->color) {
+                        'success' => '#22c55e', // เขียว
+                        'warning' => '#facc15', // เหลือง
+                        'danger'  => '#ef4444', // แดง
+                        'primary' => '#2b7fff', // เทา fallback
+                    };
+                })
         ];
     }
 

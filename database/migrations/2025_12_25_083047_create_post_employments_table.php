@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('employees', function (Blueprint $table) {
+        Schema::create('post_employments', function (Blueprint $table) {
             $table->id();
             $table->foreignID('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('status_id')->nullable()->constrained('work_status_defination_details')->nullOnDelete();
             $table->string('employee_code')->unique(); // รหัสพนักงาน ไม่ซ้ำ
             $table->foreignId('department_id')->nullable()->constrained('departments')->nullOnDelete();
             $table->foreignId('position_id')->nullable()->constrained('positions')->nullOnDelete();
+            $table->string('salary')->nullable();
             $table->date('hired_at'); // วันที่เริ่มงาน ต้องมี
-            $table->enum('status', ['active','resigned','terminated'])->default('active'); // สถานะเริ่มต้น
             $table->timestamps();
         });
     }
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('employees');
+        Schema::dropIfExists('post_employments');
     }
 };

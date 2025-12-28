@@ -38,7 +38,9 @@ class SocialAuthController extends Controller
                 'password'    => bcrypt(Str::random(16)),
                 'role_id'     => 3,
             ]);
-            $user->userHasoneApplicant()->create([]);
+            $user->userHasonePreEmployment()->create([
+                'status_id' => 1,
+            ]);
 
             Auth::login($user);
             LineSendMessageService::send($socialUser->getId(), ['ยินดีต้อนรับสู่เว็บอับโหลดเรซูเม่', 'กรุณาอับเดตข้อมูลโปรไฟล์ให้ครบถ้วน']);

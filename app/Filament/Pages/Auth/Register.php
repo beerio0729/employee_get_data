@@ -37,10 +37,13 @@ class Register extends BaseRegister
     }
 
     protected function handleRegistration(array $data): Model
-    {   $user = parent::handleRegistration($data);
-        DB::transaction(function () use ($user) {   
-            $user->userHasoneApplicant()->create([]);
-        },attempts: 5);
+    {
+        $user = parent::handleRegistration($data);
+        DB::transaction(function () use ($user) {
+            $user->userHasonePreEmployment()->create([
+                'status_id' => 1,
+            ]);
+        }, attempts: 5);
         return $user;
     }
 }

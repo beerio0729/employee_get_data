@@ -14,8 +14,8 @@ class ProfileWidget extends Widget
         return [
             'name' => $user->userHasoneIdcard->name_th,
             'last_name' => $user->userHasoneIdcard->last_name_th,
-            'applicant' => $user->userHasoneApplicant(),
-            'employee' => $user->userHasoneEmployee(),
+            'pre_employment' => $user->userHasonePreEmployment(),
+            'post_employment' => $user->userHasManyPostEmployment(),
             'image' => $user->userHasmanyDocEmp()->where('file_name', 'image_profile')->first()->path ?? '/user.png',
         ];
     }

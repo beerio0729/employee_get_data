@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('applicants', function (Blueprint $table) {
+        Schema::create('pre_employments', function (Blueprint $table) {
             $table->id();
             $table->foreignID('user_id')->constrained('users')->onDelete('cascade');
-            $table->string('status')->default('new'); // ไม่ควร null
-            $table->timestamp('applied_at');          // วันที่สมัคร (ต้องมี)
+            $table->foreignId('status_id')->nullable()->constrained('work_status_defination_details')->nullOnDelete();
+            $table->timestamp('applied_at');  // วันที่สมัคร (ต้องมี)
             $table->timestamp('interview_at')->nullable(); // วันสัมภาษณ์ (อาจยังไม่มี)
-            $table->timestamp('result_at')->nullable();    // วันที่สรุปผล (อาจยังไม่มี)
+            $table->timestamp('result_at')->nullable();  // วันที่สรุปผล (อาจยังไม่มี)
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('applicants');
+        Schema::dropIfExists('pre_employments');
     }
 };

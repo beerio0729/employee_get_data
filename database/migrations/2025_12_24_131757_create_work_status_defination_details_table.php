@@ -14,11 +14,11 @@ return new class extends Migration
         Schema::create('work_status_defination_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('work_status_def_id')->constrained('work_status_definations')->onDelete('cascade');
-            $table->string('work_phase')->nullable(); // ใช้ enum หรือ string ก็ได้
             $table->string('code')->nullable();
             $table->string('name_th');
             $table->string('name_en');
-            $table->integer('sequence')->default(0);
+            $table->string('work_phase')->nullable(); // ใช้ enum หรือ string ก็ได้
+            $table->enum('color', ['success', 'warning','danger'])->default('warning');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

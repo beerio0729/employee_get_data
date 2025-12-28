@@ -1494,7 +1494,7 @@ class ActionFormComponent
                     event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
                 } else {
                     $record->userHasoneApplicant()->update([
-                        'status' => 'doc_passed',
+                        'status_id' => 2,
                     ]);
                     return redirect('/pdf');
                 }

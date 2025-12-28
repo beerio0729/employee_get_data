@@ -14,11 +14,10 @@ return new class extends Migration
         Schema::create('work_status_definations', function (Blueprint $table) {
             $table->id();
             //$table->foreignId('company_id')->constrained()->onDelete('cascade');
-            $table->enum('main_work_status', ['pre_employment', 'employed']);
             $table->string('code')->nullable(); // สำหรับ internal logic
             $table->string('name_th')->nullable();
             $table->string('name_en')->nullable();
-            $table->integer('sequence')->nullable();
+            $table->enum('main_work_status', ['pre_employment', 'post_employment']);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

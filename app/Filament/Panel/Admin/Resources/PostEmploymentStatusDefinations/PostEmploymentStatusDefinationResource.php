@@ -25,7 +25,7 @@ class PostEmploymentStatusDefinationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::UserPlus;
 
-    protected static ?string $recordTitleAttribute = 'สถานะหลังอนุมัติจ้างงาน';
+    protected static ?string $recordTitleAttribute = 'name_th';
 
     protected static ?string $modelLabel = 'สถานะหลังอนุมัติจ้างงาน';
 
@@ -56,4 +56,5 @@ class PostEmploymentStatusDefinationResource extends Resource
             'edit' => EditPostEmploymentStatusDefination::route('/{record}/edit'),
         ];
     }
+    
 }

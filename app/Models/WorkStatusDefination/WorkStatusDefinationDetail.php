@@ -15,7 +15,7 @@ class WorkStatusDefinationDetail extends Model
         'work_phase', // (string / enum) เก็บช่วงของเหตุการณ์เช่น ก่อนเวลานัดสัมพาด นัดสัมภาษณ์แล้ว หลังเวลาสัมพาด หลังเวลาประกาศผล เป็นต้น
         'name_th',
         'name_en',
-        'sequence',
+        'color',
         'is_active',
     ];
 

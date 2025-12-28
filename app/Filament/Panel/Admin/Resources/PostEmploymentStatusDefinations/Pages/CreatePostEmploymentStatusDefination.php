@@ -9,4 +9,10 @@ use App\Filament\Panel\Admin\Resources\PostEmploymentStatusDefinations\PostEmplo
 class CreatePostEmploymentStatusDefination extends CreateRecord
 {
     protected static string $resource = PostEmploymentStatusDefinationResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        // redirect ไปหน้า list ของ resource
+        return $this->getResource()::getUrl('index');
+    }
 }

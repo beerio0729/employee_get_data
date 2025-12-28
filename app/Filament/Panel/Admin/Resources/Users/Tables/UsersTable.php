@@ -68,14 +68,14 @@ class UsersTable
                                     return 'ไม่มีข้อมูลชื่อภาษาไทย';
                                 }
                             }),
-                        TextColumn::make('work_status')->label('สถานะ')->searchable()->sortable()
+                        TextColumn::make('main_work_status')->label('สถานะ')->searchable()->sortable()
                             ->formatStateUsing(function ($state, $record) {
-                                if ($state === 'applicant') {
+                                if ($state === 'pre_employment') {
                                     $status = config("iconf.applicant_status.{$record->userHasoneApplicant?->status}");
                                 } else {
                                     $status = config("iconf.employee_status.{$record->userHasoneEmployee?->status}");
                                 }
-                                return config("iconf.work_status.{$state}") . " : " . $status;
+                                return config("workstateconfig.main_work_status.{$state}") . " : " . $status;
                             }),
 
                     ]),
@@ -95,10 +95,9 @@ class UsersTable
                             $form->fill($record->userHasoneApplicant->attributesToArray());
                         })
                         ->visible(
-                            fn($record) => in_array(
-                                $record->userHasoneApplicant->status,
-                                ['doc_passed', 'interview_scheduled', 'no_interviewed']
-                            )
+                            function ($record) {
+                                dump($record->userHasonePreEmployment);
+                            }
                         )
                         ->color('success')
                         ->icon('heroicon-m-calendar')

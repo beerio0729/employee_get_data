@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Actions\Action;
+use App\Models\OrganizationLevel;
 use App\Filament\Pages\Auth\Login;
 use Filament\Support\Colors\Color;
 use App\Filament\Pages\EditProfile;
@@ -23,6 +24,8 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use SolutionForest\FilamentSimpleLightBox\SimpleLightBoxPlugin;
+use App\Filament\Panel\Admin\MultiResources\OrganizationStructureFirsts\OrganizationStructureFirstResource;
+use App\Filament\Panel\Admin\MultiResources\OrganizationStructureSeconds\OrganizationStructureSecondResource;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -62,6 +65,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             //->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverResources(in: app_path('Filament/Panel/Admin/Resources'), for: 'App\Filament\Panel\Admin\Resources')
+            ->resources($this->organizationResources())
             //->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->discoverPages(in: app_path('Filament/Panel/Admin/Pages'), for: 'App\Filament\Panel\Admin\Pages')
             ->pages([])
@@ -87,5 +91,34 @@ class AdminPanelProvider extends PanelProvider
                     ? '<script>window.App = window.App || {}; window.App.userId = ' . Auth::id() . ';</script>'
                     : '' // ถ้าไม่ล็อกอินก็ไม่แทรกอะไรเลย
             );
+    }
+
+    protected function organizationResources(): array
+    {
+        $OrgLevel = OrganizationLevel::get();
+        $resources = [];
+
+        if ($OrgLevel->isNotEmpty()) {
+            foreach ($OrgLevel->pluck('level') as $sort) {
+                // map level_sort เป็นชื่อ class
+                $map = [
+                    1 => 'First',
+                    2 => 'Second',
+                    3 => 'Third',
+                    4 => 'Fourth',
+                    5 => 'Fifth',
+                    6 => 'Sixth',
+                    7 => 'Seventh',
+                ];
+
+                $level = $map[$sort] ?? null;
+                if ($level) {
+                    $class = "App\\Filament\\Panel\\Admin\\MultiResources\\OrganizationStructure{$level}s\\OrganizationStructure{$level}Resource";
+                    $resources[] = $class;
+                }
+            }
+        }
+
+        return $resources;
     }
 }

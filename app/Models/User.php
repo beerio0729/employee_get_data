@@ -6,6 +6,12 @@ use Carbon\Carbon;
 use Filament\Panel;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
+
+use App\Models\WorkStatus\PreEmployment;
+use App\Models\WorkStatus\PostEmployment;
 
 use App\Models\Document\DocEmp;
 use App\Models\Document\Idcard;
@@ -23,14 +29,14 @@ use App\Models\Document\Resume\ResumeCertificates;
 use App\Models\Document\Resume\ResumeOtherContacts;
 use App\Models\Document\Resume\ResumeJobPreferences;
 use App\Models\Document\Resume\ResumeWorkExperiences;
-use App\Models\Additional\AdditionalInfo;
+
 use App\Models\Additional\Father;
 use App\Models\Additional\Mother;
+use App\Models\Additional\AdditionalInfo;
 use App\Models\Additional\Sibling; //พี่น้อง
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
+
+
 
 class User extends Authenticatable implements FilamentUser
 {
@@ -45,7 +51,7 @@ class User extends Authenticatable implements FilamentUser
     protected $fillable = [
         'name',
         'role_id',
-        'work_status',
+        'main_work_status',
         'email',
         'tel',
         'provider',
@@ -150,19 +156,19 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
-    
+
     /********User Hasone ไปสถานะต่างๆ********/
-    
-    public function userHasoneApplicant() //ผู้สมัคร
+
+    public function userHasonePreEmployment() //ผู้สมัคร
     {
-        return $this->hasOne(Applicant::class, 'user_id', 'id')->withDefault();
+        return $this->hasOne(PreEmployment::class, 'user_id', 'id')->withDefault();
     }
-    
-    public function userHasoneEmployee() //พนักงาน
+
+    public function userHasManyPostEmployment() //พนักงาน
     {
-        return $this->hasOne(Employee::class, 'user_id', 'id')->withDefault();
+        return $this->hasMany(PostEmployment::class, 'user_id', 'id');
     }
-    
+
     /**************User HasOne ไปที่เอกสาร*************/
 
     public function userHasoneResume() //resume

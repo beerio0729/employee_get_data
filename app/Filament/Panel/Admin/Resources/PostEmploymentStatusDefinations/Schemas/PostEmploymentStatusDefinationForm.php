@@ -25,15 +25,8 @@ class PostEmploymentStatusDefinationForm
             ->columns(3)
             ->description('ใช้สำหรับระบุสถานะย่อยของ สถานะบุคคลนั้นเช่น ถ้าเป็นพนักงานแล้ว มีสถานะอะไรบ้างเป็นต้น')
             ->schema([
-                ...WorkStatusDefinationFromComponent::formComponent(),
-                Select::make('work_status_def_id')
-                    ->label('เลือกสถานะบุคคล')
-                    ->required()
-                    ->options(
-                        fn() => WorkStatusDefination::where('main_work_status', 'post_employment')
-                            ->pluck('name_th', 'id')
-                    ),
-
+                ...WorkStatusDefinationFromComponent::formComponent('post_employment'),
             ]);
     }
+    
 }
