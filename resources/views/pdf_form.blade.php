@@ -537,7 +537,7 @@ $cert = $user->userHasoneCertificate?->data;
                 <td class="con-data-text">
                     @if($resume?->resumeHasoneJobPreference()->exists())
                     @php
-                    $province = \App\Models\Provinces::pluck('name_en', 'id')->toArray();
+                    $province = \App\Models\Geography\Provinces::pluck('name_en', 'id')->toArray();
                     @endphp
                     @foreach ($resume?->resumeHasoneJobPreference->location as $index => $item)
                     <span class="item-data-text">
