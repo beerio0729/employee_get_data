@@ -792,26 +792,27 @@ $cert = $user->userHasoneCertificate?->data;
                 <div class="flex-item-container-multi-row">
                     <div class="flex-cell flex-input-inner" style="border-right: none;">
                         <div class="checkbox-group" style="display: block;">
-                            <span class="input-col checkbox-item">
+                            <span class="input-col checkbox-item" style="padding-right: 10px;">
                                 <span class="data-checkbox">
                                     @if ($user->userHasoneMilitary?->type === 8)
                                     <i class="fa fa-check"></i>
                                     @endif
                                 </span> Completed
                             </span>
-                            <span class="input-col checkbox-item">
+                            <span class="input-col checkbox-item" style="padding-right: 10px;">
                                 <span class="data-checkbox">
                                     @if (in_array($user->userHasoneMilitary?->result, ["ดำ","ผ่อนผัน", "ยกเว้น"]))
                                     <i class="fa fa-check"></i>
                                     @endif
                                 </span> Exemted, because
+                                @if (in_array($user->userHasoneMilitary?->result, ["ดำ","ผ่อนผัน"]))
+                                <span class="data-fill">{{ config('iconf.marital')[$user->userHasoneMilitary?->result] ?? '' }}</span>
+                                @endif
+                                @if(filled($user->userHasoneMilitary?->reason_for_exemption))
+                                <span class="data-fill">{{$user->userHasoneMilitary?->reason_for_exemption}}</span>
+                                @endif
                             </span>
-                            @if (in_array($user->userHasoneMilitary?->result, ["ดำ","ผ่อนผัน"]))
-                            <span class="data-fill">{{ config('iconf.marital')[$user->userHasoneMilitary?->result] ?? '' }}</span>
-                            @else
-                            <span class="data-fill">{{$user->userHasoneMilitary?->reason_for_exemption}}</span>
-                            @endif
-                            <span class="input-col checkbox-item">
+                            <span class="input-col checkbox-item" style="padding-right: 10px;">
                                 <span class="data-checkbox">
                                     @if ($user->userHasoneMilitary?->result === 'แดง')
                                     <i class="fa fa-check"></i>
@@ -1442,11 +1443,13 @@ $cert = $user->userHasoneCertificate?->data;
                     </span> Yes
                 </span>
                 <br>
+                @if ($additional?->worked_company_before)
                 <span class="flex-label-inner">Immediate supervisor : </span>
                 <span class="data-fill">{{$additional?->worked_company_supervisor}}</span>
                 <span class="flex-label-inner">Please identify : </span>
                 <span class="data-fill">{{$additional?->worked_company_detail}}</span>
                 <br>
+                @endif
                 <span class="flex-label-inner">Do you know anyone in the company? : </span>
                 <span class="input-col checkbox-item">
                     <span class="data-checkbox">
@@ -1462,10 +1465,12 @@ $cert = $user->userHasoneCertificate?->data;
                         @endif
                     </span> Yes
                 </span>
+                @if ($additional?->know_someone)
                 <span class="flex-label-inner"> | Name : </span>
                 <span class="data-fill">{{$additional?->know_someone_name}}</span>
                 <span class="flex-label-inner">Relation : </span>
                 <span class="data-fill">{{$additional?->know_someone_relation}}</span>
+                @endif
                 <br>
                 <span class="flex-label-inner">How did you hear about this job opening? : </span>
                 @if(filled($additional?->how_to_know_job))
