@@ -274,6 +274,7 @@ $cert = $user->userHasoneCertificate?->data;
             align-items: center;
             /*flex-wrap: wrap;*/
             justify-content: space-between;
+            line-height: 2.2;
         }
 
         .checkbox-item {
@@ -784,43 +785,45 @@ $cert = $user->userHasoneCertificate?->data;
 
 
             @if(!in_array(trim(strtolower($idcard?->prefix_name_en),"."), ['miss', 'mrs']))
-            <div class="flex-row-container"> <!------สถานะการเกณฑ์หทหาร----->
+            <div class="flex-container-multi-row"> <!------สถานะการเกณฑ์หทหาร----->
                 <div class="flex-cell" style="flex-basis: 10%; flex-grow: 0;">
                     <span class="flex-label-inner">Military Status</span>
                 </div>
-                <div class="flex-cell flex-input-inner" style="border-right: none;">
-                    <div class="checkbox-group">
-                        <span class="input-col checkbox-item">
-                            <span class="data-checkbox">
-                                @if ($user->userHasoneMilitary?->type === 8)
-                                <i class="fa fa-check"></i>
-                                @endif
-                            </span> Completed
-                        </span>
-                        <span class="input-col checkbox-item">
-                            <span class="data-checkbox">
-                                @if (in_array($user->userHasoneMilitary?->result, ["ดำ","ผ่อนผัน", "ยกเว้น"]))
-                                <i class="fa fa-check"></i>
-                                @endif
-                            </span> Exemted, because
-                        </span>
-                        @if (in_array($user->userHasoneMilitary?->result, ["ดำ","ผ่อนผัน"]))
-                        <span class="data-fill">{{ config('iconf.marital')[$user->userHasoneMilitary?->result] ?? '' }}</span>
-                        @else
-                        <span class="data-fill">{{$user->userHasoneMilitary?->reason_for_exemption}}</span>
-                        @endif
-                        <span class="input-col checkbox-item">
-                            <span class="data-checkbox">
-                                @if ($user->userHasoneMilitary?->result === 'แดง')
-                                <i class="fa fa-check"></i>
-                                @endif
-                            </span> I will be drafted in year
-                        </span>
-                        @if ($user->userHasoneMilitary?->result === 'แดง')
-                        <span class="data-fill">{{date_format($user->userHasoneMilitary?->date_to_army,"d /m /Y ")}}</span>
-                        @endif
-                    </div>
+                <div class="flex-item-container-multi-row">
+                    <div class="flex-cell flex-input-inner" style="border-right: none;">
+                        <div class="checkbox-group" style="display: block;">
+                            <span class="input-col checkbox-item">
+                                <span class="data-checkbox">
+                                    @if ($user->userHasoneMilitary?->type === 8)
+                                    <i class="fa fa-check"></i>
+                                    @endif
+                                </span> Completed
+                            </span>
+                            <span class="input-col checkbox-item">
+                                <span class="data-checkbox">
+                                    @if (in_array($user->userHasoneMilitary?->result, ["ดำ","ผ่อนผัน", "ยกเว้น"]))
+                                    <i class="fa fa-check"></i>
+                                    @endif
+                                </span> Exemted, because
+                            </span>
+                            @if (in_array($user->userHasoneMilitary?->result, ["ดำ","ผ่อนผัน"]))
+                            <span class="data-fill">{{ config('iconf.marital')[$user->userHasoneMilitary?->result] ?? '' }}</span>
+                            @else
+                            <span class="data-fill">{{$user->userHasoneMilitary?->reason_for_exemption}}</span>
+                            @endif
+                            <span class="input-col checkbox-item">
+                                <span class="data-checkbox">
+                                    @if ($user->userHasoneMilitary?->result === 'แดง')
+                                    <i class="fa fa-check"></i>
+                                    @endif
+                                </span> I will be drafted in year
+                            </span>
+                            @if ($user->userHasoneMilitary?->result === 'แดง')
+                            <span class="data-fill">{{date_format($user->userHasoneMilitary?->date_to_army,"d /m /Y ")}}</span>
+                            @endif
+                        </div>
 
+                    </div>
                 </div>
             </div>
             @endif
@@ -1105,7 +1108,7 @@ $cert = $user->userHasoneCertificate?->data;
         </table>
 
         <div class="page-break"></div>
-        
+
         <!---------------EDUCATION BACKGROUND--------------->
 
         <div class="section-header">
@@ -1403,9 +1406,14 @@ $cert = $user->userHasoneCertificate?->data;
                 <span class="flex-label-inner">In case of emergency, please notify : </span>
                 <span class="data-fill">{{$additional?->emergency_name}}</span>
                 <span class="flex-label-inner">&nbsp;Relation : </span>
+                @if(filled($additional?->emergency_relation))
                 <span class="data-fill">{{$additional?->emergency_relation}}</span>
+                @else
+                --
+                @endif
                 <br>
                 <span class="flex-label-inner">Address information : </span>
+                @if(filled($additional->subdistrict_id))
                 <span class="data-fill">
                     &nbsp;{{$additional?->emergency_address}}
                     &nbsp;{{$additional?->additionalInfoBelongtosubdistrict->name_th}}
@@ -1413,6 +1421,9 @@ $cert = $user->userHasoneCertificate?->data;
                     &nbsp;{{$additional?->additionalInfoBelongtoprovince->name_th}}
                     &nbsp;{{$additional?->zipcode}}
                 </span>
+                @else
+                --
+                @endif
             </div>
             <div style="border-bottom: 1px solid #00000042;">
                 <span class="flex-label-inner">Have you ever worked with the company or its subsidiary companies? : </span>
@@ -1457,7 +1468,11 @@ $cert = $user->userHasoneCertificate?->data;
                 <span class="data-fill">{{$additional?->know_someone_relation}}</span>
                 <br>
                 <span class="flex-label-inner">How did you hear about this job opening? : </span>
+                @if(filled($additional?->how_to_know_job))
                 <span class="data-fill">{{$additional?->how_to_know_job}}</span>
+                @else
+                --
+                @endif
             </div>
             <div>
                 <span class="flex-label-inner">Do you have any medical condition? : </span>
@@ -1476,7 +1491,11 @@ $cert = $user->userHasoneCertificate?->data;
                     </span> Yes
                 </span>
                 <span class="flex-label-inner"> | Please identify : </span>
+                @if (filled($additional?->medical_condition_detail))
                 <span class="data-fill">{{$additional?->medical_condition_detail}}</span>
+                @else
+                --
+                @endif
                 <br>
                 <span class="flex-label-inner">Do you still have valid insurance coverage through the SSO? : </span>
                 <span class="input-col checkbox-item">
@@ -1494,7 +1513,11 @@ $cert = $user->userHasoneCertificate?->data;
                     </span> Yes
                 </span>
                 <span class="flex-label-inner"> | Hospital Name : </span>
+                @if(filled($additional?->sso_hospital))
                 <span class="data-fill">{{$additional?->sso_hospital}}</span>
+                @else
+                --
+                @endif
             </div>
             <div>
             </div>

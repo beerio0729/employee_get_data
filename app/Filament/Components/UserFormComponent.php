@@ -1157,6 +1157,10 @@ class UserFormComponent
                     ->label('ชื่อ-นามสกุล ผู้ติดต่อ')
                     ->placeholder('กรอกชื่อ-นามสกุล ผู้ที่ติดต่อ'),
                 TextInput::make('emergency_relation')
+                    ->required()
+                    ->validationMessages([
+                        'required' => 'คุณยังไม่ได้ระบุความสัมพันธ์'
+                    ])
                     ->label('ความสัมพันธ์')
                     ->placeholder('ระบุความสัมพันธ์กับคุณเช่น "เป็นเพื่อน"'),
                 TextInput::make('emergency_tel')
