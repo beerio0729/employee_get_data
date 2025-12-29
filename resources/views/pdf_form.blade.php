@@ -955,7 +955,11 @@ $cert = $user->userHasoneCertificate?->data;
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner cell2">Age : </span>
-                            <span class="data-fill">{{$father?->age}} Years</span>
+                            <span class="data-fill">
+                                @if (filled($father?->age))
+                                {{$father?->age}} Years
+                                @endif
+                            </span>
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner cell2">Nationality : </span>
@@ -1003,7 +1007,10 @@ $cert = $user->userHasoneCertificate?->data;
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner cell2">Age : </span>
-                            <span class="data-fill">{{$mother?->age}} Years</span>
+                            <span class="data-fill">
+                                @if(filled($mother?->age))
+                                {{$mother?->age}} Years
+                                @endif</span>
                         </div>
                         <div class="flex-cell cell2 wrap noborder">
                             <span class="flex-label-inner cell2">Nationality : </span>
