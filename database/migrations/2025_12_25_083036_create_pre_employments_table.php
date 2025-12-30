@@ -13,8 +13,7 @@ return new class extends Migration
     {
         Schema::create('pre_employments', function (Blueprint $table) {
             $table->id();
-            $table->foreignID('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('status_id')->nullable()->constrained('work_status_defination_details')->nullOnDelete();
+            $table->foreignId('work_status_id')->nullable()->constrained('work_statuses')->onDelete('cascade');
             $table->timestamp('applied_at')->useCurrent();  // วันที่สมัคร (ต้องมี)
             $table->timestamp('interview_at')->nullable(); // วันสัมภาษณ์ (อาจยังไม่มี)
             $table->timestamp('result_at')->nullable();  // วันที่สรุปผล (อาจยังไม่มี)

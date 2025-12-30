@@ -4,36 +4,33 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Filament\Panel;
-use Filament\Models\Contracts\FilamentUser;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-
-use App\Models\WorkStatus\PreEmployment;
-use App\Models\WorkStatus\PostEmployment;
-
 use App\Models\Document\DocEmp;
 use App\Models\Document\Idcard;
 use App\Models\Document\Marital;
+use App\Models\Additional\Father;
+use App\Models\Additional\Mother;
 use App\Models\Document\Military;
 use App\Models\Document\AnotherDoc;
 use App\Models\Document\Transcript;
 use App\Models\Document\Certificate;
+use App\Models\WorkStatus\WorkStatus;
 use App\Models\Document\Resume\Resume;
+use Illuminate\Notifications\Notifiable;
+use App\Models\Additional\AdditionalInfo;
+use Filament\Models\Contracts\FilamentUser;
+use App\Models\Additional\Sibling; //พี่น้อง
 use App\Models\Document\Resume\ResumeSkills;
 use App\Models\Document\Resume\ResumeLocation;
 use App\Models\Document\Resume\ResumeEducations;
 use App\Models\Document\Resume\ResumeLangSkills;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Models\Document\Resume\ResumeCertificates;
+
 use App\Models\Document\Resume\ResumeOtherContacts;
 use App\Models\Document\Resume\ResumeJobPreferences;
 use App\Models\Document\Resume\ResumeWorkExperiences;
-
-use App\Models\Additional\Father;
-use App\Models\Additional\Mother;
-use App\Models\Additional\AdditionalInfo;
-use App\Models\Additional\Sibling; //พี่น้อง
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 
 
@@ -157,16 +154,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
-    /********User Hasone ไปสถานะต่างๆ********/
+    /********User Hasone work status********/
 
-    public function userHasonePreEmployment() //ผู้สมัคร
+    public function userHasoneWorkStatus() //resume
     {
-        return $this->hasOne(PreEmployment::class, 'user_id', 'id')->withDefault();
-    }
-
-    public function userHasManyPostEmployment() //พนักงาน
-    {
-        return $this->hasMany(PostEmployment::class, 'user_id', 'id');
+        return $this->hasOne(WorkStatus::class, 'user_id', 'id')->withDefault();
     }
 
     /**************User HasOne ไปที่เอกสาร*************/
@@ -274,5 +266,23 @@ class User extends Authenticatable implements FilamentUser
     public function userHasmanyResumeToOtherContact()
     {
         return $this->userHasoneResume->hasMany(ResumeOtherContacts::class, 'resume_id', 'id');
+    }
+
+    /***************** Helper**************/
+
+    public function isPreEmployment()
+    {
+        return $this->userHasoneWorkStatus
+            ?->WorkStatusBelongToWorkStatusDefDetail
+            ?->workStatusDefDetailBelongsToWorkStatusDef
+            ?->main_work_status === 'pre_employment';
+    }
+    
+    public function isPostEmployment()
+    {
+        return $this->userHasoneWorkStatus
+            ?->WorkStatusBelongToWorkStatusDefDetail
+            ?->workStatusDefDetailBelongsToWorkStatusDef
+            ?->main_work_status === 'post_employment';
     }
 }

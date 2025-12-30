@@ -17,7 +17,7 @@ class PreEmployMentStatusDefinationsTable
             ->modifyQueryUsing(
                 fn($query) =>
                 $query->whereRelation(
-                    'workStatusDefinationDetailBelongsToWorkStatusDefination',
+                    'workStatusDefDetailBelongsToWorkStatusDef',
                     'main_work_status',
                     'pre_employment'
                 )

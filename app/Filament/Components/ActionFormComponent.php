@@ -13,6 +13,7 @@ use App\Events\ProcessEmpDocEvent;
 use Filament\Actions\DeleteAction;
 use Illuminate\Support\HtmlString;
 use App\Jobs\ProcessNoJsonEmpDocJob;
+use App\Services\CheckDocDownloaded;
 use Filament\Support\Icons\Heroicon;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Icon;
@@ -113,7 +114,7 @@ class ActionFormComponent
                         ->afterStateHydrated(function () {
                             $this->isSubmitDisabledFromFile = true;
                         })
-                        ->deleteUploadedFileUsing(function ($record) use ($action) {
+                        ->deleteUploadedFileUsing(function ($record, $livewire) use ($action) {
                             $doc = $this->getDocEmp($record, $action)->first();
 
                             if (!blank($doc)) {
@@ -1463,14 +1464,14 @@ class ActionFormComponent
                 "
             ])
             ->color('primary')
-            ->action(function ($record) {
-                $missing = $this->checkDocDownloaded();
+            ->action(function ($record, $livewire) {
+                $missing = CheckDocDownloaded::check($record);
                 $parts = [];
 
                 $hasUpload = filled($missing['upload']);
                 $hasInput  = filled($missing['input']);
 
-
+                $work_status = $record->userHasoneWorkStatus();
                 if ($hasUpload) {
                     $parts[] = 'คุณยังไม่ได้อัปโหลด: <br>"' . implode(', ', $missing['upload']) . '"';
                 }
@@ -1491,54 +1492,17 @@ class ActionFormComponent
 
                     $msg = implode('<br><br>', $parts) . '<br><br>' . $ending;
 
+                    $work_status->update([
+                        'work_status_def_detail_id' => 1,
+                    ]);
                     event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
                 } else {
-                    $record->userHasonePreEmployment()->update([
-                        'status_id' => 2,
+                    $work_status->update([
+                        'work_status_def_detail_id' => 2,
                     ]);
                     return redirect('/pdf');
                 }
             });
     }
 
-
-    /****************ฟังก์ชั่นพิเศษสำหรับเช็คว่าโหลดเอกสารหรือยัง***************** */
-    public function checkDocDownloaded()
-    {
-        $user = auth()->user();
-
-        // ดึง prefix จากบัตรประชาชน (ถ้ามี)
-        $prefix = $user->userHasoneIdcard?->prefix_name_en;
-        // ตรวจว่าเป็นผู้หญิงหรือไม่
-        $isFemale = in_array(trim(strtolower($prefix), "."), ['miss', 'mrs']);
-        $errorUplaod = [ //สำหรับเอกสารอับโหลด
-            'รูปโปรไฟล์' => $user->userHasmanyDocEmp()->where('file_name', 'image_profile')->exists(),
-            'resume'        => $user->userHasoneResume()->exists(),
-            'บัตรประชาชน'   => $user->userHasoneIdcard()->exists(),
-            'วุฒิการศึกษา'   => $user->userHasmanyTranscript()->exists(),
-        ];
-
-        $additional = $user->userHasoneAdditionalInfo;
-
-        $errorInput = [ //สำหรับข้อมูลที่ต้องกรอกเอง
-            'บิดา' => blank($user->userHasoneFather->name),
-            'มารดา' => blank($user->userHasoneMother->name),
-            'ผู้ติดต่อยามฉุกเฉิน' => blank($additional->emergency_name),
-            'คำถามสุขภาพ' => blank($additional->medical_condition),
-            'คำถามเพิ่มเติม' => blank($additional->know_someone),
-        ];
-
-        // ใส่ใบเกณฑ์ทหารเฉพาะกรณี "ไม่ใช่ผู้หญิง"
-        if (!$isFemale) {
-            $errorUplaod['ใบเกณฑ์ทหาร'] = $user->userHasoneMilitary()->exists();
-        }
-
-        // หาเฉพาะรายการที่ยังไม่มีไฟล์
-        $missingUplaod = array_keys(array_filter($errorUplaod, fn($v) => $v === false));
-        $missingInput = array_keys(array_filter($errorInput, fn($v) => $v === true));
-        return [
-            'upload' => $missingUplaod,
-            'input' => $missingInput,
-        ];
-    }
 }

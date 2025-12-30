@@ -1,7 +1,7 @@
 @php
 $span = 'span';
-$pre_status_detail = $pre_employment->first()?->preEmploymentBelongToWorkStatusDefinationDetail; //ไปตารางสถานะย่อย
-$pre_state = $pre_status_detail?->workStatusDefinationDetailBelongsToWorkStatusDefination; //ไปตารางสถานะหลัก
+$work_status_def_detail = $work_status->first()?->workStatusBelongToWorkStatusDefDetail; //ไปตารางสถานะย่อย
+$work_status_def = $work_status_def_detail?->workStatusDefDetailBelongsToWorkStatusDef; //ไปตารางสถานะหลัก
 @endphp
 
 <x-filament-widgets::widget>
@@ -16,7 +16,7 @@ $pre_state = $pre_status_detail?->workStatusDefinationDetailBelongsToWorkStatusD
                 <div class="profile-name">
                     {{ $name }} {{ $last_name ?? 'ไม่มีช้อมูลชื่อ - นามสกุล'}}
                 </div>
-                @if ($post_employment->exists())
+                @if ($isPostEmp)
                 <div class="profile-position">
                     แผนก
                 </div>
@@ -25,11 +25,11 @@ $pre_state = $pre_status_detail?->workStatusDefinationDetailBelongsToWorkStatusD
                 </div>
                 @else
                 <div class="profile-position">
-                    {{$pre_state?->name_th}}
+                    {{$work_status_def?->name_th}}
                 </div>
                 <div class="status">สถานะ :
-                    <{!! $span !!} class="status-container {{$pre_status_detail?->color}}">
-                        {{$pre_status_detail?->name_th}}
+                    <{!! $span !!} class="status-container {{$work_status_def_detail?->color}}">
+                        {{$work_status_def_detail?->name_th}}
                     </{!! $span !!}>
                 </div>
                 @endif

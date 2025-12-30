@@ -11,7 +11,7 @@ class PreEmployment extends Model
     protected $table = "pre_employments";
     protected $fillable = [
         'user_id',        // อ้างอิงไปยังตาราง users
-        'status_id',         // สถานะการสมัคร (draft, completed, interview_scheduled, interviewed, passed, rejected)
+        'work_status_id', //
         'applied_at',     // วันที่สมัคร
         'interview_at',   // วันสัมภาษณ์ (ถ้ามี)
         'result_at',      // วันที่สรุปผล (ถ้ามี)
@@ -23,7 +23,4 @@ class PreEmployment extends Model
         'result_at'    => 'datetime',  // วันที่สรุปผล
     ];
     
-    public function preEmploymentBelongToWorkStatusDefinationDetail() :BelongsTo{
-        return $this->belongsTo(WorkStatusDefinationDetail::class, 'status_id', 'id');
-    }
 }

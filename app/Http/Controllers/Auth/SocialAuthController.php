@@ -26,7 +26,6 @@ class SocialAuthController extends Controller
         $user = User::where('provider', $provider)
             ->where('provider_id', $socialUser->getId())
             ->first();
-        $email = $socialUser->getEmail();
 
         if (!$user) {
 
@@ -38,8 +37,12 @@ class SocialAuthController extends Controller
                 'password'    => bcrypt(Str::random(16)),
                 'role_id'     => 3,
             ]);
-            $user->userHasonePreEmployment()->create([
-                'status_id' => 1,
+            $workStatus = $user->userHasoneWorkStatus()->create([
+                'work_status_def_detail_id' => 1,
+            ]);
+
+            $workStatus->workStatusHasonePreEmp()->create([
+                'applied_at' => now(),
             ]);
 
             Auth::login($user);

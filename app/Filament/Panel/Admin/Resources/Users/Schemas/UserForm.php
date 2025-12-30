@@ -35,7 +35,7 @@ class UserForm
             ->components([
                 Section::Make('ข้อมูลเอกสาร')
                     ->description('รวมข้อมูลที่พนักงาน หรือ ผู้สมัครอับโหลดและเก็บข้อมูลด้วย Ai')
-                    ->collapsed()
+                    ->collapsible()
                     ->columnSpanFull()
                     ->schema([
                         Tabs::make('Tabs_doc')

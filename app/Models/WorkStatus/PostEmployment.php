@@ -14,10 +14,9 @@ class PostEmployment extends Model
 
     protected $fillable = [
         'user_id',  // อ้างอิง users
-        'status_id',  // สถานะ
+        'work_status_id', //
         'employee_code',   // รหัสพนักงาน
-        'department_id',   // แผนก
-        'position_id',
+        'level_id', //ระดับตำสุดของโครงสร้างองค์กร เช่น ตำแหน่งงาน
         'salary',
         'hired_at'       // วันที่เริ่มงาน
     ];
@@ -26,18 +25,4 @@ class PostEmployment extends Model
         'hired_at'   => 'datetime',  // วันที่สมัคร
     ];
 
-    public function postEmploymentBelongToWorkStatusDefination(): BelongsTo
-    {
-        return $this->belongsTo(WorkStatusDefination::class, 'status_id', 'id');
-    }
-
-    public function employeeBelongToDepartment()
-    {
-        return $this->belongsTo(Department::class, 'department_id', 'id');
-    }
-
-    public function employeeBelongToPosition()
-    {
-        return $this->belongsTo(Position::class, 'department_id', 'id');
-    }
 }

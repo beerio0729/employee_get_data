@@ -15,28 +15,40 @@ class RefreshInterviewStatusJob implements ShouldQueue
     use Queueable;
     public function handle(): void
     {
-        User::where('work_status', 'applicant') // เลือกเฉพาะ user ที่ยังเป็นผู้สมัคร
-            ->whereHas('userHasoneApplicant', function ($q) {
-                $q->where('status', 'interview_scheduled') // สถานะต้องเป็นนัดสัมภาษณ์แล้ว
-                    ->whereNotNull('interview_at') // ต้องมีวันที่นัดสัมภาษณ์
-                    ->where('interview_at', '<', now()->format('Y-m-d H:i:s')); // วันที่นัดสัมภาษณ์ต้องเลยเวลาปัจจุบันแล้ว
-            })
-            ->each(function ($q) { // วนทีละ user ที่ผ่านเงื่อนไขทั้งหมดด้านบน
-                $q->userHasoneApplicant()->update([
-                    'status' => 'no_interviewed', // อัปเดตสถานะผู้สมัครเป็น ไม่มาสัมภาษณ์
+        User::whereHas('userHasoneWorkStatus', function ($q) {
+            $q->where('work_status_def_detail_id', 3) // นัดสัมภาษณ์แล้ว
+                ->whereHas('workStatusHasonePreEmp', function ($q2) {
+                    $q2->whereNotNull('interview_at')
+                        ->where('interview_at', '<', now());
+                });
+        })
+            ->each(function ($q) {
+
+                $workStatus = $q->userHasoneWorkStatus;
+                $preEmp = $workStatus?->workStatusHasonePreEmp;
+
+                // อัปเดตสถานะ → ไม่มาสัมภาษณ์
+                $workStatus->update([
+                    'work_status_def_detail_id' => 5,
                 ]);
-                Notification::make() //ต้องรัน Queue
+
+                // เคลียร์วันสัมภาษณ์
+                $preEmp?->update([
+                    'interview_at' => null,
+                ]);
+
+                Notification::make() // ต้องรัน Queue
                     ->title('แจ้งวันนัดสัมภาษณ์')
-                    ->body("เรียน คุณ {$q->userHasoneIdcard->name_th} {$q->userHasoneIdcard->last_name_th} \n\n"
-                        . "<br><br>ทางบริษัทฯ ขอแจ้ง<br>❌ ยกเลิกการสัมภาษณ์<br>
-                                    เนื่องจากท่านไม่มาสัมภาษณ์ตามที่นัดหมายไว้ในวันที่<br>
-                                            <B>"
-                        . Carbon::parse($q->userHasoneApplicant->interview_at)->locale('th')->translatedFormat('d M ')
-                        . (Carbon::parse($q->userHasoneApplicant->interview_at)->year + 543)
-                        . "\nเวลา "
-                        . Carbon::parse($q->userHasoneApplicant->interview_at)->format(' H:i')
-                        . " น.\n\n"
-                        . "</B>")
+                    ->body(
+                        "เรียน คุณ {$q->userHasoneIdcard->name_th} {$q->userHasoneIdcard->last_name_th}\n\n"
+                            . "<br><br>ทางบริษัทฯ ขอแจ้ง<br>❌ ยกเลิกการสัมภาษณ์<br>
+                                เนื่องจากท่านไม่มาสัมภาษณ์ตามที่นัดหมายไว้ในวันที่<br><B>"
+                            . Carbon::parse($preEmp?->interview_at)->locale('th')->translatedFormat('d M ')
+                            . (Carbon::parse($preEmp?->interview_at)->year + 543)
+                            . "\nเวลา "
+                            . Carbon::parse($preEmp?->interview_at)->format(' H:i')
+                            . " น.\n\n</B>"
+                    )
                     ->actions([
                         Action::make('view_interview_' . now()->timestamp)
                             ->button()
@@ -44,14 +56,15 @@ class RefreshInterviewStatusJob implements ShouldQueue
                             ->markAsRead(),
                     ])
                     ->sendToDatabase($q, isEventDispatched: true);
+
                 LineSendMessageService::send($q->provider_id, [
-                    "เรียน คุณ {$q->userHasoneIdcard->name_th} {$q->userHasoneIdcard->last_name_th} \n\n"
-                        . "ทางบริษัทฯ ขอแจ้ง ❌ ยกเลิกการสัมภาษณ์
-                                    \nเนื่องจากท่านไม่มาสัมภาษณ์ตามที่นัดหมายไว้ในวันที่\n\n"
-                        . Carbon::parse($q->userHasoneApplicant->interview_at)->locale('th')->translatedFormat('d M ')
-                        . (Carbon::parse($q->userHasoneApplicant->interview_at)->year + 543)
+                    "เรียน คุณ {$q->userHasoneIdcard->name_th} {$q->userHasoneIdcard->last_name_th}\n\n"
+                        . "ทางบริษัทฯ ขอแจ้ง ❌ ยกเลิกการสัมภาษณ์\n
+                            เนื่องจากท่านไม่มาสัมภาษณ์ตามที่นัดหมายไว้ในวันที่\n\n"
+                        . Carbon::parse($preEmp?->interview_at)->locale('th')->translatedFormat('d M ')
+                        . (Carbon::parse($preEmp?->interview_at)->year + 543)
                         . "\nเวลา "
-                        . Carbon::parse($q->userHasoneApplicant->interview_at)->format(' H:i')
+                        . Carbon::parse($preEmp?->interview_at)->format(' H:i')
                         . " น.\n\n",
                 ]);
             });

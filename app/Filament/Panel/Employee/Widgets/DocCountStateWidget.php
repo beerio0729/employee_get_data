@@ -2,12 +2,12 @@
 
 namespace App\Filament\Panel\Employee\Widgets;
 
+use App\Services\CheckDocDownloaded;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class DocCountStateWidget extends StatsOverviewWidget
 {
-    protected ?string $pollingInterval = '2s';
     protected static ?int $sort = 2;
     protected int | string | array $columnSpan = 'full';
     protected string $view = 'filament.panel.employee.widgets.doc-count-state-widget';
@@ -23,27 +23,26 @@ class DocCountStateWidget extends StatsOverviewWidget
 
 
 
-        $totalFields = $additional['field'] + $father['field'] + $mother['field']+$siblig['field']+8;
-        $totalNull =  $additional['null'] + $father['null'] + $mother['null']+$siblig['null']+8-$doc_count;
+        $totalFields = $additional['field'] + $father['field'] + $mother['field'] + $siblig['field'] + 8;
+        $totalNull =  $additional['null'] + $father['null'] + $mother['null'] + $siblig['null'] + 8 - $doc_count;
         $suscess = $totalFields - $totalNull;
-        
+
         $doc_count_percent = intval(($doc_count / 8) * 100);
         $percent = intval(($suscess / $totalFields) * 100);
-        $icon_count = $doc_count_percent === 100 ? 'heroicon-m-check-circle' : 'heroicon-m-exclamation-triangle';
-        $icon_percent = $percent === 100 ? 'heroicon-m-check-circle' : 'heroicon-m-exclamation-triangle';
+        $icon_count = $this->isSuccess($user)['upload_success'] ? 'heroicon-m-check-circle' : 'heroicon-m-exclamation-triangle';
+        $icon_percent = $this->isSuccess($user)['input_success'] ? 'heroicon-m-check-circle' : 'heroicon-m-exclamation-triangle';
 
         return [
-            Stat::make('', $doc_count . '/8')
-                ->color(fn() => $doc_count === 8 ? 'success' : 'warning')
+            Stat::make('', $doc_count . $this->countAllDoc($user))
+                ->color(fn() => $this->isSuccess($user)['upload_success'] ? 'success' : 'warning')
                 ->progress($doc_count_percent)
                 ->descriptionIcon($icon_count)
                 ->description('เอกสารที่อับโหลดแล้ว'),
             Stat::make('', $percent . ' %')
                 ->descriptionIcon($icon_percent)
-                ->color(fn() => $percent === 100 ? 'success' : 'warning')
+                ->color(fn() => $this->isSuccess($user)['input_success'] ? 'success' : 'warning')
                 ->progress($percent)
-                ->description('ความสมบูรณ์ของข้อมูล')
-                ,
+                ->description('ความสมบูรณ์ของข้อมูล'),
         ];
     }
 
@@ -106,7 +105,7 @@ class DocCountStateWidget extends StatsOverviewWidget
 
         // นับช่องที่เป็น null
         $nullCount = collect($data)->filter(fn($v) => blank($v))->count();
-        
+
         return ["field" => $CountFields, "null" => $nullCount];
     }
 
@@ -119,7 +118,7 @@ class DocCountStateWidget extends StatsOverviewWidget
 
         // นับช่องที่เป็น null
         $nullCount = collect($data)->filter(fn($v) => blank($v))->count();
-        
+
         return ["field" => $CountFields, "null" => $nullCount];
     }
 
@@ -132,7 +131,29 @@ class DocCountStateWidget extends StatsOverviewWidget
 
         // นับช่องที่เป็น null
         $nullCount = collect($data)->filter(fn($v) => blank($v))->count();
-        
+
         return ["field" => $CountFields, "null" => $nullCount];
+    }
+
+    public function countAllDoc($user)
+    {
+        $gender = $user->userHasoneIdcard->gender;
+        if ($gender === 'female') {
+            $count = '/7';
+        } else {
+            $count = '/8';
+        }
+
+        return $count;
+    }
+
+    public function isSuccess($user): array
+    {
+        $missing = CheckDocDownloaded::check($user);
+
+        return [
+            'upload_success' => empty($missing['upload']),
+            'input_success'  => empty($missing['input'])
+        ];
     }
 }

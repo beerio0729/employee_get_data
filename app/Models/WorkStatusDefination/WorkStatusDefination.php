@@ -13,7 +13,6 @@ class WorkStatusDefination extends Model
         'code',
         'name_th', //ใช้เก็บประมาณว่า เป็นพนักงาน นักศึกษาฝึกงาน คนสมัคร เป็นเอาทซอรด์
         'name_en',
-        'sequence',
         'is_active',
     ];
     
@@ -21,7 +20,7 @@ class WorkStatusDefination extends Model
         'is_active' => 'boolean',
     ];
     
-    public function workStatusDefinationHasmanyWorkStatusDefinationDetail()
+    public function workStatusDefHasmanyWorkStatusDefDetail()
     {
         return $this->hasMany(WorkStatusDefination::class, 'work_status_def_id', 'id');
     }

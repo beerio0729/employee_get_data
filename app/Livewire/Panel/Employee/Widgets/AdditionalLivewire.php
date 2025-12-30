@@ -40,11 +40,13 @@ class AdditionalLivewire extends Component implements HasActions, HasSchemas
     public function openActionModal($id = null)
     {
         $this->mountAction($id);
+        $this->dispatch('refreshProfileWidget');
     }
 
     public function refreshActionModal($id = null)
     {
         $this->unmountAction();
         $this->mountAction($id);
+        $this->dispatch('refreshProfileWidget');
     }
 }

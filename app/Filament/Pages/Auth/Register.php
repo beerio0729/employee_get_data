@@ -40,8 +40,12 @@ class Register extends BaseRegister
     {
         $user = parent::handleRegistration($data);
         DB::transaction(function () use ($user) {
-            $user->userHasonePreEmployment()->create([
-                'status_id' => 1,
+            $workStatus = $user->userHasoneWorkStatus()->create([
+                'work_status_def_detail_id' => 1,
+            ]);
+
+            $workStatus->workStatusHasonePreEmp()->create([
+                'applied_at' => now(),
             ]);
         }, attempts: 5);
         return $user;
