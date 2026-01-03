@@ -16,12 +16,15 @@ return new class extends Migration
             $table->string('name_th');
             $table->string('name_en');
             $table->string('code')->nullable(); // ตัวย่อจากชื่อ en
+            $table->unsignedSmallInteger('max_count')->nullable();
             $table->foreignId('parent_id')
                 ->nullable()
                 ->constrained('organization_structures')
                 ->cascadeOnDelete();
-            $table->string('type')->index(); // เช่น division, department, team, position
-            $table->unsignedTinyInteger('level');
+            $table->foreignId('organization_level_id')
+                ->nullable()
+                ->constrained('organization_levels')
+                ->nullOnDelete(); // 🔑 สำคัญมาก
             $table->timestamps();
         });
     }

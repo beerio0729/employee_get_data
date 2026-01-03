@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('roles', function (Blueprint $table) {
-            $table->string('name_th')->after('name');
+        Schema::create('post_employment_grades', function (Blueprint $table) {
+            $table->id();
+            $table->string('name_th');
+            $table->string('name_en');
+            $table->unsignedTinyInteger('grade');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('roles', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('post_employment_grades');
     }
 };

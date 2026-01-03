@@ -4,7 +4,7 @@ namespace App\Filament\Panel\Admin\MultiResources\OrganizationStructureSevenths;
 
 use Filament\Tables\Table;
 use Filament\Schemas\Schema;
-use App\Models\OrganizationStructure;
+use App\Models\Organization\OrganizationStructure;
 use App\Filament\Panel\Admin\Overrides\BaseOrganizationStructureResource;
 use App\Filament\Panel\Admin\MultiResources\OrganizationStructureSevenths\Pages\CreateOrganizationStructureSeventh;
 use App\Filament\Panel\Admin\MultiResources\OrganizationStructureSevenths\Pages\EditOrganizationStructureSeventh;

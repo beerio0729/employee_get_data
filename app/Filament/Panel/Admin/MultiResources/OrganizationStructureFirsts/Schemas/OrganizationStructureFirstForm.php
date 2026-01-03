@@ -4,8 +4,6 @@ namespace App\Filament\Panel\Admin\MultiResources\OrganizationStructureFirsts\Sc
 
 use App\Filament\Panel\Admin\Components\MultiResources\Forms\OrganizationStructureFormComponent;
 use Filament\Schemas\Schema;
-use App\Models\OrganizationLevel;
-use Filament\Forms\Components\TextInput;
 
 class OrganizationStructureFirstForm
 {

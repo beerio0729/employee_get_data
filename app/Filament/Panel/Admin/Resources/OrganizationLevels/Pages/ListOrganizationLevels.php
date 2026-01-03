@@ -3,10 +3,11 @@
 namespace App\Filament\Panel\Admin\Resources\OrganizationLevels\Pages;
 
 use Filament\Actions\Action;
-use App\Models\OrganizationLevel;
+
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use App\Models\Organization\OrganizationLevel;
 use App\Filament\Panel\Admin\Resources\OrganizationLevels\OrganizationLevelResource;
 
 class ListOrganizationLevels extends ListRecords
@@ -24,7 +25,8 @@ class ListOrganizationLevels extends ListRecords
                     $levels = OrganizationLevel::pluck('level'); // จะได้ collection: ['first','second',...]
 
                     foreach ($levels as $level) {
-                        cache()->forget('org_level_' . $level);
+                        cache()->forget('org_level_collection_' . $level);
+                        cache()->forget('org_level_id_' . $level);
                     }
                     
                     Notification::make()

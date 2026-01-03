@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('work_status_id')->nullable()->constrained('work_statuses')->onDelete('cascade');
             $table->string('employee_code')->unique(); // รหัสพนักงาน ไม่ซ้ำ
-            $table->foreignId('level_id')->nullable()->constrained('organization_levels')->nullOnDelete();
+            $table->foreignId('lowest_org_structure_id')->nullable()->constrained('organization_structures')->nullOnDelete();
+            $table->foreignId('post_employment_grade_id')->nullable()->constrained('post_employment_grades')->nullOnDelete();
             $table->string('salary')->nullable();
             $table->date('hired_at'); // วันที่เริ่มงาน ต้องมี
             $table->timestamps();

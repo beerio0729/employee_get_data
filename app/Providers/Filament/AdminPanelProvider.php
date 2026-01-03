@@ -5,15 +5,14 @@ namespace App\Providers\Filament;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Actions\Action;
-use App\Models\OrganizationLevel;
 use App\Filament\Pages\Auth\Login;
 use Filament\Support\Colors\Color;
 use App\Filament\Pages\EditProfile;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Auth;
 use App\Filament\Pages\Auth\Register;
-use Filament\Navigation\NavigationGroup;
 use Filament\Http\Middleware\Authenticate;
+use App\Models\Organization\OrganizationLevel;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -23,9 +22,6 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
-use SolutionForest\FilamentSimpleLightBox\SimpleLightBoxPlugin;
-use App\Filament\Panel\Admin\MultiResources\OrganizationStructureFirsts\OrganizationStructureFirstResource;
-use App\Filament\Panel\Admin\MultiResources\OrganizationStructureSeconds\OrganizationStructureSecondResource;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -33,7 +29,6 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            // ->plugin(SimpleLightBoxPlugin::make())
             ->id('admin')
             ->darkMode(false)
             ->font('Noto Sans Thai')
@@ -52,12 +47,12 @@ class AdminPanelProvider extends PanelProvider
                     ->label('ไปโหมดพนักงาน')
                     ->url('/'),
             ])
-            ->navigationGroups([
-                NavigationGroup::make()
-                    ->label('Setting')
-                    ->icon('heroicon-o-cog-6-tooth')
-                    ->collapsed(),
-            ])
+            // ->navigationGroups([
+            //     NavigationGroup::make()
+            //         ->label('Setting')
+            //         ->icon('heroicon-o-cog-6-tooth')
+            //         ->collapsed(),
+            // ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('5s')
             ->colors([

@@ -4,10 +4,11 @@ namespace App\Filament\Panel\Admin\MultiResources\OrganizationStructureFirsts\Ta
 
 use Filament\Tables\Table;
 use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use App\Models\Organization\OrganizationStructure;
 use App\Filament\Panel\Admin\Components\MultiResources\Tables\OrganizationStructureTableComponent;
-use Filament\Actions\DeleteAction;
 
 class OrganizationStructureFirstsTable
 {
@@ -15,7 +16,7 @@ class OrganizationStructureFirstsTable
     {
         return $table
             ->modifyQueryUsing(
-                fn($query) => $query->where('level', $level)
+                fn($query) => $query->where('organization_level_id', OrganizationStructure::getLevelId($level))
             )
             ->columns(OrganizationStructureTableComponent::tableComponent($label))
             ->filters([

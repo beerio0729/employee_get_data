@@ -9,7 +9,6 @@ use Detection\MobileDetect;
 use Filament\Actions\Action;
 use Filament\Schemas\Schema;
 use Filament\Actions\BulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\ActionGroup;
 use Filament\Support\Enums\Width;
@@ -22,18 +21,15 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\Select;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\BaseFilter;
 use App\Services\LineSendMessageService;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Enums\FiltersLayout;
-use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\Layout\Panel;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Forms\Components\DateTimePicker;
 use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 
@@ -180,6 +176,9 @@ class UsersTable
                         ->schema([
                             DateTimePicker::make('interview_at')
                                 ->hiddenLabel()
+                                ->readOnly(function($record) {
+                                    return filled($record->userHasoneWorkStatus->workStatusHasonePreEmp->interview_at);
+                                })
                                 ->required()
                                 ->validationMessages(['required' => 'กรุณาเลือกวันเวลานัดสัมภาษณ์'])
                                 ->native(false)

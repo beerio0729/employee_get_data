@@ -7,6 +7,7 @@ use Filament\Actions\EditAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
+use App\Models\Organization\OrganizationStructure;
 use App\Filament\Panel\Admin\Components\MultiResources\Tables\OrganizationStructureTableComponent;
 
 class OrganizationStructureFourthsTable
@@ -15,7 +16,7 @@ class OrganizationStructureFourthsTable
     {
         return $table
             ->modifyQueryUsing(
-                fn($query) => $query->where('level', $level)
+                fn($query) => $query->where('organization_level_id', OrganizationStructure::getLevelId($level))
             )
             ->columns(OrganizationStructureTableComponent::tableParentComponent($label, $level))
             ->filters([

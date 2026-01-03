@@ -3,8 +3,6 @@
 namespace App\Filament\Panel\Admin\Resources\OrganizationLevels\Schemas;
 
 use Filament\Schemas\Schema;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 
 class OrganizationLevelForm
@@ -17,7 +15,7 @@ class OrganizationLevelForm
                 TextInput::make('name_en')->label('ชื่อระดับองค์กร (En)'),
                 TextInput::make('level')
                     ->readOnly()
-                    ->label('ระดับ')
+                    ->label('Level')
                     ->default(fn ($model) => $model::count() + 1)
             ])->columns(3);
     }

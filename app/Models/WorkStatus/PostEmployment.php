@@ -2,11 +2,8 @@
 
 namespace App\Models\WorkStatus;
 
-use App\Models\Position;
-use App\Models\Department;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\WorkStatusDefination\WorkStatusDefination;
 
 class PostEmployment extends Model
 {
@@ -16,7 +13,8 @@ class PostEmployment extends Model
         'user_id',  // อ้างอิง users
         'work_status_id', //
         'employee_code',   // รหัสพนักงาน
-        'level_id', //ระดับตำสุดของโครงสร้างองค์กร เช่น ตำแหน่งงาน
+        'lowest_org_structure_id', //id ของช้อมูลในระดับต่ำสุดของโครงสร้างองค์กร ซึ่งส่วนมากจะเป็นตำแหน่ง เช่น หัวหน้าวิศวกร
+        'post_employment_grade_id', //ระดับชั้นของคนๆ นั้น
         'salary',
         'hired_at'       // วันที่เริ่มงาน
     ];
@@ -24,5 +22,10 @@ class PostEmployment extends Model
     protected $casts = [
         'hired_at'   => 'datetime',  // วันที่สมัคร
     ];
+    
+    public function PostEmpBelongToGrade() :BelongsTo
+    {
+        return $this->belongsTo(PostEmploymentGrade::class, 'post_employment_grade_id', 'id')->withDefault();
+    }
 
 }

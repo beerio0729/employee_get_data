@@ -2,17 +2,17 @@
 
 namespace App\Filament\Panel\Admin\Resources\OrganizationLevels;
 
-use App\Filament\Panel\Admin\Resources\OrganizationLevels\Pages\CreateOrganizationLevel;
+use BackedEnum;
+use Filament\Tables\Table;
+use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
+use Filament\Support\Icons\Heroicon;
+use App\Models\Organization\OrganizationLevel;
 use App\Filament\Panel\Admin\Resources\OrganizationLevels\Pages\EditOrganizationLevel;
 use App\Filament\Panel\Admin\Resources\OrganizationLevels\Pages\ListOrganizationLevels;
+use App\Filament\Panel\Admin\Resources\OrganizationLevels\Pages\CreateOrganizationLevel;
 use App\Filament\Panel\Admin\Resources\OrganizationLevels\Schemas\OrganizationLevelForm;
 use App\Filament\Panel\Admin\Resources\OrganizationLevels\Tables\OrganizationLevelsTable;
-use App\Models\OrganizationLevel;
-use BackedEnum;
-use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Table;
 
 class OrganizationLevelResource extends Resource
 {

@@ -2,8 +2,9 @@
 
 namespace App\Filament\Panel\Admin\Components\MultiResources\Tables;
 
-use App\Models\OrganizationLevel;
+
 use Filament\Tables\Columns\TextColumn;
+use App\Models\Organization\OrganizationStructure;
 
 class OrganizationStructureTableComponent
 {
@@ -27,13 +28,14 @@ class OrganizationStructureTableComponent
     }
 
     public static function tableParentComponent($label, $level): array
-    {
+    {   $isLowest = $level === OrganizationStructure::getLevelLowest();
         return [
             ...self::tableComponent($label),
             TextColumn::make('parent.name_th')
-                ->label(OrganizationLevel::where('level', $level - 1)->value('name_th'))
+                ->label(OrganizationStructure::getLevelCollection($level-1)?->name_th ?? '-')
                 ->sortable()
                 ->searchable(),
+            TextColumn::make('max_count')->label('จำนวนสูงสุด')->visible($isLowest),
         ];
     }
 
