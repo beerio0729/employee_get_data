@@ -91,6 +91,18 @@ class User extends Authenticatable implements FilamentUser
         };
     }
 
+    public function isSuperAdmin(): bool
+    {
+        $role_name = auth()->user()->userBelongToRole->name;
+        return $role_name === 'super_admin' ? 1 : 0;
+    }
+    
+    public function isAdmin(): bool
+    {
+        $role_name = auth()->user()->userBelongToRole->name;
+        return in_array($role_name, ['super_admin', 'admin'], true) ? 1 : 0;
+    }
+
 
     /*เอาค่าของประสบการณ์มาเรียงเป็น HTML */
 
@@ -277,7 +289,7 @@ class User extends Authenticatable implements FilamentUser
             ?->workStatusDefDetailBelongsToWorkStatusDef
             ?->main_work_status === 'pre_employment';
     }
-    
+
     public function isPostEmployment()
     {
         return $this->userHasoneWorkStatus

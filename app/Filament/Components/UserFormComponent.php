@@ -23,6 +23,8 @@ use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
+use App\Models\OpenPosition;
+use App\Models\Organization\OrganizationStructure;
 
 class UserFormComponent
 {
@@ -342,7 +344,7 @@ class UserFormComponent
                                     ->placeholder('รหัสไปรษณีย์')
                             ])->collapsed(),
                     ]),
-                Tab::make('ตำแหน่งงาน')
+                Tab::make('ตำแหน่งงาน*')
                     ->extraAttributes(
                         fn() => ($this->isMobile)
                             ? ['style' => 'padding: 24px 15px']
@@ -352,7 +354,7 @@ class UserFormComponent
                         Section::make('ตำแหน่งงาน')
                             ->contained(false)
                             ->relationship('userHasoneResumeToJobPreference')
-                            ->description('ระบุตำแหน่งงานทีต้องการสมัคร ได้สูงสุด 4 ตำแหน่ง/ รวมถึงเลือกพื้นที่ทำงาน')
+                            ->description('ส่วนนี้สำคัญมาก กรุณาตรวจสอบข้อมูลอย่างละเอียด, สามารถระบุตำแหน่งงานทีต้องการสมัคร ได้สูงสุด 4 ตำแหน่ง/ รวมถึงเลือกพื้นที่ทำงาน')
                             ->schema([
                                 Fieldset::make('job_con')
                                     ->label('ความพร้อมในการทำงาน')
@@ -376,7 +378,7 @@ class UserFormComponent
                                             : []
                                     )
                                     ->schema([
-                                        Repeater::make('position')
+                                        Repeater::make('positions_id')
                                             ->hiddenLabel()
                                             ->maxItems(4)
                                             ->columnSpanFull()
@@ -389,7 +391,7 @@ class UserFormComponent
                                                 if (count($datas) === count($record?->position ?? [])) {
                                                     $record->updateOrCreate(
                                                         ['resume_id' => $record->resume_id],            // เงื่อนไขหาแถวเดิม
-                                                        ['position' => array_values($datas)]   // ข้อมูลที่จะอัปเดตหรือสร้าง
+                                                        ['positions_id' => array_values($datas)]   // ข้อมูลที่จะอัปเดตหรือสร้าง
                                                     );
                                                     Notification::make()
                                                         ->title('แก้ไขข้อมูลเรียบร้อยแล้ว')
@@ -398,16 +400,23 @@ class UserFormComponent
                                                 }
                                             })
                                             ->simple(
-                                                TextInput::make('position')
+                                                Select::make('position')
                                                     ->label('ตำแหน่งงาน')
-                                                    ->placeholder('ระบุตำแหน่งงานที่ต้องการ')
-                                                    ->afterStateHydrated(function ($component, $state) {
-                                                        if (! blank($state)) {
-                                                            // แปลงเฉพาะตอนแสดงใน input
-                                                            $component->state(ucwords($state));
-                                                        }
-                                                    }),
-
+                                                    ->options(
+                                                        fn($get, $state) =>
+                                                        OrganizationStructure::whereIn('id', OpenPosition::pluck('position_id'))
+                                                            ->whereNotIn(
+                                                                'id',
+                                                                collect($get('../../position')) // 👈 ชื่อ repeater field
+                                                                    ->pluck('position')
+                                                                    ->filter()
+                                                                    ->reject(fn($id) => $id == $state) // 👈 ยกเว้นตัวเอง
+                                                                    ->toArray()
+                                                            )
+                                                            ->pluck('name_en', 'id')
+                                                            ->map(fn($name) => ucwords($name))
+                                                    )
+                                                    ->searchable()
                                             )
                                             ->columnSpanFull(),
                                     ]),

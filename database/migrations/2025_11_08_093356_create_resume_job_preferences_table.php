@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignID('resume_id')->constrained('resumes')->onDelete('cascade'); // เชื่อมกับตาราง employees
             $table->string('availability_date')->nullable(); // วันที่สะดวกเริ่มทำงาน (ใช้ string เพื่อความยืดหยุ่นตาม JSON)
             $table->string('expected_salary')->nullable(); // เงินเดือนที่คาดหวัง (ใช้ string เพื่อความยืดหยุ่นตาม JSON)
-            $table->json('position')->nullable();
+            $table->json('position_id')->nullable();
             $table->json('location')->nullable();
             $table->json('other_location')->nullable();
             $table->timestamps();

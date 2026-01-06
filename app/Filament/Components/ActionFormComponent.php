@@ -1497,12 +1497,14 @@ class ActionFormComponent
                     ]);
                     event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
                 } else {
-                    $work_status->update([
-                        'work_status_def_detail_id' => 2,
-                    ]);
+                    if ($work_status->first()->work_status_def_detail_id === 1) {
+                        $work_status->update([
+                            'work_status_def_detail_id' => 2,
+                        ]);
+                    }
+
                     return redirect('/pdf');
                 }
             });
     }
-
 }

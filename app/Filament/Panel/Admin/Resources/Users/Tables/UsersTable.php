@@ -13,6 +13,7 @@ use Filament\Actions\ViewAction;
 use Filament\Actions\ActionGroup;
 use Filament\Support\Enums\Width;
 use Filament\Actions\DeleteAction;
+use Filament\Support\Colors\Color;
 use Illuminate\Support\HtmlString;
 use Filament\Tables\Filters\Filter;
 use Filament\Support\Icons\Heroicon;
@@ -20,6 +21,7 @@ use Illuminate\Support\Facades\Date;
 use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\Select;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables\Columns\TextColumn;
 use App\Services\LineSendMessageService;
 use Filament\Notifications\Notification;
@@ -31,6 +33,8 @@ use Filament\Tables\Columns\Layout\Stack;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Forms\Components\DateTimePicker;
+use App\Models\Organization\OrganizationStructure;
+use App\Models\WorkStatusDefination\WorkStatusDefination;
 use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 
 class UsersTable
@@ -70,17 +74,14 @@ class UsersTable
                                 $user = $record->userHasoneIdcard;
                                 return "{$user->prefix_name_th} {$state} {$user->last_name_th}";
                             }),
-                        TextColumn::make('userHasoneWorkStatus.workStatusBelongToWorkStatusDefDetail')->label('สถานะ')->searchable()->sortable()
-                            ->formatStateUsing(function ($state) {
-                                if (filled($state)) {
-                                    $status_detail = $state->name_th; //$state จะไปตาราง status detail
-                                    $status = $state->workStatusDefDetailBelongsToWorkStatusDef->name_th;
-                                } else {
-                                    $status = 'ไม่มีสถานะ';
-                                    $status_detail = 'ไม่มีรายละเอียดสถานะ';
-                                }
-                                return $status . " : " . $status_detail;
-                            }),
+                        TextColumn::make('userHasoneWorkStatus.workStatusBelongToWorkStatusDefDetail.name_th')
+                            ->label('สถานะ')
+                            ->formatStateUsing(function ($state, $record) {
+                                $detail = $record->userHasoneWorkStatus?->workStatusBelongToWorkStatusDefDetail;
+                                $status = $detail?->workStatusDefDetailBelongsToWorkStatusDef?->name_th;
+
+                                return ($status ?? 'ไม่มีสถานะ') . ' : ' . ($detail->name_th ?? 'ไม่มีรายละเอียดสถานะ');
+                            })
 
                     ]),
                     ...self::detailUserForDesktop(),
@@ -90,23 +91,36 @@ class UsersTable
             ])
             ->filters([
                 SelectFilter::make('work_status_id')
-                    ->label('สถานะ')
-                    ->relationship('userHasoneWorkStatus.workStatusBelongToWorkStatusDefDetail.workStatusDefDetailBelongsToWorkStatusDef', 'name_th')
+                    ->label('เลือกสถานะ')
+                    //->relationship('userHasoneWorkStatus.workStatusBelongToWorkStatusDefDetail.workStatusDefDetailBelongsToWorkStatusDef', 'name_th')
+                    ->options(WorkStatusDefination::pluck('name_th', "id"))
+                    ->query(function ($query, $filter, $livewire) {
+                        $work_status_id = $filter->getTable()->getFilter('work_status_id')->getState()['value'];
+
+                        if ($work_status_id === '1') {
+                            $query->whereRelation('userHasoneWorkStatus.workStatusBelongToWorkStatusDefDetail.workStatusDefDetailBelongsToWorkStatusDef', 'id', intval($work_status_id));
+                        } else {
+                            $livewire->tableFilters['interview_at_filter']['positions_id'] = null;
+                            $livewire->tableFilters['interview_at_filter']['interview_at'] = null;
+                        }
+                    })
+                    ->default(1)
                     ->searchable()
                     ->preload(),
                 SelectFilter::make('status_detail_id')
-                    ->label('รายละเอียดสถานะ')
+                    ->label('เลือกรายละเอียดสถานะ')
                     ->options(function ($filter) {
-                        $work_status_id = intval($filter->getTable()->getFilter('work_status_id')->getState()['value']);
-                        return WorkStatusDefinationDetail::where('work_status_def_id', $work_status_id)->pluck('name_th', 'id');
+                        $work_status_id = $filter?->getTable()?->getFilter('work_status_id')?->getState()['value'];
+                        return WorkStatusDefinationDetail::where('work_status_def_id', intval($work_status_id))->pluck('name_th', 'id');
                     })
                     ->query(function ($query, $filter, $livewire) {
-                        $work_status_id_detail = $filter->getTable()->getFilter('status_detail_id')->getState()['value'];
+                        $work_status_id_detail = $filter->getTable()->getFilter('status_detail_id')->getState()['value'] ?? null;
 
                         if (filled($work_status_id_detail)) {
                             if ($work_status_id_detail !== '3') {
                                 $livewire->tableFilters['interview_at_filter']['interview_at'] = null;
-                            } $query->whereRelation('userHasoneWorkStatus.workStatusBelongToWorkStatusDefDetail', 'id', intval($work_status_id_detail));
+                            }
+                            $query->whereRelation('userHasoneWorkStatus.workStatusBelongToWorkStatusDefDetail', 'id', intval($work_status_id_detail));
                         } else {
                             $livewire->tableFilters['interview_at_filter']['interview_at'] = null;
                         }
@@ -117,29 +131,71 @@ class UsersTable
                     ->columnSpan(2)
                     ->columns(2)
                     ->schema([
-                        DateTimePicker::make('interview_at')
-                            ->label('เวลานัดสัมภาณษ์')
-                            ->visible(function ($state, $livewire) {
-                                $status = $livewire->tableFilters['status_detail_id']['value'] ?? null;
-                                return $status === '3';
+                        Select::make('positions_id')
+                            ->label('เลือกตำแหน่งที่สมัคร')
+                            ->visible(function ($livewire) {
+                                $status = $livewire->tableFilters['work_status_id']['value'];
+                                return $status === '1' ? 1 : 0;
                             })
-                            ->seconds(false)
-                        //DateTimePicker::make('created_until'),
-                    ])->query(function (Builder $query, array $data): Builder {
-                        return $query->when(
-                            $data['interview_at'] ?? null,
-                            function (Builder $query, $value) {
-                                $carbonValue = Carbon::parse($value);
-                                $date = $carbonValue->toDateString();   // YYYY-MM-DD
-                                $time = $carbonValue->format('H:i');   // HH:MM
+                            ->reactive()
+                            ->multiple()
+                            ->options(function () {
+                                $lowest_level = OrganizationStructure::getLevelLowest(); //ระดับต่ำสุดของโครงสร้างองค์กร
+                                $level_id = organizationStructure::getLevelId($lowest_level); //id ของระดับต่ำสุดของโครงสร้างองค์กร มักเป็น "ตำแหน่งพนักงาน"
+                                $org_name = OrganizationStructure::where('organization_level_id', $level_id)->pluck('name_th', 'id');
+                                return $org_name;
+                            }),
+                        DateTimePicker::make('interview_at')
+                            ->label('ระบุเวลานัดสัมภาณษ์')
+                            ->displayFormat('D, j M Y, G:i น.')
+                            ->locale('th')
+                            ->afterStateHydrated(fn($set) => $set('interview_at', now()))
+                            ->buddhist()
+                            ->minutesStep(15)
+                            ->visible(function ($livewire, $set) {
+                                $status = $livewire->tableFilters['status_detail_id']['value'] ?? null;
+                                if ($status === '3') {
+                                    //$set('interview_at', now());
+                                    return 1;
+                                } else {
+                                    $set('interview_at', null);
+                                    return 0;
+                                }
+                            })
+                            ->seconds(false),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when(
+                                $data['positions_id'],
+                                function ($query) use ($data) {
+                                    $query->whereHas(
+                                        'userHasoneResume.resumeHasoneJobPreference',
+                                        function ($q) use ($data) {
+                                            $q->where(function ($qq) use ($data) {
+                                                foreach ($data['positions_id'] as $pos) {
+                                                    $qq->orWhereJsonContains('positions_id', (int) $pos);
+                                                }
+                                            });
+                                        }
+                                    );
+                                }
+                            )
+                            ->when(
+                                $data['interview_at'],
+                                function (Builder $query, $value) {
+                                    $carbonValue = Carbon::parse($value);
+                                    $date = $carbonValue->toDateString();   // YYYY-MM-DD
+                                    $time = $carbonValue->format('H:i');   // HH:MM
 
-                                $query->whereHas('userHasoneWorkStatus.workStatusHasonePreEmp', function (Builder $q) use ($date, $time) {
-                                    $q->whereDate('interview_at', $date)
-                                        ->whereTime('interview_at', '>=', '00:01')
-                                        ->whereTime('interview_at', '<=', $time);
-                                });
-                            }
-                        );
+                                    $query->whereHas('userHasoneWorkStatus.workStatusHasonePreEmp', function (Builder $q) use ($date, $time) {
+                                        $q->whereDate('interview_at', $date)
+                                            ->whereTime('interview_at', '>=', '00:00')
+                                            ->whereTime('interview_at', '<=', $time);
+                                    });
+                                }
+                            )
+                        ;
                     })
             ], layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(4)
@@ -176,7 +232,7 @@ class UsersTable
                         ->schema([
                             DateTimePicker::make('interview_at')
                                 ->hiddenLabel()
-                                ->readOnly(function($record) {
+                                ->readOnly(function ($record) {
                                     return filled($record->userHasoneWorkStatus->workStatusHasonePreEmp->interview_at);
                                 })
                                 ->required()
@@ -328,9 +384,15 @@ class UsersTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->label('ลบข้อมูลของบุคคลที่เลือก')
+                        ->visible(fn($model) => (new $model())->isSuperAdmin()),
                     BulkAction::make('mark_as_interviewed')
                         ->icon(Heroicon::ChatBubbleLeftRight)
+                        ->visible(
+                            fn($livewire) =>
+                            $livewire->tableFilters['status_detail_id']['value'] === '3'
+                                ? 1 : 0
+                        )
                         ->label('มาสัมภาษณ์แล้ว')
                         ->action(function ($records) {
                             foreach ($records as $record) {
@@ -339,8 +401,100 @@ class UsersTable
                                 ]);
                             }
                         })
-                        ->requiresConfirmation() // จะมี popup confirm
-                        ->color('success'), // สีเขียว
+                        ->requiresConfirmation()
+                        ->color('success'),
+                    BulkAction::make('mark_as_waiting_approval')
+                        ->icon(Heroicon::CheckCircle)
+                        ->label('รออนุมัติจ้างงาน')
+                        ->visible(fn($livewire) =>$livewire->tableFilters['status_detail_id']['value'] === '4'  ? 1 : 0)
+                        ->action(function ($records, $action) {
+                            foreach ($records as $record) {
+                                $work_status = $record->userHasoneWorkStatus;
+                                $work_status->update([
+                                    'work_status_def_detail_id' => 6,
+                                ]);
+                                $work_status->workStatusHasonePreEmp()->update([
+                                    'result_at' => now(),
+                                ]);
+                                notification::make('noti')
+                                    ->title(function() use ($action) {
+                                        return 'กำหนดสถานะเป็น "'.$action->getLabel().'" เรียบร้อยแล้ว';
+                                    })
+                                    ->success()
+                                    ->send();
+                            }
+                        })
+                        ->requiresConfirmation() 
+                        ->color('success'),
+                    BulkAction::make('mark_as_rejected')
+                        ->icon(Heroicon::XCircle)
+                        ->label('ไม่ผ่านการคัดเลือก')
+                        ->visible(fn($livewire) =>$livewire->tableFilters['status_detail_id']['value'] === '4'  ? 1 : 0)
+                        ->action(function ($records, $action) {
+                            foreach ($records as $record) {
+                                $work_status = $record->userHasoneWorkStatus;
+                                $work_status->update([
+                                    'work_status_def_detail_id' => 7,
+                                ]);
+                                $work_status->workStatusHasonePreEmp()->update([
+                                    'result_at' => now(),
+                                ]);
+                                notification::make('noti')
+                                    ->title(function() use ($action) {
+                                        return 'กำหนดสถานะเป็น "'.$action->getlabel().'" เรียบร้อยแล้ว';
+                                    })
+                                    ->success()
+                                    ->send();
+                            }
+                        })
+                        ->requiresConfirmation() 
+                        ->color('danger'),
+                    BulkAction::make('mark_as_waiting_compare')
+                        ->icon(Heroicon::Users)
+                        ->label('รอเปรียบเทียบ')
+                        ->visible(fn($livewire) =>$livewire->tableFilters['status_detail_id']['value'] === '4'  ? 1 : 0)
+                        ->action(function ($records, $action) {
+                            foreach ($records as $record) {
+                                $work_status = $record->userHasoneWorkStatus;
+                                $work_status->update([
+                                    'work_status_def_detail_id' => 8,
+                                ]);
+                                $work_status->workStatusHasonePreEmp()->update([
+                                    'result_at' => now(),
+                                ]);
+                                notification::make('noti')
+                                    ->title(function() use ($action) {
+                                        return 'กำหนดสถานะเป็น "'.$action->getlabel().'" เรียบร้อยแล้ว';
+                                    })
+                                    ->success()
+                                    ->send();
+                            }
+                        })
+                        ->requiresConfirmation() 
+                        ->color('warning'),
+                    BulkAction::make('mark_as_substitute')
+                        ->icon(Heroicon::ArrowPathRoundedSquare)
+                        ->label('สำรอง')
+                        ->visible(fn($livewire) =>$livewire->tableFilters['status_detail_id']['value'] === '4'  ? 1 : 0)
+                        ->action(function ($records, $action) {
+                            foreach ($records as $record) {
+                                $work_status = $record->userHasoneWorkStatus;
+                                $work_status->update([
+                                    'work_status_def_detail_id' => 9, 
+                                ]);
+                                $work_status->workStatusHasonePreEmp()->update([
+                                    'result_at' => now(),
+                                ]);
+                                notification::make('noti')
+                                    ->title(function() use ($action) {
+                                        return 'กำหนดสถานะเป็น "'.$action->getlabel().'" เรียบร้อยแล้ว';
+                                    })
+                                    ->success()
+                                    ->send();
+                            }
+                        })
+                        ->requiresConfirmation()
+                        ->color(Color::Blue),
                 ]),
             ]);
     }
@@ -368,9 +522,23 @@ class UsersTable
             TextColumn::make('userHasoneWorkStatus.workStatusHasonePreEmp.interview_at')
                 ->searchable()->sortable()
                 ->label('วันนัดสัมภาษณ์')
-                ->buddhistDate('d M Y H:i')
+                ->buddhistDate('D, j M Y, G:i น.')
                 ->prefix(new HtmlString('<div><strong>วันที่นัดสัมภาษณ์ :</strong></div>'))
                 ->visible(fn($record) => $record?->isPreEmployment()),
+            Stack::make([
+                TextColumn::make('label_job_preferrnet')
+                    ->default('ตำแหน่งที่สมัคร :')
+                    ->weight(FontWeight::Bold),
+                TextColumn::make('userHasoneResume.resumeHasoneJobPreference.positions_id')
+                    ->label('ตำแหน่งที่สมัคร')
+                    ->formatStateUsing(function ($state) {
+                        $lowest_level = OrganizationStructure::getLevelLowest(); //ระดับต่ำสุดของโครงสร้างองค์กร
+                        $level_id = organizationStructure::getLevelId($lowest_level); //id ของระดับต่ำสุดของโครงสร้างองค์กร มักเป็น "ตำแหน่งพนักงาน"
+                        $org_level = OrganizationStructure::where('organization_level_id', $level_id)->get();
+                        return $org_level->where('id', $state)->first()->name_th;
+                    })
+            ])->visible(fn($record) => $record?->isPreEmployment()),
+
             // Stack::make([
             //     TextColumn::make('userHasManyPostEmp.employeeBelongToDepartment.name')
             //         ->searchable()->sortable()

@@ -8,6 +8,7 @@ use Filament\Tables\Table;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Database\Eloquent\Builder;
 use App\Filament\Panel\Admin\Resources\Users\Pages\EditUser;
 use App\Filament\Panel\Admin\Resources\Users\Pages\ListUsers;
 use App\Filament\Panel\Admin\Resources\Users\Pages\CreateUser;
@@ -33,7 +34,7 @@ class UserResource extends Resource
     }
 
     public static function table(Table $table): Table
-    {   
+    {
         return UsersTable::configure($table);
     }
 
@@ -52,6 +53,19 @@ class UserResource extends Resource
             'edit' => EditUser::route('/{record}/edit'),
         ];
     }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->with([
+                'userHasoneResume',
+                'userHasoneIdcard',
+                'userHasoneWorkStatus.workStatusBelongToWorkStatusDefDetail',
+                'userHasoneWorkStatus.workStatusHasonePreEmp',
+                //'userHasoneWorkStatus.workStatusHasonePostEmp',
+            ]);
+    }
+
 
     // ป้องกันไม่ให้ผู้ใช้ทั่วไปเข้าถึง Resource
     /* 

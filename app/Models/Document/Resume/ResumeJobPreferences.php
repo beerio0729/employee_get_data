@@ -14,13 +14,13 @@ class ResumeJobPreferences extends Model
         "resume_id",
         "availability_date",
         "expected_salary",
-        "position",
+        "positions_id",
         "location",
         "other_location",
     ];
     
     protected $casts = [
-        'position' => 'array',
+        'positions_id' => 'array',
         'location' => 'array',
         'other_location' => 'array',
          

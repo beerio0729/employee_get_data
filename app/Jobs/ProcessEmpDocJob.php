@@ -5,6 +5,7 @@ namespace App\Jobs;
 use Exception;
 use Throwable;
 use RuntimeException;
+use App\Models\OpenPosition;
 use Illuminate\Bus\Queueable;
 use App\Events\ProcessEmpDocEvent;
 use Illuminate\Support\Facades\Log;
@@ -103,12 +104,28 @@ class ProcessEmpDocJob implements ShouldQueue
 
     protected function buildContents($file_Paths)
     {
+        $originalPrompt = config("empPromtForAi.{$this->file_name}", '');
+
+        // ถ้าเป็น resume ให้ต่อ list ตำแหน่งงานที่เปิดรับ
+        if ($this->file_name === 'resume') {
+            // ดึงตำแหน่งงานที่เปิดรับจาก DB
+            $openPositions = [];
+
+            foreach (OpenPosition::all() as $position) {
+                $openPositions[] = $position->positionBelongsToOrgStructure->name_en;
+            }
+
+            // ต่อ string
+            $originalPrompt .= "\n\nตำแหน่งงานที่บริษัทเปิดรับ: "
+                . implode(", ", $openPositions)
+                . "\n\nโปรดตรวจสอบตำแหน่งงานที่ผู้สมัครสนใจและใส่เฉพาะตำแหน่งที่มีความหมายตรงกับกับที่บริษัทเปิดรับในฟิลด์ 'position' โดยใช้ค่าข้อความตามตำแหน่งงานที่เปิดรับสมัคร";
+        }
 
         $fileContent = Storage::disk('public')->get($file_Paths);
         $mimeType = Storage::disk('public')->mimeType($file_Paths);
         $parts = [
             [
-                'text' => config("empPromtForAi.{$this->file_name}", [])
+                'text' => $originalPrompt
             ],
             [
                 'inline_data' => [

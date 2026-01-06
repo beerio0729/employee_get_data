@@ -11,6 +11,9 @@ class OrganizationStructureSecondForm
     {
         return $schema
             ->columns(4)
-            ->components(OrganizationStructureFormComponent::formSecondComponent($label, $level));
+            ->components([
+                OrganizationStructureFormComponent::formSecondComponent($label, $level),
+                ...OrganizationStructureFormComponent::formComponent($label, $level),
+            ]);
     }
 }

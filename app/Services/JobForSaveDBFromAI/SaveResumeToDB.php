@@ -5,6 +5,7 @@ namespace App\Services\JobForSaveDBFromAI;
 use App\Models\Geography\Districts;
 use App\Models\Geography\Provinces;
 use App\Models\Geography\Subdistricts;
+use App\Models\Organization\OrganizationStructure;
 
 class SaveResumeToDB
 {
@@ -30,7 +31,7 @@ class SaveResumeToDB
         $resume->resumeHasoneJobPreference()->create(
             [
                 ...$hasOneDataSuccess,
-                'position' => $hasManyData['position'],
+                'positions_id' => $this->getPositionIds($hasManyData['position']?? []),
                 'location' => $this->getProvinceIds($hasManyData['location'] ?? []),
             ]
         );
@@ -148,4 +149,16 @@ class SaveResumeToDB
 
         return $ids;
     }
+    
+    function getPositionIds(array $Positions): array
+    {
+        $ids = [];
+
+        foreach ($Positions as $Position) {
+            $ids[] = OrganizationStructure::where('name_en', $Position)->value('id');
+        }
+
+        return $ids;
+    }
+    
 }
