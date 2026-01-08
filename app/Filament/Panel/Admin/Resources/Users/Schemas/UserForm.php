@@ -3,11 +3,8 @@
 namespace App\Filament\Panel\Admin\Resources\Users\Schemas;
 
 
-use App\Models\Role;
 use Detection\MobileDetect;
 use Filament\Schemas\Schema;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -30,7 +27,7 @@ class UserForm
         $currentYear_AD = date('Y'); // เช่น ค.ศ. 2025
         $years_education_AD = range($currentYear_AD - 30, $currentYear_AD); // 40 ปีย้อนหลัง
         return $schema
-            ->disabled(fn($record) => $record ? true : false)
+            //->disabled(fn($record) => $record ? true : false)
             //สั่งให้ disable ทั้งฟอร์ม
             ->components([
                 Section::Make('ข้อมูลเอกสาร')

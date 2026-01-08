@@ -26,27 +26,44 @@ class RefreshInterviewStatusJob implements ShouldQueue
 
                 $workStatus = $q->userHasoneWorkStatus;
                 $preEmp = $workStatus?->workStatusHasonePreEmp;
-
+                $dt = Carbon::parse($preEmp?->interview_at)->locale('th');
                 // อัปเดตสถานะ → ไม่มาสัมภาษณ์
                 $workStatus->update([
                     'work_status_def_detail_id' => 5,
                 ]);
 
+                $history = $q->userHasoneHistory();
+                $history->update([
+                    'data' => [
+                        ...$history->first()->data,
+                        [
+                            'event' => 'no interviewed',
+                            'description' => "ผิดนัดสัมภาษณ์ เพราะไม่มาสัมภาษณ์ตามนัดใน<br>วัน"
+                                . $dt->translatedFormat('D ที่ j M ')
+                                . ($dt->year + 543)
+                                . " เวลา "
+                                . $dt->format(' H:i')
+                                . " น.",
+                            'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                        ]
+                    ],
+                ]);
+                
                 // เคลียร์วันสัมภาษณ์
                 $preEmp?->update([
                     'interview_at' => null,
+                    'interview_channel' => null,
                 ]);
-
                 Notification::make() // ต้องรัน Queue
                     ->title('แจ้งวันนัดสัมภาษณ์')
                     ->body(
                         "เรียน คุณ {$q->userHasoneIdcard->name_th} {$q->userHasoneIdcard->last_name_th}\n\n"
                             . "<br><br>ทางบริษัทฯ ขอแจ้ง<br>❌ ยกเลิกการสัมภาษณ์<br>
-                                เนื่องจากท่านไม่มาสัมภาษณ์ตามที่นัดหมายไว้ในวันที่<br><B>"
-                            . Carbon::parse($preEmp?->interview_at)->locale('th')->translatedFormat('d M ')
-                            . (Carbon::parse($preEmp?->interview_at)->year + 543)
+                                เนื่องจากท่านไม่มาสัมภาษณ์ตามที่นัดหมายไว้ใน<br><B>วัน"
+                            . $dt->translatedFormat('D ที่ j M ')
+                            . $dt->year + 543
                             . "\nเวลา "
-                            . Carbon::parse($preEmp?->interview_at)->format(' H:i')
+                            . $dt->format(' H:i')
                             . " น.\n\n</B>"
                     )
                     ->actions([
@@ -60,11 +77,11 @@ class RefreshInterviewStatusJob implements ShouldQueue
                 LineSendMessageService::send($q->provider_id, [
                     "เรียน คุณ {$q->userHasoneIdcard->name_th} {$q->userHasoneIdcard->last_name_th}\n\n"
                         . "ทางบริษัทฯ ขอแจ้ง ❌ ยกเลิกการสัมภาษณ์\n
-                            เนื่องจากท่านไม่มาสัมภาษณ์ตามที่นัดหมายไว้ในวันที่\n\n"
-                        . Carbon::parse($preEmp?->interview_at)->locale('th')->translatedFormat('d M ')
-                        . (Carbon::parse($preEmp?->interview_at)->year + 543)
+                            เนื่องจากท่านไม่มาสัมภาษณ์ตามที่นัดหมายไว้ใน\n\nวัน"
+                        . $dt->translatedFormat('D ที่ j M ')
+                        . $dt->year + 543
                         . "\nเวลา "
-                        . Carbon::parse($preEmp?->interview_at)->format(' H:i')
+                        . $dt->format(' H:i')
                         . " น.\n\n",
                 ]);
             });

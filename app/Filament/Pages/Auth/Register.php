@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages\Auth;
 
+use Carbon\Carbon;
 use Filament\Schemas\Schema;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\DB;
@@ -45,7 +46,15 @@ class Register extends BaseRegister
             ]);
 
             $workStatus->workStatusHasonePreEmp()->create([
-                'applied_at' => now(),
+                'applied_at' => now()->locale('th'),
+            ]);
+
+            $user->userHasoneHistory()->create([
+                'data' => [[
+                    'event' => 'applied',
+                    'description' => 'สมัครครั้งแรกสำเร็จ',
+                    'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                ]],
             ]);
         }, attempts: 5);
         return $user;

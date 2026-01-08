@@ -165,6 +165,11 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
+    
+    public function userHasoneHistory() //resume
+    {
+        return $this->hasOne(UserHistory::class, 'user_id', 'id')->withDefault();
+    }
 
     /********User Hasone work status********/
 

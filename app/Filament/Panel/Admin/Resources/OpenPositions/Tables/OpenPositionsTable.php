@@ -3,8 +3,6 @@
 namespace App\Filament\Panel\Admin\Resources\OpenPositions\Tables;
 
 use Filament\Tables\Table;
-use App\Models\OpenPosition;
-use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
@@ -15,6 +13,7 @@ class OpenPositionsTable
     public static function configure(Table $table): Table
     {   
         return $table
+            ->recordUrl(null) //ป้องกันไม่ให้กดที่ตารางแล้วแก้ไข้
             ->columns([
                 TextColumn::make('PositionBelongsToOrgStructure.name_th')
                     ->label('ตำแหน่งที่เปิดรับ'),
@@ -25,7 +24,6 @@ class OpenPositionsTable
                 //
             ])
             ->recordActions([
-                EditAction::make(),
                 DeleteAction::make()
             ])
             ->toolbarActions([

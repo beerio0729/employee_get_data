@@ -1,9 +1,12 @@
 @php
 use Carbon\Carbon;
+use App\Models\Organization\OrganizationStructure;
 
 $resume = $user->userHasoneResume;
-$salary = $resume?->resumeHasoneJobPreference->expected_salary ?? null;
-$availability_date = $resume?->resumeHasoneJobPreference->availability_date ?? null;
+$job_preference = $resume?->resumeHasoneJobPreference;
+$jop_positions_id = $job_preference?->positions_id;
+$salary = $job_preference?->expected_salary ?? null;
+$availability_date = $job_preference?->availability_date ?? null;
 
 $resumeLocation = $resume?->resumeHasonelocation;
 $resumeSameIdcard = $resumeLocation?->same_id_card ?? 0;
@@ -518,17 +521,17 @@ $cert = $user->userHasoneCertificate?->data;
             <tr>
                 <td class="label-col">Position Applied</td>
                 <td class="con-data-text">
-                    @if($resume?->resumeHasoneJobPreference()->exists())
-                    @foreach ($resume?->resumeHasoneJobPreference->position as $index => $item)
+                    @if(filled($jop_positions_id))
+                    @foreach ($jop_positions_id as $index => $position_id)
                     <span class="item-data-text">
                         {{$index+1}}.
                         <span class="data-fill">
-                            {{$item}}
+                            {{OrganizationStructure::where('id', $position_id)->first()->name_th}}
                         </span>
                     </span>
                     @endforeach
                     @else
-                    <h4 style="text-align: center;">---------- No Data ----------</h4>
+                    <div style="text-align: center;"><B>---------- No Position Applied ----------</B></div>
                     @endif
                 </td>
             </tr>
@@ -536,11 +539,11 @@ $cert = $user->userHasoneCertificate?->data;
             <tr>
                 <td class="label-col">Location</td>
                 <td class="con-data-text">
-                    @if($resume?->resumeHasoneJobPreference()->exists())
+                    @if(filled($job_preference?->location))
                     @php
                     $province = \App\Models\Geography\Provinces::pluck('name_en', 'id')->toArray();
                     @endphp
-                    @foreach ($resume?->resumeHasoneJobPreference->location as $index => $item)
+                    @foreach ($job_preference?->location as $index => $item)
                     <span class="item-data-text">
                         {{$index+1}}.
                         <span class="data-fill">
@@ -548,9 +551,8 @@ $cert = $user->userHasoneCertificate?->data;
                         </span>
                     </span>
                     @endforeach
-                    @if(blank($resume?->resumeHasoneJobPreference->location))
-                    <span style="text-align: center;">---------- no data ----------</span>
-                    @endif
+                    @else
+                    <div style="text-align: center;"><B>---------- No Location ----------</B></div>
                     @endif
 
                 </td>

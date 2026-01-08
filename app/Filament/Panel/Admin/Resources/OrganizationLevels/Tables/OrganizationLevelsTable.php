@@ -15,6 +15,7 @@ class OrganizationLevelsTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->recordUrl(null)
             ->striped()
             ->reorderable('level')
             ->columns([

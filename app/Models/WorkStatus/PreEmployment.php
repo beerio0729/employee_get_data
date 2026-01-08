@@ -11,7 +11,8 @@ class PreEmployment extends Model
     protected $table = "pre_employments";
     protected $fillable = [
         'user_id',        // อ้างอิงไปยังตาราง users
-        'work_status_id', //
+        'work_status_id',
+        'interview_channel', //ช่องทางการสัมภาษณ์
         'applied_at',     // วันที่สมัคร
         'interview_at',   // วันสัมภาษณ์ (ถ้ามี)
         'result_at',      // วันที่สรุปผล (ถ้ามี)

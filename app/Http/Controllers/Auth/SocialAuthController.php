@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 
+use Carbon\Carbon;
 use App\Models\User;
 use Illuminate\Support\Str;
 use App\Events\ProcessEmpDocEvent;
@@ -42,9 +43,16 @@ class SocialAuthController extends Controller
             ]);
 
             $workStatus->workStatusHasonePreEmp()->create([
-                'applied_at' => now(),
+                'applied_at' => now()->locale('th'),
             ]);
 
+            $user->userHasoneHistory()->create([
+                'data' => [[
+                    'event' => 'applied',
+                    'description' => 'สมัครครั้งแรกสำเร็จ',
+                    'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                ]],
+            ]);
             Auth::login($user);
             LineSendMessageService::send($socialUser->getId(), ['ยินดีต้อนรับสู่เว็บอับโหลดเรซูเม่', 'กรุณาอับเดตข้อมูลโปรไฟล์ให้ครบถ้วน']);
             return redirect('/profile');

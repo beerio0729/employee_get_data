@@ -16,4 +16,10 @@ class EditOpenPosition extends EditRecord
             DeleteAction::make(),
         ];
     }
+    
+    protected function getRedirectUrl(): string
+    {
+        // redirect ไปหน้า list ของ resource
+        return $this->getResource()::getUrl('index');
+    }
 }

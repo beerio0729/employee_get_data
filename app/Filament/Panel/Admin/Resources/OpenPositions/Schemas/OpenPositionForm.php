@@ -39,12 +39,14 @@ class OpenPositionForm
                                 }
                             )
                             ->options(
-                                function ($get) use ($lowest_level) {
-                                    $org_level = OrganizationStructure::where('organization_level_id', organizationStructure::getLevelId($lowest_level));
+                                function ($get, $model) use ($lowest_level) {
+                                    $openPositionIds = $model::pluck('position_id')->toArray();
+                                    $org_level = OrganizationStructure::where('organization_level_id', organizationStructure::getLevelId($lowest_level))
+                                        ->whereNotIn('id', $openPositionIds);
                                     return
-                                        $get("parent_id")
-                                        ? $org_level->where('parent_id', $get("parent_id"))->pluck('name_th', 'id')
-                                        : $org_level->pluck('name_th', 'id');
+                                        $get("parent_id") //ถ้ามีการกรองข้อมูล
+                                        ? $org_level->where('parent_id', $get("parent_id"))->pluck('name_th', 'id') //เลือกเฉพาะส่วนที่กรอง
+                                        : $org_level->pluck('name_th', 'id'); //เอาทั้งหมด
                                 }
 
                             )->afterStateHydrated(function ($state, $set) use ($lowest_level) {
@@ -77,7 +79,6 @@ class OpenPositionForm
                                     $set($levelMap[$currentLevel], $current->id);
                                     $current = $current?->parent;
                                     $currentLevel--;
-                                    
                                 }
                             })
                     ];

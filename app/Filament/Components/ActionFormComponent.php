@@ -24,6 +24,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use App\Filament\Components\UserFormComponent;
 use Filament\Schemas\Components\Utilities\Set;
 use Asmit\FilamentUpload\Forms\Components\AdvancedFileUpload;
+use Carbon\Carbon;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ActionFormComponent
@@ -1467,7 +1468,6 @@ class ActionFormComponent
             ->action(function ($record, $livewire) {
                 $missing = CheckDocDownloaded::check($record);
                 $parts = [];
-
                 $hasUpload = filled($missing['upload']);
                 $hasInput  = filled($missing['input']);
 
@@ -1501,8 +1501,18 @@ class ActionFormComponent
                         $work_status->update([
                             'work_status_def_detail_id' => 2,
                         ]);
+                        $history = $record->userHasoneHistory();
+                        $history->update([
+                            'data' => [
+                                ...$history->first()->data ?? [],
+                                [
+                                    'event' => 'doc passed',
+                                    'description' => 'เปลี่ยนสถานะจาก "สมัครใหม่" เป็น "เอกสารผ่านแล้ว"',
+                                    'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                                ]
+                            ],
+                        ]);
                     }
-
                     return redirect('/pdf');
                 }
             });

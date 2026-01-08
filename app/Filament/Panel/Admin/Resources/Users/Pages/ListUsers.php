@@ -20,7 +20,8 @@ class ListUsers extends ListRecords
         return [
             //CreateAction::make(),
             Action::make('refresh_status_interview')
-                ->label('อับเตดสถานะ')
+                ->label('คัดกรองคนไม่มาสัมภาษณ์')
+                ->visible(fn($livewire) => $livewire->tableFilters['filter_component']['status_detail_id'] === '3' ? 1 : 0)
                 ->action(function () {
                     dispatch(new RefreshInterviewStatusJob());
                     Notification::make()
