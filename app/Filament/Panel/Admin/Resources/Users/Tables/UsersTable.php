@@ -266,7 +266,7 @@ class UsersTable
                             $history = $record->userHasoneHistory();
                             $history->update([
                                 'data' => [
-                                    ...$history->first()->data,
+                                    ...$history->first()->data ?? [],
                                     [
                                         'event' => 'interview scheduled',
                                         'description' => "นัดหมายวันนัดสัมภาษณ์ผ่านช่องทาง \"{$data['interview_channel']}\"",

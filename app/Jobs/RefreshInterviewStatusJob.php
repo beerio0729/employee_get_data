@@ -35,7 +35,7 @@ class RefreshInterviewStatusJob implements ShouldQueue
                 $history = $q->userHasoneHistory();
                 $history->update([
                     'data' => [
-                        ...$history->first()->data,
+                        ...$history->first()->data ?? [],
                         [
                             'event' => 'no interviewed',
                             'description' => "ผิดนัดสัมภาษณ์ เพราะไม่มาสัมภาษณ์ตามนัดใน<br>วัน"
