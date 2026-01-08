@@ -339,7 +339,7 @@ class UsersTable
                                     $history = $record->userHasoneHistory();
                                     $history->update([
                                         'data' => [
-                                            ...$history->first()->data,
+                                            ...$history->first()->data ?? [],
                                             [
                                                 'event' => 'cancel interview',
                                                 'description' => "ยกเลิกการนัดสัมภาษณ์ของ<br>วัน"
