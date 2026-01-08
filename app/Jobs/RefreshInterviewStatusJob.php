@@ -33,22 +33,25 @@ class RefreshInterviewStatusJob implements ShouldQueue
                 ]);
 
                 $history = $q->userHasoneHistory();
-                $history->update([
-                    'data' => [
-                        ...$history->first()->data ?? [],
-                        [
-                            'event' => 'no interviewed',
-                            'description' => "ผิดนัดสัมภาษณ์ เพราะไม่มาสัมภาษณ์ตามนัดใน<br>วัน"
-                                . $dt->translatedFormat('D ที่ j M ')
-                                . ($dt->year + 543)
-                                . " เวลา "
-                                . $dt->format(' H:i')
-                                . " น.",
-                            'date' => Carbon::now()->format('Y-m-d h:i:s'),
-                        ]
-                    ],
-                ]);
-                
+                $history->updateOrCreate(
+                    ['user_id'=> $q->di],
+                    [
+                        'data' => [
+                            ...$history->first()->data ?? [],
+                            [
+                                'event' => 'no interviewed',
+                                'description' => "ผิดนัดสัมภาษณ์ เพราะไม่มาสัมภาษณ์ตามนัดใน<br>วัน"
+                                    . $dt->translatedFormat('D ที่ j M ')
+                                    . ($dt->year + 543)
+                                    . " เวลา "
+                                    . $dt->format(' H:i')
+                                    . " น.",
+                                'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                            ]
+                        ],
+                    ]
+                );
+
                 // เคลียร์วันสัมภาษณ์
                 $preEmp?->update([
                     'interview_at' => null,

@@ -264,17 +264,20 @@ class UsersTable
                                 'interview_at' => $data['interview_at'],
                             ]);
                             $history = $record->userHasoneHistory();
-                            $history->update([
-                                'data' => [
-                                    ...$history->first()->data ?? [],
-                                    [
-                                        'event' => 'interview scheduled',
-                                        'description' => "นัดหมายวันนัดสัมภาษณ์ผ่านช่องทาง \"{$data['interview_channel']}\"",
-                                        'value' => $data['interview_at'],
-                                        'date' => carbon::now()->format('y-m-d h:i:s'),
-                                    ]
-                                ],
-                            ]);
+                            $history->updateOrCreate(
+                                ['user_id' => $record->id],
+                                [
+                                    'data' => [
+                                        ...$history->first()->data ?? [],
+                                        [
+                                            'event' => 'interview scheduled',
+                                            'description' => "นัดหมายวันนัดสัมภาษณ์ผ่านช่องทาง \"{$data['interview_channel']}\"",
+                                            'value' => $data['interview_at'],
+                                            'date' => carbon::now()->format('y-m-d h:i:s'),
+                                        ]
+                                    ],
+                                ]
+                            );
                             Notification::make() //ต้องรัน Queue
                                 ->title('แจ้งวันนัดสัมภาษณ์')
                                 ->body("เรียน คุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th} \n\n"
@@ -337,21 +340,24 @@ class UsersTable
                                     ]);
 
                                     $history = $record->userHasoneHistory();
-                                    $history->update([
-                                        'data' => [
-                                            ...$history->first()->data ?? [],
-                                            [
-                                                'event' => 'cancel interview',
-                                                'description' => "ยกเลิกการนัดสัมภาษณ์ของ<br>วัน"
-                                                    . $dt->translatedFormat('D ที่ j M ')
-                                                    . ($dt->year + 543)
-                                                    . " เวลา "
-                                                    . $dt->format(' H:i')
-                                                    . " น.",
-                                                'date' => carbon::now()->format('y-m-d h:i:s'),
-                                            ]
-                                        ],
-                                    ]);
+                                    $history->updateOrCreate(
+                                        ['user_id' => $record->id],
+                                        [
+                                            'data' => [
+                                                ...$history->first()->data ?? [],
+                                                [
+                                                    'event' => 'cancel interview',
+                                                    'description' => "ยกเลิกการนัดสัมภาษณ์ของ<br>วัน"
+                                                        . $dt->translatedFormat('D ที่ j M ')
+                                                        . ($dt->year + 543)
+                                                        . " เวลา "
+                                                        . $dt->format(' H:i')
+                                                        . " น.",
+                                                    'date' => carbon::now()->format('y-m-d h:i:s'),
+                                                ]
+                                            ],
+                                        ]
+                                    );
                                     Notification::make() //ต้องรัน Queue
                                         ->title('แจ้งวันนัดสัมภาษณ์')
                                         ->body("เรียน คุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th} \n\n"
@@ -508,16 +514,19 @@ class UsersTable
                                     'work_status_def_detail_id' => 4,
                                 ]);
                                 $history = $record->userHasoneHistory();
-                                $history->update([
-                                    'data' => [
-                                        ...$history->first()->data ?? [],
-                                        [
-                                            'event' => 'interviewed',
-                                            'description' => 'มาสัมภาษณ์แล้ว',
-                                            'date' => Carbon::now()->format('Y-m-d h:i:s'),
-                                        ]
-                                    ],
-                                ]);
+                                $history->updateOrCreate(
+                                    ['user_id' => $record->id],
+                                    [
+                                        'data' => [
+                                            ...$history->first()->data ?? [],
+                                            [
+                                                'event' => 'interviewed',
+                                                'description' => 'มาสัมภาษณ์แล้ว',
+                                                'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                                            ]
+                                        ],
+                                    ]
+                                );
                             }
                         })
                         ->requiresConfirmation()
@@ -539,17 +548,20 @@ class UsersTable
                                     'result_at' => now(),
                                 ]);
                                 $history = $record->userHasoneHistory();
-                                $history->update([
-                                    'data' => [
-                                        ...$history->first()->data ?? [],
-                                        [
-                                            'event' => 'selection results',
-                                            'value' => 'waiting approval',
-                                            'description' => 'ผลการคัดเลือกหลังสัมภาษณ์ คือ "รออนุมัติจ้างงาน"',
-                                            'date' => Carbon::now()->format('Y-m-d h:i:s'),
-                                        ]
-                                    ],
-                                ]);
+                                $history->updateOrCreate(
+                                    ['user_id' => $record->id],
+                                    [
+                                        'data' => [
+                                            ...$history->first()->data ?? [],
+                                            [
+                                                'event' => 'selection results',
+                                                'value' => 'waiting approval',
+                                                'description' => 'ผลการคัดเลือกหลังสัมภาษณ์ คือ "รออนุมัติจ้างงาน"',
+                                                'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                                            ]
+                                        ],
+                                    ]
+                                );
                                 notification::make('noti')
                                     ->title(function () use ($action) {
                                         return 'กำหนดสถานะเป็น "' . $action->getLabel() . '" เรียบร้อยแล้ว';
@@ -578,17 +590,20 @@ class UsersTable
                                 ]);
 
                                 $history = $record->userHasoneHistory();
-                                $history->update([
-                                    'data' => [
-                                        ...$history->first()->data ?? [],
-                                        [
-                                            'event' => 'selection results',
-                                            'value' => 'rejected',
-                                            'description' => 'ผลการคัดเลือกหลังสัมภาษณ์ คือ "ไม่ผ่านการคัดเลือก"',
-                                            'date' => Carbon::now()->format('Y-m-d h:i:s'),
-                                        ]
-                                    ],
-                                ]);
+                                $history->updateOrCreate(
+                                    ['user_id' => $record->id],
+                                    [
+                                        'data' => [
+                                            ...$history->first()->data ?? [],
+                                            [
+                                                'event' => 'selection results',
+                                                'value' => 'rejected',
+                                                'description' => 'ผลการคัดเลือกหลังสัมภาษณ์ คือ "ไม่ผ่านการคัดเลือก"',
+                                                'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                                            ]
+                                        ],
+                                    ]
+                                );
                                 notification::make('noti')
                                     ->title(function () use ($action) {
                                         return 'กำหนดสถานะเป็น "' . $action->getlabel() . '" เรียบร้อยแล้ว';
@@ -616,17 +631,20 @@ class UsersTable
                                     'result_at' => now(),
                                 ]);
                                 $history = $record->userHasoneHistory();
-                                $history->update([
-                                    'data' => [
-                                        ...$history->first()->data ?? [],
-                                        [
-                                            'event' => 'selection results',
-                                            'value' => 'waiting compare',
-                                            'description' => 'ผลการคัดเลือกหลังสัมภาษณ์ คือ "รอเปรียบเทียบ"',
-                                            'date' => Carbon::now()->format('Y-m-d h:i:s'),
-                                        ]
-                                    ],
-                                ]);
+                                $history->updateOrCreate(
+                                    ['user_id' => $record->id],
+                                    [
+                                        'data' => [
+                                            ...$history->first()->data ?? [],
+                                            [
+                                                'event' => 'selection results',
+                                                'value' => 'waiting compare',
+                                                'description' => 'ผลการคัดเลือกหลังสัมภาษณ์ คือ "รอเปรียบเทียบ"',
+                                                'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                                            ]
+                                        ],
+                                    ]
+                                );
                                 notification::make('noti')
                                     ->title(function () use ($action) {
                                         return 'กำหนดสถานะเป็น "' . $action->getlabel() . '" เรียบร้อยแล้ว';
@@ -654,17 +672,20 @@ class UsersTable
                                     'result_at' => now(),
                                 ]);
                                 $history = $record->userHasoneHistory();
-                                $history->update([
-                                    'data' => [
-                                        ...$history->first()->data ?? [],
-                                        [
-                                            'event' => 'selection results',
-                                            'value' => 'substitute',
-                                            'description' => 'ผลการคัดเลือกหลังสัมภาษณ์ คือ "สำรอง"',
-                                            'date' => Carbon::now()->format('Y-m-d h:i:s'),
-                                        ]
-                                    ],
-                                ]);
+                                $history->updateOrCreate(
+                                    ['user_id' => $record->id],
+                                    [
+                                        'data' => [
+                                            ...$history->first()->data ?? [],
+                                            [
+                                                'event' => 'selection results',
+                                                'value' => 'substitute',
+                                                'description' => 'ผลการคัดเลือกหลังสัมภาษณ์ คือ "สำรอง"',
+                                                'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                                            ]
+                                        ],
+                                    ]
+                                );
                                 notification::make('noti')
                                     ->title(function () use ($action) {
                                         return 'กำหนดสถานะเป็น "' . $action->getlabel() . '" เรียบร้อยแล้ว';

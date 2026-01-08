@@ -1502,16 +1502,19 @@ class ActionFormComponent
                             'work_status_def_detail_id' => 2,
                         ]);
                         $history = $record->userHasoneHistory();
-                        $history->update([
-                            'data' => [
-                                ...$history->first()->data ?? [],
-                                [
-                                    'event' => 'doc passed',
-                                    'description' => 'เปลี่ยนสถานะจาก "สมัครใหม่" เป็น "เอกสารผ่านแล้ว"',
-                                    'date' => Carbon::now()->format('Y-m-d h:i:s'),
-                                ]
-                            ],
-                        ]);
+                        $history->updateOrCreate(
+                            ['user_id' => $record->id],
+                            [
+                                'data' => [
+                                    ...$history->first()->data ?? [],
+                                    [
+                                        'event' => 'doc passed',
+                                        'description' => 'เปลี่ยนสถานะจาก "สมัครใหม่" เป็น "เอกสารผ่านแล้ว"',
+                                        'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                                    ]
+                                ],
+                            ]
+                        );
                     }
                     return redirect('/pdf');
                 }
