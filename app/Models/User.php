@@ -25,15 +25,11 @@ use App\Models\Document\Resume\ResumeEducations;
 use App\Models\Document\Resume\ResumeLangSkills;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use App\Models\Document\Resume\ResumeCertificates;
-
 use App\Models\Document\Resume\ResumeOtherContacts;
 use App\Models\Document\Resume\ResumeJobPreferences;
 use App\Models\Document\Resume\ResumeWorkExperiences;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-
-
-
 
 class User extends Authenticatable implements FilamentUser
 {

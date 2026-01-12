@@ -46,7 +46,7 @@ class ListUsers extends ListRecords
         ];
     }
 
-    public function closeActionModal($id = null)
+    public function closeActionModal()
     {
         $this->unmountAction();
     }

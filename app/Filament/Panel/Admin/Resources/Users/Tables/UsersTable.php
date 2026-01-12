@@ -250,6 +250,24 @@ class UsersTable
                                 ->options([
                                     'online' => 'Online',
                                     'onsite' => 'OnSite'
+                                ]),
+                            Select::make('interview_duration')
+                                ->label('ระยะเวลาการสัมภาษณ์')
+                                ->hidden(function ($record) {
+                                    return filled($record->userHasoneWorkStatus->workStatusHasonePreEmp->interview_at);
+                                })
+                                ->required()
+                                ->validationMessages(['required' => 'กรุณาระบุระยะเวลาในการสัมภาษณ์'])
+                                ->placeholder('ระบุระยะเวลาในการสัมภาษณ์')
+                                ->options([
+                                    15 => '15 นาที',
+                                    30 => '30 นาที',
+                                    45 => '45 นาที',
+                                    60 => '1 ชั่วโมง',
+                                    75 => '1 ชั่วโมง 15 นาที',
+                                    90 => '1 ชั่วโมง 30 นาที',
+                                    105 => '1 ชั่วโมง 45 นาที',
+                                    120 => '2 ชั่วโมง',
                                 ])
 
                         ])
@@ -257,21 +275,23 @@ class UsersTable
                             $view_notification = 'view_interview_' . Date::now()->timestamp;
                             $workStatus = $record->userHasoneWorkStatus()->first();
                             $interview_date = Carbon::parse($data['interview_at'])->locale('th');
+                            if ($data['interview_channel'] === 'online') {
+                                $calendar = new GoogleCalendarService();
+                                $calendar_response = $calendar->createEvent([
+                                    'start_time' => $data['interview_at'],
+                                    'duration' => $data['interview_duration'], //ระยะเวลาการประชุม
+                                    'email' => $record->email,
+                                    'title' => "นัดประชุมคุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th}",
+                                ]);
+                            }
 
-                            $calendar = new GoogleCalendarService();
-                            $calendar_response = $calendar->createEvent([
-                                'start_time' => $data['interview_at'],
-                                'duration' => 30, //ระยะเวลาการประชุม
-                                'email' => $record->email,
-                                'title' => "นัดประชุมคุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th}",
-                            ]);
 
                             $workStatus->update([
                                 'work_status_def_detail_id' => 3,
                             ]);
 
                             $workStatus->workStatusHasonePreEmp()->update([
-                                'google_calendar_id' => $calendar_response->id,
+                                'google_calendar_id' => $calendar_response?->id ?? null,
                                 'interview_channel' => $data['interview_channel'],
                                 'interview_at' => $data['interview_at'],
                             ]);
@@ -293,8 +313,7 @@ class UsersTable
                             Notification::make() //ต้องรัน Queue
                                 ->title('แจ้งวันนัดสัมภาษณ์')
                                 ->body("เรียน คุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th} \n\n"
-                                    . "<br><br>ทางบริษัทฯ ขอแจ้งนัดหมายวันสัมภาษณ์งานของท่านใน<br>
-                                <B>วัน"
+                                    . "<br><br>ทางบริษัทฯ ขอแจ้งนัดหมายวันสัมภาษณ์งานของท่านใน<br><B>วัน"
                                     . $interview_date->translatedFormat('D ที่ j M ')
                                     . $interview_date->year + 543
                                     . "\nเวลา "
@@ -405,11 +424,10 @@ class UsersTable
                                             . "ขออภัยมา ณ ที่นี้",
                                     ]);
                                 })
-
                                 ->cancelParentActions()
                                 ->successNotificationTitle('เคลียร์ข้อมูลทั้งหมดเรียบร้อยแล้ว'),
                             Action::make('see_calendar')
-                                ->label(function ($record, $livewire) {
+                                ->label(function ($record) {
                                     $calendar_id = $record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id;
                                     $calendar = new GoogleCalendarService();
                                     $calendar_data = $calendar->getEvent($calendar_id);
@@ -433,21 +451,8 @@ class UsersTable
                                 })
                                 ->visible(fn($record) => filled($record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id) &&
                                     $record?->userHasoneWorkStatus?->workStatusBelongToWorkStatusDefDetail?->work_phase === 'interview_scheduled_time')
-                                ->action(function ($record, $livewire) {
-                                    // $calendar_id = $record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id;
-                                    // $calendar = new GoogleCalendarService();
-                                    // $calendar_data = $calendar->getEvent($calendar_id);
 
-                                    // if (blank($calendar_data->hangoutLink)) {
-                                    //     Notification::make()
-                                    //         ->title('ไม่มีลิงค์ห้องประชุม')
-                                    //         ->warning()
-                                    //         ->send();
-                                    // }
-
-                                    $livewire->dispatch('closeActionModal');
-                                })
-                                ->url(function ($record, $livewire) {
+                                ->url(function ($record) {
                                     $calendar_id = $record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id;
                                     $calendar = new GoogleCalendarService();
                                     $calendar_data = $calendar->getEvent($calendar_id);
@@ -455,13 +460,15 @@ class UsersTable
                                     if (blank($calendar_data->hangoutLink)) {
                                         parse_str(parse_url($calendar_data->htmlLink, PHP_URL_QUERY), $query);
                                         $id = $query['eid'];
+
                                         return "https://calendar.google.com/calendar/u/0/r/eventedit/{$id}";
                                     } else {
                                         return $calendar_data->hangoutLink;
                                     }
                                 })
+                                ->action(fn($livewire) => $livewire->dispatch('closeActionModal'))
+                                ->cancelParentActions()
                                 ->openUrlInNewTab()
-
                         ]),
                     Action::make('role_id')
                         ->mountUsing(function (Schema $form, $record) {
@@ -840,13 +847,9 @@ class UsersTable
         return self::$isMobile ? [] : self::detailUserComponent();
     }
 
-    protected static function panelDetailUserForPhone()
+    protected static function panelDetailUserForPhone(): array
     {
-        if (self::$isMobile) {
-            return self::panelDetailUserComponent();
-        } else {
-            return [];
-        }
+        return self::$isMobile ? self::panelDetailUserComponent() : [];
     }
 
     protected static function isDateTime($value): bool
