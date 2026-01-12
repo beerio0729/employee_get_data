@@ -255,7 +255,7 @@ class UsersTable
                         ->action(function ($record, array $data) {
                             $view_notification = 'view_interview_' . Date::now()->timestamp;
                             $workStatus = $record->userHasoneWorkStatus()->first();
-                            $dt = Carbon::parse($data['interview_at'])->locale('th');
+                            $interview_date = Carbon::parse($data['interview_at'])->locale('th');
 
                             $calendar = new GoogleCalendarService();
                             $calendar_response = $calendar->createEvent([
@@ -264,8 +264,7 @@ class UsersTable
                                 'email' => $record->email,
                                 'title' => "นัดประชุมคุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th}",
                             ]);
-                            //dd($calendar_response);
-                            //dd($calendar_response->id.'-----'.$calendar_response->htmlLink.'-----'.$calendar_response->getSummary());
+                            
                             $workStatus->update([
                                 'work_status_def_detail_id' => 3,
                             ]);
@@ -295,10 +294,10 @@ class UsersTable
                                 ->body("เรียน คุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th} \n\n"
                                     . "<br><br>ทางบริษัทฯ ขอแจ้งนัดหมายวันสัมภาษณ์งานของท่านใน<br>
                                 <B>วัน"
-                                    . $dt->translatedFormat('D ที่ j M ')
-                                    . $dt->year + 543
+                                    . $interview_date->translatedFormat('D ที่ j M ')
+                                    . $interview_date->year + 543
                                     . "\nเวลา "
-                                    . $dt->format(' H:i')
+                                    . $interview_date->format(' H:i')
                                     . " น."
                                     . "</B>"
                                     . "<br>ผ่านช่องทาง <B>\"" . ucwords($data['interview_channel']) . " \"</B>"
@@ -315,10 +314,10 @@ class UsersTable
                             LineSendMessageService::send($record->provider_id, [
                                 "เรียน คุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th} \n\n"
                                     . "ทางบริษัทฯ ขอแจ้งนัดหมายวันสัมภาษณ์งานของท่านใน\n\nวัน "
-                                    . $dt->translatedFormat('D ที่ j M ')
-                                    . $dt->year + 543
+                                    . $interview_date->translatedFormat('D ที่ j M ')
+                                    . $interview_date->year + 543
                                     . "\nเวลา "
-                                    . $dt->format(' H:i')
+                                    . $interview_date->format(' H:i')
                                     . " น.\n"
                                     . "ผ่านช่องทาง \"" . ucwords($data['interview_channel']) . " \"\n\n"
                                     . "โปรดเตรียมเอกสารที่เกี่ยวข้องและมาถึงก่อนเวลานัดหมาย 10 นาที \n\n"
@@ -342,7 +341,7 @@ class UsersTable
                                     $view_notification = 'view_interview_' . Date::now()->timestamp;
                                     $workStatus = $record->userHasoneWorkStatus()->first();
                                     $interview_date = $workStatus?->workStatusHasonePreEmp?->interview_at;
-                                    $dt = Carbon::parse($interview_date)->locale('th');
+                                    $interview_date = Carbon::parse($interview_date)->locale('th');
                                     $calendar_id = $record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id;
                                     $calendar = new GoogleCalendarService();
                                     $calendar->deleteEvent($calendar_id);
@@ -364,10 +363,10 @@ class UsersTable
                                                 [
                                                     'event' => 'cancel interview',
                                                     'description' => "ยกเลิกการนัดสัมภาษณ์ของ<br>วัน"
-                                                        . $dt->translatedFormat('D ที่ j M ')
-                                                        . ($dt->year + 543)
+                                                        . $interview_date->translatedFormat('D ที่ j M ')
+                                                        . ($interview_date->year + 543)
                                                         . " เวลา "
-                                                        . $dt->format(' H:i')
+                                                        . $interview_date->format(' H:i')
                                                         . " น.",
                                                     'date' => carbon::now()->format('y-m-d H:i:s'),
                                                 ]
@@ -379,10 +378,10 @@ class UsersTable
                                         ->body("เรียน คุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th} \n\n"
                                             . "<br><br>ทางบริษัทฯ ขอแจ้ง<br>❌ ยกเลิกนัดหมายวันสัมภาษณ์งานของท่านใน<br>
                                             <B>วัน"
-                                            . $dt->translatedFormat('D ที่ j M ')
-                                            . ($dt->year + 543)
+                                            . $interview_date->translatedFormat('D ที่ j M ')
+                                            . ($interview_date->year + 543)
                                             . " เวลา "
-                                            . $dt->format(' H:i')
+                                            . $interview_date->format(' H:i')
                                             . " น."
                                             . "</B>"
                                             . "<br><br>ขออภัยมา ณ ที่นี้")
@@ -397,10 +396,10 @@ class UsersTable
                                         "เรียน คุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th} \n\n"
                                             . "ทางบริษัทฯ ขอแจ้ง 
                                             \n❌ ยกเลิกนัดหมายวันสัมภาษณ์งานของท่านใน\n\nวัน "
-                                            . $dt->translatedFormat('D ที่ j M ')
-                                            . ($dt->year + 543)
+                                            . $interview_date->translatedFormat('D ที่ j M ')
+                                            . ($interview_date->year + 543)
                                             . "\nเวลา "
-                                            . $dt->format(' H:i')
+                                            . $interview_date->format(' H:i')
                                             . " น.\n\n"
                                             . "ขออภัยมา ณ ที่นี้",
                                     ]);
@@ -504,8 +503,8 @@ class UsersTable
                                             if (! self::isDateTime($state)) {
                                                 return $state;
                                             }
-                                            $dt = Carbon::parse($state)->locale('th');
-                                            return $dt->translatedFormat('D, j M ') . ($dt->year + 543) . ', ' . $dt->format('H:i');
+                                            $interview_date = Carbon::parse($state)->locale('th');
+                                            return $interview_date->translatedFormat('D, j M ') . ($interview_date->year + 543) . ', ' . $interview_date->format('H:i');
                                         })
 
                                         ->visible(fn($state) => filled($state))
@@ -513,8 +512,8 @@ class UsersTable
                                     TextEntry::make('date')
                                         ->label('เวลา')
                                         ->formatStateUsing(function ($state) {
-                                            $dt = Carbon::parse($state)->locale('th');
-                                            return $dt->translatedFormat('j M ') . ($dt->year + 543) . ', ' . $dt->format('H:i:s');
+                                            $interview_date = Carbon::parse($state)->locale('th');
+                                            return $interview_date->translatedFormat('j M ') . ($interview_date->year + 543) . ', ' . $interview_date->format('H:i:s');
                                         })
                                         ->alignment(fn() => self::$isMobile ? Alignment::Start : Alignment::Center)
                                         ->columnSpan(fn($get) => $get('value') ? ['default' => 1] : ['default' => 2]),

@@ -87,14 +87,21 @@ class GoogleCalendarService
     }
 
     // 2. READ
-    public function getEvent($eventId)
+    public function getEvent($eventId = null)
     {
-        return $this->service->events->get($this->calendar_id, $eventId) ?? null;
+        if (blank($eventId)) {
+            return;
+        }
+        return $this->service->events->get($this->calendar_id, $eventId);
     }
 
     // 3. UPDATE
-    public function updateEvent($eventId, $data)
+    public function updateEvent($eventId = null, $data)
     {
+        if (blank($eventId)) {
+            return;
+        }
+        
         $duration = $data['duration'] ?? 30; // ถ้าไม่ส่งมา ให้ Default ที่ 30 นาที
         $start = Carbon::parse($data['start_time'])->format('Y-m-d\TH:i:s');
         $end = Carbon::parse($data['start_time'])->addMinutes($duration)->format('Y-m-d\TH:i:s');
@@ -118,8 +125,11 @@ class GoogleCalendarService
     }
 
     // 4. DELETE
-    public function deleteEvent($eventId)
+    public function deleteEvent($eventId = null)
     {
+        if (blank($eventId)) {
+            return;
+        }
         return $this->service->events->delete($this->calendar_id, $eventId);
     }
 }
