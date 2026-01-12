@@ -24,6 +24,7 @@ use Filament\Forms\Components\Select;
 use Filament\Support\Enums\Alignment;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Support\Enums\FontWeight;
+use App\Services\GoogleCalendarService;
 use Filament\Tables\Columns\TextColumn;
 use App\Services\LineSendMessageService;
 use Filament\Notifications\Notification;
@@ -255,11 +256,22 @@ class UsersTable
                             $view_notification = 'view_interview_' . Date::now()->timestamp;
                             $workStatus = $record->userHasoneWorkStatus()->first();
                             $dt = Carbon::parse($data['interview_at'])->locale('th');
+
+                            $calendar = new GoogleCalendarService();
+                            $calendar_response = $calendar->createEvent([
+                                'start_time' => $data['interview_at'],
+                                'duration' => 30, //ระยะเวลาการประชุม
+                                'email' => $record->email,
+                                'title' => "นัดประชุมคุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th}",
+                            ]);
+                            //dd($calendar_response);
+                            //dd($calendar_response->id.'-----'.$calendar_response->htmlLink.'-----'.$calendar_response->getSummary());
                             $workStatus->update([
                                 'work_status_def_detail_id' => 3,
                             ]);
 
                             $workStatus->workStatusHasonePreEmp()->update([
+                                'google_calendar_id' => $calendar_response->id,
                                 'interview_channel' => $data['interview_channel'],
                                 'interview_at' => $data['interview_at'],
                             ]);
@@ -273,7 +285,7 @@ class UsersTable
                                             'event' => 'interview scheduled',
                                             'description' => "นัดหมายวันนัดสัมภาษณ์ผ่านช่องทาง \"{$data['interview_channel']}\"",
                                             'value' => $data['interview_at'],
-                                            'date' => carbon::now()->format('y-m-d h:i:s'),
+                                            'date' => carbon::now()->format('y-m-d H:i:s'),
                                         ]
                                     ],
                                 ]
@@ -331,12 +343,16 @@ class UsersTable
                                     $workStatus = $record->userHasoneWorkStatus()->first();
                                     $interview_date = $workStatus?->workStatusHasonePreEmp?->interview_at;
                                     $dt = Carbon::parse($interview_date)->locale('th');
+                                    $calendar_id = $record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id;
+                                    $calendar = new GoogleCalendarService();
+                                    $calendar->deleteEvent($calendar_id);
                                     $workStatus->update([
                                         'work_status_def_detail_id' => 2,
                                     ]);
                                     $workStatus->workStatusHasonePreEmp()->update([
                                         'interview_channel' => null,
                                         'interview_at' => null,
+                                        'google_calendar_id' => null
                                     ]);
 
                                     $history = $record->userHasoneHistory();
@@ -353,7 +369,7 @@ class UsersTable
                                                         . " เวลา "
                                                         . $dt->format(' H:i')
                                                         . " น.",
-                                                    'date' => carbon::now()->format('y-m-d h:i:s'),
+                                                    'date' => carbon::now()->format('y-m-d H:i:s'),
                                                 ]
                                             ],
                                         ]
@@ -392,6 +408,30 @@ class UsersTable
 
                                 ->cancelParentActions()
                                 ->successNotificationTitle('เคลียร์ข้อมูลทั้งหมดเรียบร้อยแล้ว'),
+                            Action::make('see_calendar')
+                                ->label('เข้าร่วมประชุม')
+                                ->color(Color::Indigo)
+                                ->disabled(function ($record) {
+                                    $interviewAt = $record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->interview_at;
+
+                                    if (! $interviewAt) {
+                                        return true; // ไม่มีเวลานัด = ปิด
+                                    }
+
+                                    return now()->lt(
+                                        Carbon::parse($interviewAt)->subMinutes(30)
+                                    );
+                                })
+                                ->visible(fn($record) => filled($record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id) &&
+                                    $record?->userHasoneWorkStatus?->workStatusBelongToWorkStatusDefDetail?->work_phase === 'interview_scheduled_time')
+                                ->url(function ($record) {
+                                    $calendar_id = $record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id;
+                                    $calendar = new GoogleCalendarService();
+                                    $calendar_data = $calendar->getEvent($calendar_id);
+
+                                    return $calendar_data->hangoutLink;
+                                })
+                                ->openUrlInNewTab()
                         ]),
                     Action::make('role_id')
                         ->mountUsing(function (Schema $form, $record) {
@@ -522,7 +562,7 @@ class UsersTable
                                             [
                                                 'event' => 'interviewed',
                                                 'description' => 'มาสัมภาษณ์แล้ว',
-                                                'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                                                'date' => Carbon::now()->format('Y-m-d H:i:s'),
                                             ]
                                         ],
                                     ]
@@ -557,7 +597,7 @@ class UsersTable
                                                 'event' => 'selection results',
                                                 'value' => 'waiting approval',
                                                 'description' => 'ผลการคัดเลือกหลังสัมภาษณ์ คือ "รออนุมัติจ้างงาน"',
-                                                'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                                                'date' => Carbon::now()->format('Y-m-d H:i:s'),
                                             ]
                                         ],
                                     ]
@@ -599,7 +639,7 @@ class UsersTable
                                                 'event' => 'selection results',
                                                 'value' => 'rejected',
                                                 'description' => 'ผลการคัดเลือกหลังสัมภาษณ์ คือ "ไม่ผ่านการคัดเลือก"',
-                                                'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                                                'date' => Carbon::now()->format('Y-m-d H:i:s'),
                                             ]
                                         ],
                                     ]
@@ -640,7 +680,7 @@ class UsersTable
                                                 'event' => 'selection results',
                                                 'value' => 'waiting compare',
                                                 'description' => 'ผลการคัดเลือกหลังสัมภาษณ์ คือ "รอเปรียบเทียบ"',
-                                                'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                                                'date' => Carbon::now()->format('Y-m-d H:i:s'),
                                             ]
                                         ],
                                     ]
@@ -681,7 +721,7 @@ class UsersTable
                                                 'event' => 'selection results',
                                                 'value' => 'substitute',
                                                 'description' => 'ผลการคัดเลือกหลังสัมภาษณ์ คือ "สำรอง"',
-                                                'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                                                'date' => Carbon::now()->format('Y-m-d H:i:s'),
                                             ]
                                         ],
                                     ]

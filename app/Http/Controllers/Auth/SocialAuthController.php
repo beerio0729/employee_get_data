@@ -50,7 +50,7 @@ class SocialAuthController extends Controller
                 'data' => [[
                     'event' => 'applied',
                     'description' => 'สมัครครั้งแรกสำเร็จ',
-                    'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                    'date' => Carbon::now()->format('Y-m-d H:i:s'),
                 ]],
             ]);
             Auth::login($user);

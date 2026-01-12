@@ -4,6 +4,9 @@ namespace App\Models\WorkStatus;
 
 use Illuminate\Database\Eloquent\Model;
 use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class WorkStatus extends Model
 {
@@ -13,18 +16,18 @@ class WorkStatus extends Model
         'work_status_def_detail_id',
     ];
 
-    public function workStatusBelongToWorkStatusDefDetail() //resume
+    public function workStatusBelongToWorkStatusDefDetail() :BelongsTo
     {
         return $this->belongsTo(WorkStatusDefinationDetail::class, 'work_status_def_detail_id', 'id')->withDefault();
     }
 
-    public function workStatusHasonePreEmp() //resume
+    public function workStatusHasonePreEmp() :HasOne
     {
         return $this->hasOne(PreEmployment::class, 'work_status_id', 'id')->withDefault();
     }
     
-    public function workStatusHasmanyPreEmp() //resume
+    public function workStatusHasmanyPostEmp() :HasMany
     {
-        return $this->hasMany(PostEmployment::class, 'work_status_id', 'id')->withDefault();
+        return $this->hasMany(PostEmployment::class, 'work_status_id', 'id');
     }
 }

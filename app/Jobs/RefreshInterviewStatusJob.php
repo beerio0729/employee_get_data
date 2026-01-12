@@ -5,6 +5,7 @@ namespace App\Jobs;
 use Carbon\Carbon;
 use App\Models\User;
 use Filament\Actions\Action;
+use App\Services\GoogleCalendarService;
 use App\Services\LineSendMessageService;
 use Filament\Notifications\Notification;
 use Illuminate\Foundation\Queue\Queueable;
@@ -27,6 +28,9 @@ class RefreshInterviewStatusJob implements ShouldQueue
                 $workStatus = $q->userHasoneWorkStatus;
                 $preEmp = $workStatus?->workStatusHasonePreEmp;
                 $dt = Carbon::parse($preEmp?->interview_at)->locale('th');
+                $calendar_id = $q?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id;
+                $calendar = new GoogleCalendarService();
+                $calendar->deleteEvent($calendar_id);
                 // อัปเดตสถานะ → ไม่มาสัมภาษณ์
                 $workStatus->update([
                     'work_status_def_detail_id' => 5,
@@ -34,7 +38,7 @@ class RefreshInterviewStatusJob implements ShouldQueue
 
                 $history = $q->userHasoneHistory();
                 $history->updateOrCreate(
-                    ['user_id'=> $q->di],
+                    ['user_id' => $q->di],
                     [
                         'data' => [
                             ...$history->first()->data ?? [],
@@ -46,7 +50,7 @@ class RefreshInterviewStatusJob implements ShouldQueue
                                     . " เวลา "
                                     . $dt->format(' H:i')
                                     . " น.",
-                                'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                                'date' => Carbon::now()->format('Y-m-d H:i:s'),
                             ]
                         ],
                     ]
@@ -56,6 +60,7 @@ class RefreshInterviewStatusJob implements ShouldQueue
                 $preEmp?->update([
                     'interview_at' => null,
                     'interview_channel' => null,
+                    'google_calendar_id' => null
                 ]);
                 Notification::make() // ต้องรัน Queue
                     ->title('แจ้งวันนัดสัมภาษณ์')

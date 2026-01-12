@@ -53,7 +53,7 @@ class Register extends BaseRegister
                 'data' => [[
                     'event' => 'applied',
                     'description' => 'สมัครครั้งแรกสำเร็จ',
-                    'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                    'date' => Carbon::now()->format('Y-m-d H:i:s'),
                 ]],
             ]);
         }, attempts: 5);

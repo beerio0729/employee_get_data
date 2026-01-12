@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('work_status_id')->nullable()->constrained('work_statuses')->onDelete('cascade');
             $table->string('interview_channel')->nullable(); //ช่องทางการสัมภาษณ์
+            $table->string('google_calendar_id')->nullable();
             $table->timestamp('applied_at')->useCurrent();  // วันที่สมัคร (ต้องมี)
             $table->timestamp('interview_at')->nullable(); // วันสัมภาษณ์ (อาจยังไม่มี)
             $table->timestamp('result_at')->nullable();  // วันที่สรุปผล (อาจยังไม่มี)

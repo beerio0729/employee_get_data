@@ -1510,7 +1510,7 @@ class ActionFormComponent
                                     [
                                         'event' => 'doc passed',
                                         'description' => 'เปลี่ยนสถานะจาก "สมัครใหม่" เป็น "เอกสารผ่านแล้ว"',
-                                        'date' => Carbon::now()->format('Y-m-d h:i:s'),
+                                        'date' => Carbon::now()->format('Y-m-d H:i:s'),
                                     ]
                                 ],
                             ]
