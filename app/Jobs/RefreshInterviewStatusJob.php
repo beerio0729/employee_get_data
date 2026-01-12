@@ -38,7 +38,7 @@ class RefreshInterviewStatusJob implements ShouldQueue
 
                 $history = $q->userHasoneHistory();
                 $history->updateOrCreate(
-                    ['user_id' => $q->di],
+                    ['user_id' => $q->id],
                     [
                         'data' => [
                             ...$history->first()->data ?? [],

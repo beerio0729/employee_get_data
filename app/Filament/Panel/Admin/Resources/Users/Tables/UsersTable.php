@@ -41,6 +41,7 @@ use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Forms\Components\Repeater\TableColumn;
 use App\Models\WorkStatusDefination\WorkStatusDefination;
 use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
+use Google\Service\WorkloadManager\Notice;
 
 class UsersTable
 {
@@ -264,7 +265,7 @@ class UsersTable
                                 'email' => $record->email,
                                 'title' => "นัดประชุมคุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th}",
                             ]);
-                            
+
                             $workStatus->update([
                                 'work_status_def_detail_id' => 3,
                             ]);
@@ -408,11 +409,20 @@ class UsersTable
                                 ->cancelParentActions()
                                 ->successNotificationTitle('เคลียร์ข้อมูลทั้งหมดเรียบร้อยแล้ว'),
                             Action::make('see_calendar')
-                                ->label('เข้าร่วมประชุม')
+                                ->label(function ($record, $livewire) {
+                                    $calendar_id = $record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id;
+                                    $calendar = new GoogleCalendarService();
+                                    $calendar_data = $calendar->getEvent($calendar_id);
+
+                                    if (blank($calendar_data->hangoutLink)) {
+                                        return "สร้างลิงค์ห้องประชุม";
+                                    } else {
+                                        return "เข้าห้องประชุม";
+                                    }
+                                })
                                 ->color(Color::Indigo)
                                 ->disabled(function ($record) {
                                     $interviewAt = $record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->interview_at;
-
                                     if (! $interviewAt) {
                                         return true; // ไม่มีเวลานัด = ปิด
                                     }
@@ -423,14 +433,35 @@ class UsersTable
                                 })
                                 ->visible(fn($record) => filled($record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id) &&
                                     $record?->userHasoneWorkStatus?->workStatusBelongToWorkStatusDefDetail?->work_phase === 'interview_scheduled_time')
-                                ->url(function ($record) {
+                                ->action(function ($record, $livewire) {
+                                    // $calendar_id = $record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id;
+                                    // $calendar = new GoogleCalendarService();
+                                    // $calendar_data = $calendar->getEvent($calendar_id);
+
+                                    // if (blank($calendar_data->hangoutLink)) {
+                                    //     Notification::make()
+                                    //         ->title('ไม่มีลิงค์ห้องประชุม')
+                                    //         ->warning()
+                                    //         ->send();
+                                    // }
+
+                                    $livewire->dispatch('closeActionModal');
+                                })
+                                ->url(function ($record, $livewire) {
                                     $calendar_id = $record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id;
                                     $calendar = new GoogleCalendarService();
                                     $calendar_data = $calendar->getEvent($calendar_id);
 
-                                    return $calendar_data->hangoutLink;
+                                    if (blank($calendar_data->hangoutLink)) {
+                                        parse_str(parse_url($calendar_data->htmlLink, PHP_URL_QUERY), $query);
+                                        $id = $query['eid'];
+                                        return "https://calendar.google.com/calendar/u/0/r/eventedit/{$id}";
+                                    } else {
+                                        return $calendar_data->hangoutLink;
+                                    }
                                 })
                                 ->openUrlInNewTab()
+
                         ]),
                     Action::make('role_id')
                         ->mountUsing(function (Schema $form, $record) {
