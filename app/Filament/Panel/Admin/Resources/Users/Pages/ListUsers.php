@@ -25,7 +25,7 @@ class ListUsers extends ListRecords
                 ->label('คัดกรองคนไม่มาสัมภาษณ์')
                 ->visible(fn($livewire) => $livewire->tableFilters['filter_component']['status_detail_id'] === '3' ? 1 : 0)
                 ->action(function ($livewire) {
-                    dispatch(new RefreshInterviewStatusJob());
+                    RefreshInterviewStatusJob::dispatch();
                     Notification::make()
                         ->title("คัดกรองคนไม่มาสัมภาษณ์เรียบร้อยแล้ว")
                         ->success()
