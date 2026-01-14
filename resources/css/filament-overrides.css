@@ -147,6 +147,10 @@ select.fi-select-input {
     color: var(--info-700);
 }
 
+.fi-btn:not(.fi-outlined).fi-color:not(label){
+    color: var(--text);
+}
+
 .fi-ta-header-cell {
     font-size: var(--text-base);
 }
