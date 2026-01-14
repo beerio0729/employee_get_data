@@ -108,3 +108,51 @@ input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
 .fi-dropdown-panel {
     max-width: 16rem !important;
 }
+
+/********ปรับสไตล์ ->prefix และ ->surfix **********/
+.fi-input-wrp .fi-input-wrp-label {
+    /* ปรับสี */
+    color: var(--gray-950);
+}
+
+.fi-input-wrp .fi-input-wrp-prefix:not(.fi-inline) {
+    padding-inline-start: calc(var(--spacing) * 2);
+    padding-inline-end: calc(var(--spacing) * 2);
+    border-color: var(--info-300);
+}
+
+.fi-input-wrp .fi-input-wrp-suffix:not(.fi-inline) {
+    padding-inline-start: calc(var(--spacing) * 2);
+    padding-inline-end: calc(var(--spacing) * 2);
+    border-color: var(--info-300);
+}
+
+/********แก้ไขสีตัวอักษรทั้งโปรเจ็ค**********/
+.fi-body,
+.fi-ta-header-cell,
+.fi-ta-ctn .fi-ta-filters .fi-ta-filters-header .fi-ta-filters-heading,
+.fi-fo-field .fi-fo-field-label-content,
+.fi-select-input .fi-select-input-btn,
+.fi-input-wrp .fi-input-wrp-label,
+.fi-modal>.fi-modal-window-ctn>.fi-modal-window .fi-modal-heading,
+.fi-fo-date-time-picker .fi-fo-date-time-picker-display-text-input,
+.fi-fo-radio>.fi-fo-radio-label>.fi-fo-radio-label-text,
+.fi-btn:not(.fi-outlined),
+.fi-btn>.fi-icon,
+select.fi-select-input {
+    color: var(--info-800);
+}
+
+.fi-ta-ctn .fi-ta-selection-indicator>:first-child {
+    color: var(--info-700);
+}
+
+.fi-ta-header-cell {
+    font-size: var(--text-base);
+}
+
+/********แก้ไขสีขอบโฟกัสของ field form**********/
+.fi-input-wrp {
+    --tw-ring-color:
+        color-mix(in oklab, var(--info-300), var(--info-800));
+}

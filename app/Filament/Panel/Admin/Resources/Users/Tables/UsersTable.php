@@ -33,6 +33,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Enums\FiltersLayout;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\TimePicker;
+use Filament\Schemas\Components\Fieldset;
 use Filament\Tables\Columns\Layout\Panel;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
@@ -229,47 +232,69 @@ class UsersTable
                             );
                         })
                         ->modalHeading('นัดหมายวันสัมภาษณ์')
-                        ->modalWidth(Width::Medium)
+                        ->modalWidth(Width::ExtraLarge)
                         ->closeModalByClickingAway(false)
                         ->schema([
-                            DateTimePicker::make('interview_at')
+                            Fieldset::make('Label')
+                                ->contained(false)
                                 ->hiddenLabel()
-                                ->minDate(now())
-                                ->required()
-                                ->validationMessages(['required' => 'กรุณาเลือกวันเวลานัดสัมภาษณ์'])
-                                ->native(false)
-                                ->placeholder('วันเวลาในการนัดสัมภาษณ์')
-                                ->displayFormat('d M Y | เวลา H:i')
-                                ->seconds(false)
-                                ->locale('th')
-                                ->buddhist(),
-                            Radio::make('interview_channel')
-                                ->required()
-                                ->validationMessages(['required' => 'กรุณาเลือกช่องทางการสัมภาษณ์'])
-                                ->label('ช่องทางการสัมภาษณ์')
-                                ->inline(1)
-                                ->options([
-                                    'online' => 'Online',
-                                    'onsite' => 'OnSite'
-                                ]),
-                            Select::make('interview_duration')
-                                ->label('ระยะเวลาการสัมภาษณ์')
-                                ->required()
-                                ->validationMessages(['required' => 'กรุณาระบุระยะเวลาในการสัมภาษณ์'])
-                                ->placeholder('ระบุระยะเวลาในการสัมภาษณ์')
-                                ->options([
-                                    15 => '15 นาที',
-                                    30 => '30 นาที',
-                                    45 => '45 นาที',
-                                    60 => '1 ชั่วโมง',
-                                    75 => '1 ชั่วโมง 15 นาที',
-                                    90 => '1 ชั่วโมง 30 นาที',
-                                    105 => '1 ชั่วโมง 45 นาที',
-                                    120 => '2 ชั่วโมง',
-                                ])
+                                ->columns(3)
+                                ->schema([
+                                    DatePicker::make('interview_day')
+                                        ->hiddenLabel()
+                                        ->minDate(now())
+                                        ->required()
+                                        ->validationMessages(['required' => 'กรุณาเลือกวันนัดสัมภาษณ์'])
+                                        ->native(false)
+                                        ->placeholder('DD MM YYYY')
+                                        ->displayFormat('d M Y')
+                                        ->seconds(false)
+                                        ->prefix('วันที่')
+                                        ->locale('th')
+                                        ->buddhist()
+                                        ->columnSpan(2),
+                                    TimePicker::make('interview_time')
+                                        ->hiddenLabel()
+                                        ->prefix('เวลา')
+                                        ->suffix('น.')
+                                        ->native(false)
+                                        ->required()
+                                        ->seconds(false)
+                                        ->validationMessages(['required' => 'กรุณาเลือกเวลานัดสัมภาษณ์'])
+                                        ->placeholder('hh:mm')
+                                        ->minutesStep(5)
+                                        ->columns(1),
+                                    Select::make('interview_duration')
+                                        ->label('ระยะเวลาการสัมภาษณ์')
+                                        ->required()
+                                        ->columnSpanFull()
+                                        ->validationMessages(['required' => 'กรุณาระบุระยะเวลาในการสัมภาษณ์'])
+                                        ->options([
+                                            15 => '15 นาที',
+                                            30 => '30 นาที',
+                                            45 => '45 นาที',
+                                            60 => '1 ชั่วโมง',
+                                            75 => '1 ชั่วโมง 15 นาที',
+                                            90 => '1 ชั่วโมง 30 นาที',
+                                            105 => '1 ชั่วโมง 45 นาที',
+                                            120 => '2 ชั่วโมง',
+                                        ]),
+                                    Radio::make('interview_channel')
+                                        ->required()
+                                        ->columnSpanFull()
+                                        ->validationMessages(['required' => 'กรุณาเลือกช่องทางการสัมภาษณ์'])
+                                        ->label('ช่องทางการสัมภาษณ์')
+                                        ->inline(1)
+                                        ->options([
+                                            'online' => 'Online',
+                                            'onsite' => 'OnSite'
+                                        ]),
 
+                                ])
                         ])
                         ->action(function ($record, array $data) {
+                            $data['interview_at'] = "{$data['interview_day']} {$data['interview_time']}";
+
                             $hasInterview = filled($record?->userHasoneWorkStatus?->workStatusHasonePreEmp->interview_at);
                             $interviewService = new InterviewService();
                             if ($hasInterview) {
@@ -450,7 +475,7 @@ class UsersTable
                         ]),
 
                     DeleteAction::make()->label('ลบพนักงาน'),
-                ])
+                ])->icon(Heroicon::AdjustmentsVertical)
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
