@@ -116,7 +116,8 @@ class GoogleCalendarService
         $event_time->setDateTime($start);
         $event_time->setTimeZone('Asia/Bangkok');
         $event->setStart($event_time);
-
+        
+        $event_time = new EventDateTime();
         $event_time->setDateTime($end);
         $event_time->setTimeZone('Asia/Bangkok');
         $event->setEnd($event_time);

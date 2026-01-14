@@ -37,6 +37,7 @@ use Filament\Tables\Columns\Layout\Panel;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Illuminate\Database\Eloquent\Builder;
+use App\Services\Interview\InterviewService;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Forms\Components\DateTimePicker;
 use App\Models\Organization\OrganizationStructure;
@@ -205,22 +206,25 @@ class UsersTable
                         ->mountUsing(function (Schema $form, $record) {
                             $form->fill($record->userHasoneWorkStatus->workStatusHasonePreEmp->attributesToArray());
                         })
-                        ->visible(
+                        ->hidden(
                             function ($record) {
                                 $work_state_detail = $record->userHasoneWorkStatus?->workStatusBelongToWorkStatusDefDetail;
-                                if ($work_state_detail->work_phase === "pre_interview_time") {
-                                    return 0;
-                                }
-                                return 1;
+                                return in_array($work_state_detail->work_phase, ["pre_interview_time", "post_result_time"]);
                             }
                         )
                         ->color('success')
                         ->icon('heroicon-m-calendar')
-                        ->modalSubmitActionLabel('อับเดตข้อมูล')
+                        ->modalSubmitActionLabel(
+                            fn($record) =>
+                            filled($record?->userHasoneWorkStatus?->workStatusHasonePreEmp->interview_at)
+                                ? 'แก้ไขนัดสัมภาษณ์'
+                                : 'นัดสัมภาษณ์'
+                        )
                         ->modalSubmitAction(function ($action, $record) {
                             $action->disabled(
                                 function () use ($record) {
-                                    return filled($record->userHasoneWorkStatus->workStatusHasonePreEmp->interview_at);
+                                    $work_state_detail = $record->userHasoneWorkStatus?->workStatusBelongToWorkStatusDefDetail;
+                                    return $work_state_detail->work_phase === "pre_interview_time";
                                 }
                             );
                         })
@@ -230,9 +234,7 @@ class UsersTable
                         ->schema([
                             DateTimePicker::make('interview_at')
                                 ->hiddenLabel()
-                                ->readOnly(function ($record) {
-                                    return filled($record->userHasoneWorkStatus->workStatusHasonePreEmp->interview_at);
-                                })
+                                ->minDate(now())
                                 ->required()
                                 ->validationMessages(['required' => 'กรุณาเลือกวันเวลานัดสัมภาษณ์'])
                                 ->native(false)
@@ -242,9 +244,6 @@ class UsersTable
                                 ->locale('th')
                                 ->buddhist(),
                             Radio::make('interview_channel')
-                                ->disabled(function ($record) {
-                                    return filled($record->userHasoneWorkStatus->workStatusHasonePreEmp->interview_at);
-                                })
                                 ->required()
                                 ->validationMessages(['required' => 'กรุณาเลือกช่องทางการสัมภาษณ์'])
                                 ->label('ช่องทางการสัมภาษณ์')
@@ -255,9 +254,6 @@ class UsersTable
                                 ]),
                             Select::make('interview_duration')
                                 ->label('ระยะเวลาการสัมภาษณ์')
-                                ->hidden(function ($record) {
-                                    return filled($record->userHasoneWorkStatus->workStatusHasonePreEmp->interview_at);
-                                })
                                 ->required()
                                 ->validationMessages(['required' => 'กรุณาระบุระยะเวลาในการสัมภาษณ์'])
                                 ->placeholder('ระบุระยะเวลาในการสัมภาษณ์')
@@ -274,76 +270,13 @@ class UsersTable
 
                         ])
                         ->action(function ($record, array $data) {
-                            $view_notification = 'view_interview_' . Date::now()->timestamp;
-                            $workStatus = $record->userHasoneWorkStatus()->first();
-                            $interview_date = Carbon::parse($data['interview_at'])->locale('th');
-                            if ($data['interview_channel'] === 'online') {
-                                $calendar = new GoogleCalendarService();
-                                $calendar_response = $calendar->createEvent([
-                                    'start_time' => $data['interview_at'],
-                                    'duration' => $data['interview_duration'], //ระยะเวลาการประชุม
-                                    'email' => $record->email,
-                                    'title' => "นัดประชุมคุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th}",
-                                ]);
+                            $hasInterview = filled($record?->userHasoneWorkStatus?->workStatusHasonePreEmp->interview_at);
+                            $interviewService = new InterviewService();
+                            if ($hasInterview) {
+                                $interviewService->update($record, $data);
+                            } else {
+                                $interviewService->create($record, $data);
                             }
-
-                            $workStatus->update([
-                                'work_status_def_detail_id' => 3,
-                            ]);
-
-                            $workStatus->workStatusHasonePreEmp()->update([
-                                'google_calendar_id' => $calendar_response?->id ?? null,
-                                'interview_channel' => $data['interview_channel'],
-                                'interview_at' => $data['interview_at'],
-                            ]);
-                            $history = $record->userHasoneHistory();
-                            $history->updateOrCreate(
-                                ['user_id' => $record->id],
-                                [
-                                    'data' => [
-                                        ...$history->first()->data ?? [],
-                                        [
-                                            'event' => 'interview scheduled',
-                                            'description' => "นัดหมายวันนัดสัมภาษณ์ผ่านช่องทาง \"{$data['interview_channel']}\"",
-                                            'value' => $data['interview_at'],
-                                            'date' => carbon::now()->format('y-m-d H:i:s'),
-                                        ]
-                                    ],
-                                ]
-                            );
-                            Notification::make() //ต้องรัน Queue
-                                ->title('แจ้งวันนัดสัมภาษณ์')
-                                ->body("เรียน คุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th} \n\n"
-                                    . "<br><br>ทางบริษัทฯ ขอแจ้งนัดหมายวันสัมภาษณ์งานของท่านใน<br><B>วัน"
-                                    . $interview_date->translatedFormat('D ที่ j M ')
-                                    . $interview_date->year + 543
-                                    . "\nเวลา "
-                                    . $interview_date->format(' H:i')
-                                    . " น."
-                                    . "</B>"
-                                    . "<br>ผ่านช่องทาง <B>\"" . ucwords($data['interview_channel']) . " \"</B>"
-                                    . "<br><br>โปรดเตรียมเอกสารที่เกี่ยวข้องและมาถึงก่อนเวลานัดหมาย 10 นาที"
-                                    . "<br>ขอบคุณค่ะ")
-                                ->actions([
-                                    Action::make($view_notification)
-                                        ->button()
-                                        ->label('ทำเครื่องหมายว่าอ่านแล้ว')
-                                        ->markAsRead(),
-                                ])
-                                ->sendToDatabase($record, isEventDispatched: true);
-
-                            LineSendMessageService::send($record->provider_id, [
-                                "เรียน คุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th} \n\n"
-                                    . "ทางบริษัทฯ ขอแจ้งนัดหมายวันสัมภาษณ์งานของท่านใน\n\nวัน "
-                                    . $interview_date->translatedFormat('D ที่ j M ')
-                                    . $interview_date->year + 543
-                                    . "\nเวลา "
-                                    . $interview_date->format(' H:i')
-                                    . " น.\n"
-                                    . "ผ่านช่องทาง \"" . ucwords($data['interview_channel']) . " \"\n\n"
-                                    . "โปรดเตรียมเอกสารที่เกี่ยวข้องและมาถึงก่อนเวลานัดหมาย 10 นาที \n\n"
-                                    . "ขอบคุณค่ะ",
-                            ]);
                             Notification::make()
                                 ->title('นัดหมายวันสัมภาษณ์เรียบร้อยแล้ว')
                                 ->success()
@@ -359,71 +292,8 @@ class UsersTable
                                 ->modalDescription("คุณต้องการยกเลิกนัดสัมภาษณ์ใช่หรือไม่")
                                 ->modalSubmitActionLabel('ยืนยัน')
                                 ->action(function ($record) {
-                                    $view_notification = 'view_interview_' . Date::now()->timestamp;
-                                    $workStatus = $record->userHasoneWorkStatus()->first();
-                                    $interview_date = $workStatus?->workStatusHasonePreEmp?->interview_at;
-                                    $interview_date = Carbon::parse($interview_date)->locale('th');
-                                    $calendar_id = $record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id;
-                                    $calendar = new GoogleCalendarService();
-                                    $calendar->deleteEvent($calendar_id);
-                                    $workStatus->update([
-                                        'work_status_def_detail_id' => 2,
-                                    ]);
-                                    $workStatus->workStatusHasonePreEmp()->update([
-                                        'interview_channel' => null,
-                                        'interview_at' => null,
-                                        'google_calendar_id' => null
-                                    ]);
-
-                                    $history = $record->userHasoneHistory();
-                                    $history->updateOrCreate(
-                                        ['user_id' => $record->id],
-                                        [
-                                            'data' => [
-                                                ...$history->first()->data ?? [],
-                                                [
-                                                    'event' => 'cancel interview',
-                                                    'description' => "ยกเลิกการนัดสัมภาษณ์ของ<br>วัน"
-                                                        . $interview_date->translatedFormat('D ที่ j M ')
-                                                        . ($interview_date->year + 543)
-                                                        . " เวลา "
-                                                        . $interview_date->format(' H:i')
-                                                        . " น.",
-                                                    'date' => carbon::now()->format('y-m-d H:i:s'),
-                                                ]
-                                            ],
-                                        ]
-                                    );
-                                    Notification::make() //ต้องรัน Queue
-                                        ->title('แจ้งวันนัดสัมภาษณ์')
-                                        ->body("เรียน คุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th} \n\n"
-                                            . "<br><br>ทางบริษัทฯ ขอแจ้ง<br>❌ ยกเลิกนัดหมายวันสัมภาษณ์งานของท่านใน<br>
-                                            <B>วัน"
-                                            . $interview_date->translatedFormat('D ที่ j M ')
-                                            . ($interview_date->year + 543)
-                                            . " เวลา "
-                                            . $interview_date->format(' H:i')
-                                            . " น."
-                                            . "</B>"
-                                            . "<br><br>ขออภัยมา ณ ที่นี้")
-                                        ->actions([
-                                            Action::make($view_notification)
-                                                ->button()
-                                                ->label('ทำเครื่องหมายว่าอ่านแล้ว')
-                                                ->markAsRead(),
-                                        ])
-                                        ->sendToDatabase($record, isEventDispatched: true);
-                                    LineSendMessageService::send($record->provider_id, [
-                                        "เรียน คุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th} \n\n"
-                                            . "ทางบริษัทฯ ขอแจ้ง 
-                                            \n❌ ยกเลิกนัดหมายวันสัมภาษณ์งานของท่านใน\n\nวัน "
-                                            . $interview_date->translatedFormat('D ที่ j M ')
-                                            . ($interview_date->year + 543)
-                                            . "\nเวลา "
-                                            . $interview_date->format(' H:i')
-                                            . " น.\n\n"
-                                            . "ขออภัยมา ณ ที่นี้",
-                                    ]);
+                                    $interviewService = new InterviewService();
+                                    $interviewService->delete($record);
                                 })
                                 ->cancelParentActions()
                                 ->successNotificationTitle('เคลียร์ข้อมูลทั้งหมดเรียบร้อยแล้ว'),
@@ -461,8 +331,6 @@ class UsersTable
                                     // ปุ่ม visible ถ้าเวลาปัจจุบันยังไม่เกินเวลา + buffer
                                     return now()->startOfMinute()->lte($interviewAt);
                                 })
-
-
                                 ->url(function ($record) {
                                     $calendar_id = $record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id;
                                     $calendar = new GoogleCalendarService();
