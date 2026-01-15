@@ -3,8 +3,10 @@
 namespace App\Filament\Panel\Admin\Overrides;
 
 use UnitEnum;
+use Detection\MobileDetect;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
+use App\Providers\Filament\AdminPanelProvider;
 use App\Models\Organization\OrganizationStructure;
 
 abstract class BaseOrganizationStructureResource extends Resource
@@ -28,11 +30,28 @@ abstract class BaseOrganizationStructureResource extends Resource
 
     public static function getNavigationIcon(): ?Heroicon
     {
-        return Heroicon::BuildingOffice;
+        $detect = new MobileDetect();
+        if ($detect->isiOS() || $detect->isAndroidOS()) {
+            return null;
+        } else {
+            return Heroicon::EllipsisVertical;
+        }
     }
 
     public static function getNavigationGroup(): string|UnitEnum|null
     {
-        return 'ตั้งค่าองค์กร';
+        return 'Settings';
     }
+
+    public static function getNavigationParentItem(): ?string
+    {   
+        $detect = new MobileDetect();
+
+        if ($detect->isiOS() || $detect->isAndroidOS()) {
+            return null;
+        } else {
+            return 'โครงสร้างองค์กร';
+        }
+    }
+
 }

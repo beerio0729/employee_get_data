@@ -18,7 +18,10 @@ class OrganizationStructureFourthResource extends BaseOrganizationStructureResou
 
     protected static int $level = 4;
 
-    protected static ?int $navigationSort = 4;
+    public static function getNavigationSort(): ?int
+    {
+        return static::$level + 1;
+    }
 
     public static function form(Schema $schema): Schema
     {

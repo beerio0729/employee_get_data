@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Filament\Pages\Auth\Register;
 use Filament\Http\Middleware\Authenticate;
 use App\Models\Organization\OrganizationLevel;
+use Filament\Actions\ActionGroup;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -47,12 +48,6 @@ class AdminPanelProvider extends PanelProvider
                     ->label('ไปโหมดพนักงาน')
                     ->url('/'),
             ])
-            // ->navigationGroups([
-            //     NavigationGroup::make()
-            //         ->label('Setting')
-            //         ->icon('heroicon-o-cog-6-tooth')
-            //         ->collapsed(),
-            // ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('5s')
             ->colors([

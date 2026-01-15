@@ -5,10 +5,11 @@ namespace App\Filament\Panel\Admin\Resources\PreEmployMentStatusDefinations;
 use UnitEnum;
 use BackedEnum;
 use Filament\Tables\Table;
+use Detection\MobileDetect;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
-use Filament\Support\Icons\Heroicon;
 
+use Filament\Support\Icons\Heroicon;
 use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 use App\Filament\Panel\Admin\Resources\PreEmployMentStatusDefinations\Pages\EditPreEmployMentStatusDefination;
 use App\Filament\Panel\Admin\Resources\PreEmployMentStatusDefinations\Pages\ListPreEmployMentStatusDefinations;
@@ -20,11 +21,9 @@ class PreEmployMentStatusDefinationResource extends Resource
 {
     protected static ?string $model = WorkStatusDefinationDetail::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
-
     protected static string | UnitEnum | null $navigationGroup = 'Settings';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 9;
 
     protected static ?string $slug = 'pre_employment_def';
 
@@ -33,6 +32,26 @@ class PreEmployMentStatusDefinationResource extends Resource
     protected static ?string $modelLabel = 'สถานะก่อนจ้างงาน';
 
     protected static ?string $navigationLabel = 'กำหนดสถานะก่อนจ้างงาน';
+    
+    public static function getNavigationIcon(): ?Heroicon
+    {
+        $detect = new MobileDetect();
+        if ($detect->isiOS() || $detect->isAndroidOS()) {
+            return null;
+        } else {
+            return Heroicon::EllipsisVertical;
+        }
+    }
+    
+    public static function getNavigationParentItem(): ?string
+    {   
+        $detect = new MobileDetect();
+        if ($detect->isiOS() || $detect->isAndroidOS()) {
+            return null;
+        } else {
+            return 'กำหนดสถานะบุคคล';
+        }
+    }
 
     public static function form(Schema $schema): Schema
     {

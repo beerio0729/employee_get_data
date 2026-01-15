@@ -106,7 +106,7 @@ input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
 
 /********ความกว้างของ Drop Dwon Top Menu**********/
 .fi-dropdown-panel {
-    max-width: 16rem !important;
+    min-width: 16rem;
 }
 
 /********ปรับสไตล์ ->prefix และ ->surfix **********/

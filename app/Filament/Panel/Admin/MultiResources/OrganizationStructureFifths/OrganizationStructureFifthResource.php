@@ -17,8 +17,11 @@ class OrganizationStructureFifthResource extends BaseOrganizationStructureResour
     protected static ?string $model = OrganizationStructure::class;
 
     protected static int $level = 5;
-    
-    protected static ?int $navigationSort = 5;
+
+    public static function getNavigationSort(): ?int
+    {
+        return static::$level + 1;
+    }
 
     public static function form(Schema $schema): Schema
     {

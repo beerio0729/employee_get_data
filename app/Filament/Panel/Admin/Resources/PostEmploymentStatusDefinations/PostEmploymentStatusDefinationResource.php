@@ -5,6 +5,7 @@ namespace App\Filament\Panel\Admin\Resources\PostEmploymentStatusDefinations;
 use UnitEnum;
 use BackedEnum;
 use Filament\Tables\Table;
+use Detection\MobileDetect;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -20,16 +21,34 @@ class PostEmploymentStatusDefinationResource extends Resource
     protected static ?string $model = WorkStatusDefinationDetail::class;
 
     protected static string | UnitEnum | null $navigationGroup = 'Settings';
-    
-    protected static ?int $navigationSort = 3;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::UserPlus;
+    protected static ?int $navigationSort = 10;
 
     protected static ?string $recordTitleAttribute = 'name_th';
 
     protected static ?string $modelLabel = 'สถานะหลังอนุมัติจ้างงาน';
 
     protected static ?string $navigationLabel = 'กำหนดสถานะหลังอนุมัติจ้างงาน';
+
+    public static function getNavigationIcon(): ?Heroicon
+    {
+        $detect = new MobileDetect();
+        if ($detect->isiOS() || $detect->isAndroidOS()) {
+            return null;
+        } else {
+            return Heroicon::EllipsisVertical;
+        }
+    }
+    
+    public static function getNavigationParentItem(): ?string
+    {   
+        $detect = new MobileDetect();
+        if ($detect->isiOS() || $detect->isAndroidOS()) {
+            return null;
+        } else {
+            return 'กำหนดสถานะบุคคล';
+        }
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -56,5 +75,4 @@ class PostEmploymentStatusDefinationResource extends Resource
             'edit' => EditPostEmploymentStatusDefination::route('/{record}/edit'),
         ];
     }
-    
 }

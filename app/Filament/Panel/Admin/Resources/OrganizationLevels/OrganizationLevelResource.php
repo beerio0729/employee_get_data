@@ -3,6 +3,7 @@
 namespace App\Filament\Panel\Admin\Resources\OrganizationLevels;
 
 use BackedEnum;
+use UnitEnum;
 use Filament\Tables\Table;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
@@ -25,6 +26,10 @@ class OrganizationLevelResource extends Resource
     protected static ?string $modelLabel = 'โครงสร้างองค์กร';
 
     protected static ?string $navigationLabel = 'โครงสร้างองค์กร';
+
+    protected static string | UnitEnum | null $navigationGroup = 'Settings';
+
+    protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
     {

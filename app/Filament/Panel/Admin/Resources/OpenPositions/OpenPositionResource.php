@@ -2,13 +2,14 @@
 
 namespace App\Filament\Panel\Admin\Resources\OpenPositions;
 
+use UnitEnum;
+use BackedEnum;
+use App\Models\OpenPosition;
 use App\Filament\Panel\Admin\Resources\OpenPositions\Pages\CreateOpenPosition;
 use App\Filament\Panel\Admin\Resources\OpenPositions\Pages\EditOpenPosition;
 use App\Filament\Panel\Admin\Resources\OpenPositions\Pages\ListOpenPositions;
 use App\Filament\Panel\Admin\Resources\OpenPositions\Schemas\OpenPositionForm;
 use App\Filament\Panel\Admin\Resources\OpenPositions\Tables\OpenPositionsTable;
-use App\Models\OpenPosition;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -18,7 +19,11 @@ class OpenPositionResource extends Resource
 {
     protected static ?string $model = OpenPosition::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::UserPlus;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::AcademicCap;
+    
+    protected static string | UnitEnum | null $navigationGroup = 'Settings';
+    
+    protected static ?int $navigationSort = 11;
 
     protected static ?string $modelLabel = 'ตำแหน่งที่เปิดรับสมัคร';
 

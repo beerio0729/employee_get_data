@@ -19,7 +19,10 @@ class OrganizationStructureSixthResource extends BaseOrganizationStructureResour
 
     protected static int $level = 6;
     
-    protected static ?int $navigationSort = 6;
+    public static function getNavigationSort(): ?int
+    {
+        return static::$level + 1;
+    }
 
     public static function form(Schema $schema): Schema
     {

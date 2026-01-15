@@ -16,10 +16,13 @@ use App\Filament\Panel\Admin\MultiResources\OrganizationStructureThirds\Tables\O
 class OrganizationStructureThirdResource extends BaseOrganizationStructureResource
 {
     protected static ?string $model = OrganizationStructure::class;
-    
+
     protected static int $level = 3;
-    
-    protected static ?int $navigationSort = 3;
+
+    public static function getNavigationSort(): ?int
+    {
+        return static::$level + 1;
+    }
 
     public static function form(Schema $schema): Schema
     {
