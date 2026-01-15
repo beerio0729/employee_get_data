@@ -130,6 +130,7 @@
         }
 
         .flex_sign_container {
+            margin-top: 60px;
             display: flex;
             justify-content: space-around;
         }
@@ -566,7 +567,7 @@
             </div>
 
             <!------------------- ลายเซ็นต์ --------------------->
-            <div class="flex_sign_container" style="margin-top: 30px;">
+            <div class="flex_sign_container">
                 <div class="sign">
                     ลงชื่อ.......................................................<br>
                     (..............................................................)<br>
@@ -579,7 +580,7 @@
                 </div>
             </div>
 
-            <div class="flex_sign_container" style="margin-top: 30px;">
+            <div class="flex_sign_container">
                 <div class="sign">
                     ลงชื่อ.......................................................<br>
                     (..............................................................)<br>
@@ -619,6 +620,7 @@
     function downloadPdf() {
         document.getElementById('button').style.display = "none";
         window.print();
+        document.getElementById('button').style.display = "block";
         //location.replace('/');
     }
 </script>
