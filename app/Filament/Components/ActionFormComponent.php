@@ -1470,8 +1470,9 @@ class ActionFormComponent
                         'work_status_def_detail_id' => 1,
                     ]);
                     $this->logic = false;
+
                     event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
-                    return '#';
+
                 } else {
                     if ($work_status->first()->work_status_def_detail_id === 1) {
                         $work_status->update([
