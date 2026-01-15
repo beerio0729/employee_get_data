@@ -46,13 +46,15 @@ $cert = $user->userHasoneCertificate?->data;
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <link href="https://fonts.googleapis.com/css?family=Noto Sans Thai" rel="stylesheet" data-navigate-track="">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap" rel="stylesheet">
     <title>{{$title}}</title>
     <style>
         /* GLOBAL STYLES */
         body {
             /**font-family: 'Noto Sans Thai'; */
-            font-family: Arial, sans-serif;
+            font-family: "Sarabun", sans-serif;
             font-size: 10pt;
             margin: 0;
             padding: 0;
@@ -65,6 +67,14 @@ $cert = $user->userHasoneCertificate?->data;
                 page-break-after: always;
                 /* หรือ break-after: page; */
             }
+        }
+
+        .page-container {
+            width: 210mm;
+            margin: 0 auto 100px;
+            box-sizing: border-box;
+            border: 1px solid transparent;
+            /* ขอบใสสำหรับขอบเขต A4 */
         }
 
         .fa-file-pdf-o {
@@ -91,14 +101,6 @@ $cert = $user->userHasoneCertificate?->data;
             background-color: #a60000ff;
         }
 
-        .page-container {
-            width: 210mm;
-            margin: 0 auto 100px;
-            box-sizing: border-box;
-            border: 1px solid transparent;
-            /* ขอบใสสำหรับขอบเขต A4 */
-        }
-
         /* HEADER & PHOTO POSITIONING */
         .header-section {
             display: flex;
@@ -108,19 +110,6 @@ $cert = $user->userHasoneCertificate?->data;
             margin-bottom: 30px;
             position: relative;
             /* สำหรับตำแหน่ง "อนุมัติจากบุคคล" */
-        }
-
-        /* ตำแหน่ง "อนุมัติจากบุคคล" ที่มุมขวาบน */
-        .apply-status-box {
-            position: absolute;
-            top: -15px;
-            /* ปรับให้สูงขึ้นเหนือหัวข้อหลัก */
-            right: 0;
-            border: 1px solid red;
-            padding: 1px 4px;
-            font-size: 8pt;
-            color: red;
-            background-color: transparent;
         }
 
         .header-left {
@@ -133,6 +122,11 @@ $cert = $user->userHasoneCertificate?->data;
             padding-top: 30px;
             /* จัดตำแหน่งหัวข้อให้อยู่กลางตามรูป */
         }
+        
+         .header-right {
+            width: 30%;
+            text-align: right;
+        }
 
         .main-title {
             font-size: 16pt;
@@ -142,11 +136,6 @@ $cert = $user->userHasoneCertificate?->data;
         .sub-title {
             font-size: 11pt;
             font-weight: bold;
-        }
-
-        .header-right {
-            width: 30%;
-            text-align: right;
         }
 
         .photo-box {
@@ -738,31 +727,6 @@ $cert = $user->userHasoneCertificate?->data;
                     @endif
                 </div>
             </div>
-
-            <!--<div class="flex-row-container"> ----ที่อยู่ปัจจุบันอยู่บ้าน หอ หรือ บ้านเช่า----
-                <div class="flex-cell">
-                    <span class="flex-label-inner">Residence</span>
-                </div>
-                <div class="flex-cell flex-input-inner" style="border-right: none;">
-                    <div class="checkbox-group">
-                        <span class="input-col checkbox-item">
-                            <span class="data-checkbox"></span> Parent's House
-                        </span>
-                        <span class="input-col checkbox-item">
-                            <span class="data-checkbox"></span> Own House
-                        </span>
-                        <span class="input-col checkbox-item">
-                            <span class="data-checkbox"></span> Rented House
-                        </span>
-                        <span class="input-col checkbox-item">
-                            <span class="data-checkbox"></span> Others, please identify
-                        </span>
-                        <span class="data-fill">dcdcdcd</span>
-                    </div>
-
-                </div>
-            </div>
-            -->
 
             <div class="flex-row-container"> <!-----------ข้อมูลเบอร์ อีเมล------------>
                 <div class="flex-cell">
@@ -1567,7 +1531,7 @@ $cert = $user->userHasoneCertificate?->data;
         function downloadPdf() {
             document.getElementById('button').style.display = "none";
             window.print();
-            location.replace('/');
+            //location.replace('/');
         }
     </script>
 </body>

@@ -15,10 +15,21 @@ class LoadDocLivewire extends Component implements HasActions, HasSchemas
     use InteractsWithActions;
     use InteractsWithSchemas;
 
-    public function pdf(): Action
+    public function applicantPdfAction(): Action
     {
-        return (new ActionFormComponent())->downloadPDFAction();
+        return (new ActionFormComponent())->applicantPdfAction();
     }
+    
+    public function employmentPdfAction(): Action
+    {
+        return (new ActionFormComponent())->employmentPdfAction();
+    }
+
+    public function nonDisclosurePdfAction(): Action
+    {
+        return (new ActionFormComponent())->nonDisclosurePdfAction();
+    }
+
     public function render()
     {
         return view('livewire.panel.employee.widgets.load-doc-livewire');

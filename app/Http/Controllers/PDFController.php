@@ -2,27 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
-
 class PDFController extends Controller
 {
-    public function pdf()
-    {
-        $user = auth()->user();
-        $data = [
-            'title' => 'ข้อมูลพนักงาน',
-            'date' => date('วันl ที่ j F Y เวลา : H:i:s'),
-            'user' => $user
+    public function pdf($name_doc)
+    {   
+        $name = [
+            'applicant_form' => 'ใบสมัครของ',
+            'employment_form' => 'สัญญาจ้างงานของ',
+            'non_disclosure_form' => 'สัญญาไม่เปิดเผยข้อมูลของบริษัทของ',
         ];
-        
-        $title = "ใบสมัครของ_{$user->userHasoneIdcard->name_th}";
-        return view('pdf_form',compact('user','title'));
+        $user = auth()->user();
 
+        $title = "{$name[$name_doc]}_{$user->userHasoneIdcard->name_th}";
+        return view("documents.{$name_doc}", compact('user','title'));
 
-
-
-
-        
     }
 }

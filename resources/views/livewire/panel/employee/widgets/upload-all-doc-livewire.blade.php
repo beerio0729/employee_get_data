@@ -6,7 +6,7 @@ use Filament\Support\Colors\Color;
 <div>
     <x-filament-actions::group
         :actions="[
-            $this->image_profile(),
+            $this->image_profile,
             $this->idcard,
             $this->resume,
             $this->transcript,

@@ -19,7 +19,7 @@ Route::get('/test', function () {
     return 'Event sent';
 });
 
-Route::get('pdf', [PDFController::class, 'pdf'])->middleware('auth');
+Route::get('pdf/{name_doc}', [PDFController::class, 'pdf'])->middleware('auth');
 
 Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect']);
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback']);
