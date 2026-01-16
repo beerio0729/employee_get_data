@@ -161,3 +161,9 @@ select.fi-select-input {
     --tw-ring-color:
         color-mix(in oklab, var(--info-300), var(--info-800));
 }
+
+/************ปรับขนาดสีขอบของเมนูย่อยของ Top Menu**********/
+:where(:scope .fi-dropdown-panel:not(.fi-dropdown-list)>:not(:last-child))
+ {
+    border-color: var(--gray-300);
+}

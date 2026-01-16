@@ -2,18 +2,22 @@
 
 namespace App\Providers\Filament;
 
+
+use Closure;
 use Filament\Panel;
+use Detection\MobileDetect;
 use Filament\PanelProvider;
 use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
 use App\Filament\Pages\Auth\Login;
 use Filament\Support\Colors\Color;
 use App\Filament\Pages\EditProfile;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Support\Facades\Auth;
 use App\Filament\Pages\Auth\Register;
+use Illuminate\Support\Facades\Cache;
 use Filament\Http\Middleware\Authenticate;
 use App\Models\Organization\OrganizationLevel;
-use Filament\Actions\ActionGroup;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -25,9 +29,13 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 
 class AdminPanelProvider extends PanelProvider
-{
+{   public static bool $isiOS;
+    public static bool $isAndroidOS;
     public function panel(Panel $panel): Panel
-    {
+    {   
+        $detect = new MobileDetect();
+        static::$isiOS = $detect->isiOS();
+        static::$isAndroidOS = $detect->isAndroidOS();
         return $panel
             ->default()
             ->id('admin')
@@ -40,13 +48,23 @@ class AdminPanelProvider extends PanelProvider
             ->profile(EditProfile::class)
             ->registration(Register::class)
             ->globalSearch(false)
-            ->topNavigation()
+            ->topNavigation(fn() => Cache::get('top_navigation_' . auth()->id()) ?? 0)
             ->userMenuItems([
                 Action::make('switchmode')
-                    ->icon('heroicon-o-arrows-right-left')
+                    ->icon('heroicon-o-arrow-path-rounded-square')
                     ->color('warning')
                     ->label('ไปโหมดพนักงาน')
                     ->url('/'),
+                Action::make('menu-mode')
+                    ->hidden(fn(): bool => static::$isAndroidOS || static::$isiOS)
+                    ->label(fn() => Cache::get('top_navigation_' . auth()->id()) ? 'โหมดเมนูด้านข้าง' : 'โหมดเมนูด้านบน')
+                    ->icon(fn() => Cache::get('top_navigation_' . auth()->id()) ? 'heroicon-o-chevron-double-right' : 'heroicon-o-chevron-double-up')
+                    ->color('primary')
+                    ->action(function () {
+                        $key = 'top_navigation_' . auth()->id();
+                        Cache::put($key, 1 - (int) Cache::get($key));
+                        return redirect('/admin');
+                    }),
             ])
             ->databaseNotifications()
             ->databaseNotificationsPolling('5s')

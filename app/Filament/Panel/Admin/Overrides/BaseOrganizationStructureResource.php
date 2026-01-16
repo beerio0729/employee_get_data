@@ -6,6 +6,7 @@ use UnitEnum;
 use Detection\MobileDetect;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Cache;
 use App\Providers\Filament\AdminPanelProvider;
 use App\Models\Organization\OrganizationStructure;
 
@@ -31,7 +32,7 @@ abstract class BaseOrganizationStructureResource extends Resource
     public static function getNavigationIcon(): ?Heroicon
     {
         $detect = new MobileDetect();
-        if ($detect->isiOS() || $detect->isAndroidOS()) {
+        if (($detect->isiOS() || $detect->isAndroidOS()) || !Cache::get('top_navigation_' . auth()->id()) ?? 0) {
             return null;
         } else {
             return Heroicon::EllipsisVertical;
@@ -47,7 +48,7 @@ abstract class BaseOrganizationStructureResource extends Resource
     {   
         $detect = new MobileDetect();
 
-        if ($detect->isiOS() || $detect->isAndroidOS()) {
+        if (($detect->isiOS() || $detect->isAndroidOS()) || !Cache::get('top_navigation_' . auth()->id()) ?? 0) {
             return null;
         } else {
             return 'โครงสร้างองค์กร';

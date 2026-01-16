@@ -9,6 +9,7 @@ use Detection\MobileDetect;
 use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\Cache;
 use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 use App\Filament\Panel\Admin\Resources\PostEmploymentStatusDefinations\Pages\EditPostEmploymentStatusDefination;
 use App\Filament\Panel\Admin\Resources\PostEmploymentStatusDefinations\Pages\ListPostEmploymentStatusDefinations;
@@ -33,7 +34,7 @@ class PostEmploymentStatusDefinationResource extends Resource
     public static function getNavigationIcon(): ?Heroicon
     {
         $detect = new MobileDetect();
-        if ($detect->isiOS() || $detect->isAndroidOS()) {
+        if (($detect->isiOS() || $detect->isAndroidOS()) || !Cache::get('top_navigation_' . auth()->id()) ?? 0) {
             return null;
         } else {
             return Heroicon::EllipsisVertical;
@@ -43,7 +44,7 @@ class PostEmploymentStatusDefinationResource extends Resource
     public static function getNavigationParentItem(): ?string
     {   
         $detect = new MobileDetect();
-        if ($detect->isiOS() || $detect->isAndroidOS()) {
+        if (($detect->isiOS() || $detect->isAndroidOS()) || !Cache::get('top_navigation_' . auth()->id()) ?? 0) {
             return null;
         } else {
             return 'กำหนดสถานะบุคคล';
