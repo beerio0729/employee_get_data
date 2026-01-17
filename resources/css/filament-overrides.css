@@ -146,6 +146,8 @@ input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
 .fi-topbar-item-btn>.fi-icon,
 .fi-dropdown-list-item-label,
 .fi-dropdown-list-item>.fi-icon,
+.fi-sidebar-item-label,
+.fi-sidebar-item-btn>.fi-icon,
 select.fi-select-input {
     color: var(--info-900);
 }
@@ -158,15 +160,19 @@ select.fi-select-input {
 .fi-tabs-item.fi-active .fi-tabs-item-label,
 .fi-topbar-item.fi-active .fi-topbar-item-btn,
 .fi-topbar-item.fi-active .fi-topbar-item-btn>.fi-icon,
-.fi-topbar-item.fi-active .fi-topbar-item-label {
-    color: var(--info-600);
+.fi-topbar-item.fi-active .fi-topbar-item-label,
+.fi-sidebar-item.fi-active>.fi-sidebar-item-btn>.fi-icon,
+.fi-sidebar-item.fi-active>.fi-sidebar-item-btn>.fi-sidebar-item-label
+{
+color: var(--info-600);
 }
 
 .fi-tabs-item:hover,
 .fi-topbar-item-btn:hover,
 .fi-tabs-item.fi-active,
 .fi-topbar-item.fi-active .fi-topbar-item-btn,
-.fi-dropdown-list-item:hover {
+.fi-dropdown-list-item:hover,
+.fi-sidebar-item.fi-active>.fi-sidebar-item-btn {
     background-color: var(--info-100);
 }
 
