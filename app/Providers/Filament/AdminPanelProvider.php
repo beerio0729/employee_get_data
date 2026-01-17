@@ -45,6 +45,7 @@ class AdminPanelProvider extends PanelProvider
             ->login(Login::class)
             ->brandLogo(asset('storage/user.png'))
             ->brandLogoHeight('3.5rem')
+            ->breadcrumbs(false)
             ->profile(EditProfile::class)
             ->registration(Register::class)
             ->globalSearch(false)

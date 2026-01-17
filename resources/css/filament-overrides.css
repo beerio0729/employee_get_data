@@ -80,7 +80,7 @@ input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
 /***********สีข้อความรวม***************/
 .fi-header-heading,
 .fi-ta-text-item {
-    color: var(--primary-800);
+    color: var(--primary-900);
 }
 
 .fi-header-heading:where(.dark, .dark *),
@@ -112,7 +112,7 @@ input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
 /********ปรับสไตล์ ->prefix และ ->surfix **********/
 .fi-input-wrp .fi-input-wrp-label {
     /* ปรับสี */
-    color: var(--gray-950);
+    color: var(--gray-900);
 }
 
 .fi-input-wrp .fi-input-wrp-prefix:not(.fi-inline) {
@@ -139,8 +139,35 @@ input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
 .fi-fo-radio>.fi-fo-radio-label>.fi-fo-radio-label-text,
 .fi-btn:not(.fi-outlined),
 .fi-btn>.fi-icon,
+.fi-section-header-heading,
+.fi-section-header-description,
+.fi-tabs-item .fi-tabs-item-label,
+.fi-topbar-item-label,
+.fi-topbar-item-btn>.fi-icon,
+.fi-dropdown-list-item-label,
+.fi-dropdown-list-item>.fi-icon,
 select.fi-select-input {
-    color: var(--info-800);
+    color: var(--info-900);
+}
+
+.fi-dropdown-list-item.fi-color .fi-dropdown-list-item-label,
+.fi-dropdown-list-item>.fi-icon.fi-color {
+    color: var(--text);
+}
+
+.fi-tabs-item.fi-active .fi-tabs-item-label,
+.fi-topbar-item.fi-active .fi-topbar-item-btn,
+.fi-topbar-item.fi-active .fi-topbar-item-btn>.fi-icon,
+.fi-topbar-item.fi-active .fi-topbar-item-label {
+    color: var(--info-600);
+}
+
+.fi-tabs-item:hover,
+.fi-topbar-item-btn:hover,
+.fi-tabs-item.fi-active,
+.fi-topbar-item.fi-active .fi-topbar-item-btn,
+.fi-dropdown-list-item:hover {
+    background-color: var(--info-100);
 }
 
 .fi-ta-ctn .fi-ta-selection-indicator>:first-child {
@@ -148,7 +175,7 @@ select.fi-select-input {
 }
 
 .fi-btn:not(.fi-outlined).fi-color:not(label),
-.fi-btn:not(.fi-outlined).fi-color:not(label)>.fi-icon{
+.fi-btn:not(.fi-outlined).fi-color:not(label)>.fi-icon {
     color: var(--text);
 }
 
@@ -163,7 +190,6 @@ select.fi-select-input {
 }
 
 /************ปรับขนาดสีขอบของเมนูย่อยของ Top Menu**********/
-:where(:scope .fi-dropdown-panel:not(.fi-dropdown-list)>:not(:last-child))
- {
+:where(:scope .fi-dropdown-panel:not(.fi-dropdown-list)>:not(:last-child)) {
     border-color: var(--gray-300);
 }
