@@ -2,13 +2,12 @@
 
 namespace App\Providers\Filament;
 
-
-use Closure;
+use App\Filament\Overrides\Filament\Panel\OverridePanel;
 use Filament\Panel;
 use Detection\MobileDetect;
 use Filament\PanelProvider;
 use Filament\Actions\Action;
-use Filament\Actions\ActionGroup;
+use Filament\Support\Enums\Width;
 use App\Filament\Pages\Auth\Login;
 use Filament\Support\Colors\Color;
 use App\Filament\Pages\EditProfile;
@@ -36,10 +35,11 @@ class AdminPanelProvider extends PanelProvider
         $detect = new MobileDetect();
         static::$isiOS = $detect->isiOS();
         static::$isAndroidOS = $detect->isAndroidOS();
-        return $panel
+        return OverridePanel::make()
             ->default()
             ->id('admin')
             ->darkMode(false)
+            ->maxContentWidth(fn() => Cache::get('top_navigation_' . auth()->id()) ? Width::ScreenExtraLarge : 'full')
             ->font('Noto Sans Thai')
             ->path('/admin')
             ->login(Login::class)
@@ -130,3 +130,4 @@ class AdminPanelProvider extends PanelProvider
         return $resources;
     }
 }
+    
