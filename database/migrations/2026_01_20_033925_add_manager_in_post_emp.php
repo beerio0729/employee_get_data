@@ -17,8 +17,7 @@ return new class extends Migration
 
             $table->unsignedBigInteger('manager_id')
                 ->nullable()
-                ->after('work_status_id')
-                ->change();
+                ->after('work_status_id');
                 
             $table->foreign('manager_id')
                 ->references('id')
