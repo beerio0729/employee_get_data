@@ -9,6 +9,7 @@ use App\Jobs\BulkInterview;
 use Detection\MobileDetect;
 use Filament\Actions\Action;
 use Filament\Schemas\Schema;
+use App\Models\Document\Idcard;
 use Filament\Actions\BulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\ActionGroup;
@@ -19,7 +20,6 @@ use Illuminate\Support\HtmlString;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Radio;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Support\Facades\Date;
 use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\Select;
 use Filament\Support\Enums\Alignment;
@@ -28,7 +28,6 @@ use Filament\Support\Enums\FontWeight;
 use App\Services\GoogleCalendarService;
 use Filament\Forms\Components\Repeater;
 use Filament\Tables\Columns\TextColumn;
-use App\Services\LineSendMessageService;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
@@ -41,14 +40,14 @@ use Filament\Tables\Columns\Layout\Panel;
 use Filament\Tables\Columns\Layout\Split;
 use Filament\Tables\Columns\Layout\Stack;
 use Illuminate\Database\Eloquent\Builder;
-use App\Services\Interview\InterviewService;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Forms\Components\DateTimePicker;
 use App\Models\WorkStatus\PostEmploymentGrade;
+use App\Services\PreEmployment\ApprovedService;
+use App\Services\PreEmployment\InterviewService;
 use App\Models\Organization\OrganizationStructure;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Forms\Components\Repeater\TableColumn;
-use App\Models\Document\Resume\ResumeJobPreferences;
 use App\Models\WorkStatusDefination\WorkStatusDefination;
 use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 
@@ -215,7 +214,7 @@ class UsersTable
                         ->icon('heroicon-m-document-text')
                         ->color(Color::Stone)
                         ->modalHeading('ข้อมูลการจ้างงาน')
-                        ->modalWidth(Width::FourExtraLarge)
+                        ->modalWidth(Width::FiveExtraLarge)
                         ->closeModalByClickingAway(false)
                         ->schema([
                             Fieldset::make('employment_contract_form')
@@ -224,6 +223,18 @@ class UsersTable
                                 ->columns(3)
                                 ->contained(false)
                                 ->schema([
+                                    TextInput::make('employee_code')
+                                        ->label('รหัสพนักงาน')
+                                        ->default(function () {
+                                            $hiredAt =  PostEmployment::latest()->first()->hired_at;
+                                            if (! $hiredAt) {
+                                                return null;
+                                            }
+                                            $year = Carbon::parse($hiredAt)->year;
+                                            $count = PostEmployment::whereYear('hired_at', $year)->count() + 1;
+                                            return sprintf('%d/%03d', $year, $count);
+                                        }),
+
                                     Select::make('lowest_org_structure_id')
                                         ->label('เลือกตำแหน่งที่สมัคร')
                                         ->options(function ($record) {
@@ -234,13 +245,21 @@ class UsersTable
                                             }
                                             return $position;
                                         })
-                                        ->preload()
-                                        ->live(),
-                                    TextInput::make('salary')
-                                        ->label('เงินเดือน'),
+                                        ->preload(),
+
                                     Select::make('post_employment_grade_id')
                                         ->label('ระดับพนักงาน')
-                                        ->options(PostEmploymentGrade::pluck('name_th', 'id')),
+                                        ->options(
+                                            PostEmploymentGrade::query()
+                                                ->get()
+                                                ->mapWithKeys(fn($row) => [
+                                                    $row->id => "{$row->name_th} (G{$row->grade})",
+                                                ])
+                                                ->toArray()
+                                        ),
+                                    TextInput::make('salary')
+                                        ->label('เงินเดือน')
+                                        ->suffix('บาท'),
                                     DatePicker::make('hired_at')
                                         ->label('วันที่เริ่มงาน')
                                         ->minDate(now())
@@ -252,21 +271,34 @@ class UsersTable
                                         ->seconds(false)
                                         ->prefix('วันที่')
                                         ->locale('th')
-                                        ->buddhist()
+                                        ->buddhist(),
+                                    Select::make('manager_id')
+                                        ->columnSpan(1)
+                                        ->label('หัวหน้า')
+                                        ->options(function ($get) {
+                                            $org = OrganizationStructure::where('id', $get('lowest_org_structure_id'));
+                                            $parent_id = $org->first()->parent_id;
+                                            $idCard = Idcard::query()->whereRelation('idcardBelongtoUser.userHasoneWorkStatus.workStatusHasonePostEmp.postEmpBelongToOrg', 'parent_id', $parent_id)
+                                                ->whereRelation('idcardBelongtoUser.userHasoneWorkStatus.workStatusHasonePostEmp', 'post_employment_grade_id', 7)
+                                                ->get()
+                                                ->mapWithKeys(fn($emp) => [
+                                                    $emp->idcardBelongtoUser->id =>
+                                                    "{$emp->prefix_name_th} {$emp->name_th} {$emp->last_name_th} 
+                                                    ({$emp->idcardBelongtoUser->userHasoneWorkStatus->workStatusHasonePostEmp->postEmpBelongToOrg->name_th})",
+                                                ]);
+
+                                            return $idCard;
+                                        }),
                                 ])
                         ])
                         ->action(function ($data, $record) {
-                            $work_status = $record->userHasoneWorkStatus;
-                            $work_status->workStatusHasonePostEmp()
-                                ->updateOrCreate(
-                                    ['work_status_id' => $work_status->id],
-                                    [
-                                        'lowest_org_structure_id' => $data['lowest_org_structure_id'],
-                                        'post_employment_grade_id' => $data['post_employment_grade_id'],
-                                        'salary' => $data['salary'],
-                                        'hired_at' => $data['hired_at'],
-                                    ]
-                                );
+                            $approved = new ApprovedService();
+                            $approved->create($record, $data);
+                            
+                            Notification::make()
+                                ->title("อนุมัติการจ้างงานคุณ \"{$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th}\" เรียบร้อยแล้ว")
+                                ->success()
+                                ->send();
                         }),
                     Action::make('interview')
                         ->label('นัดหมายวันสัมภาษณ์')

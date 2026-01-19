@@ -1531,7 +1531,7 @@ $cert = $user->userHasoneCertificate?->data;
         function downloadPdf() {
             document.getElementById('button').style.display = "none";
             window.print();
-            //location.replace('/');
+            location.replace('/pdf/applicant_form');
         }
     </script>
 </body>

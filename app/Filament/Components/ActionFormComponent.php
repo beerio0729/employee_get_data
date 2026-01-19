@@ -1494,7 +1494,7 @@ class ActionFormComponent
         return
             Action::make('employment')
             ->record(auth()->user())
-            //->visible(fn($record) => $record->userHasoneWorkStatus?->work_status_def_detail_id === 6)
+            ->visible(fn($record) => $record->userHasoneWorkStatus?->work_status_def_detail_id === 6)
             ->label('สัญญาจ้างงาน')
             ->icon(new HtmlString($this->pdficon))
             ->button()
@@ -1508,7 +1508,7 @@ class ActionFormComponent
         return
             Action::make('non_disclosure')
             ->record(auth()->user())
-            //->visible(fn($record) => $record->userHasoneWorkStatus?->work_status_def_detail_id === 6)
+            ->visible(fn($record) => $record->userHasoneWorkStatus?->work_status_def_detail_id === 6)
             ->label('สัญญาไม่เปิดเผยข้อมูลของบริษัท')
             ->icon(new HtmlString($this->pdficon))
             ->button()

@@ -3,6 +3,7 @@
 namespace App\Models\Document;
 
 
+use App\Models\User;
 use App\Models\Geography\Districts;
 use App\Models\Geography\Provinces;
 use App\Models\Geography\Subdistricts;
@@ -40,6 +41,10 @@ class Idcard extends Model
     
     
     /***************ที่อยู่ตามบัตร*************** */
+    public function idcardBelongtoUser()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
     
     public function idcardBelongtoprovince()
     {

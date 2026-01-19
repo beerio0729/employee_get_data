@@ -1,3 +1,32 @@
+@php
+use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Organization\OrganizationStructure;
+
+$user = $data['user'];
+$company = $data['company'];
+$post_emp = $data['post_emp'];
+
+$now_date = function() {$now = Carbon::now()->locale('th'); return $now->translatedFormat('j F ').$now->year + 543;};
+
+$companyName = $company?->name ?? null;
+$companyAddress = $company?->address ?? null;
+$companyProvince = $company?->companyBelongtoProvince->name_th ?? null;
+$companyDistrict = $company?->companyBelongtoDistrict->name_th ?? null;
+$companySubdistrict = $company?->companyBelongtoSubdistrict->name_th ?? null;
+$companySubdistrict_type = fn() => $company->province_id === 1 ? "แขวง" : "ต.";
+$companyDistrict_type = fn() => $company->province_id === 1 ? "เขต" : "อ.";
+$companyZipcode = $company?->companyBelongtosubdistrict->zipcode ?? null;
+$companyAddressFull = "{$companyAddress} {$companySubdistrict_type()}{$companySubdistrict} {$companyDistrict_type()}{$companyDistrict} จ.{$companyProvince} {$companyZipcode}";
+
+$idcard = $user->userHasoneIdcard;
+$idcardName = "{$idcard->prefix_name_th} {$idcard->name_th} {$idcard->last_name_th}";
+$idcardNum = $formattedIdCard = preg_replace('/^(\d)(\d{4})(\d{5})(\d{2})(\d)$/', '$1-$2-$3-$4-$5',$idcard->id_card_number);
+
+$postEmp = fn() => OrganizationStructure::where('id' , $post_emp->lowest_org_structure_id)->first();
+
+@endphp
+
 <!DOCTYPE html>
 <html lang="th">
 
@@ -67,7 +96,7 @@
             justify-content: space-between;
             align-items: flex-start;
             width: 100%;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             position: relative;
             /* สำหรับตำแหน่ง "อนุมัติจากบุคคล" */
         }
@@ -96,13 +125,17 @@
         }
 
         .date_container {
-            margin-top: 30px;
-            margin-right: 150px;
+            margin-top: 15px;
+            margin-right: 215px;
         }
 
         .text {
             margin-top: 20px;
             text-indent: 50px;
+        }
+        
+        i {
+            text-decoration: underline;
         }
 
         .sub_text {
@@ -137,18 +170,25 @@
                 <!-- Element ขวา -->
             </div>
         </div>
-        <div class="right">
-            ทำที่ บริษัท..................................................................<br>
-            ที่อยู่............................................................................<br>
-            ....................................................................................
+        <div class="header-section">
+            <div class="header-left">
+                <!-- Element ซ้าย -->
+            </div>
+            <div class="header-center">
+                <!-- Element กลาง -->
+            </div>
+            <div class="header-right" style="width: 50%; text-align: left;">
+                ทำที่ {{$company?->name}}<br>
+                ที่อยู่ {{$companyAddressFull}}
+            </div>
         </div>
         <div class="right date_container">
-            วันที่..........................................................
+            วันที่ {{$now_date()}}
         </div>
         <div class="name-section">
             <div class="text">โดยหนังสือฉบับนี้ข้าพเจ้า</div>
-            <div class="text">ชื่อ ................................................. บัตรประจำตัวประชาชนเลขที่..............................................................</div>
-            <div class="text">ทำงานกับบริษัทในตำแหน่ง........................................แผนก/ฝ่าย............................................................</div>
+            <div class="text">ชื่อ <i>{{$idcardName}}</i> บัตรประจำตัวประชาชนเลขที่ <i>{{$idcardNum}}</i></div>
+            <div class="text">ทำงานกับบริษัทในตำแหน่ง <i>{{$postEmp()->name_th}}</i> แผนก/ฝ่าย <i>{{$postEmp()->parent->name_th}}</i> </div>
             <div class="text" style="text-indent: 0;">ขอให้คำมั่นเพื่อผูกพันตนต่อบริษัท ดังต่อไปนี้</div>
         </div>
         <div class="text_section">
@@ -177,7 +217,7 @@
             </div>
             <div class="sign">
                 ลงชื่อ.......................................................<br>
-                (..............................................................)<br>
+                ( {{$idcardName}} )<br>
                 พนักงาน
             </div>
         </div>
@@ -200,6 +240,6 @@
     function downloadPdf() {
         document.getElementById('button').style.display = "none";
         window.print();
-        document.getElementById('button').style.display = "block";
+        location.replace('/pdf/non_disclosure_form');
     }
 </script>

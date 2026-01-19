@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Interview;
+namespace App\Services\PreEmployment;
 
 use Filament\Actions\Action;
 use Illuminate\Support\Carbon;
@@ -15,6 +15,7 @@ class InterviewService
         $view_notification = 'view_interview_' . now()->timestamp;
         $workStatus = $record->userHasoneWorkStatus()->first();
         $interview_date = Carbon::parse($data['interview_at'])->locale('th');
+        
         if ($data['interview_channel'] === 'online') {
             $calendar = new GoogleCalendarService();
             $calendar_response = $calendar->createEvent([

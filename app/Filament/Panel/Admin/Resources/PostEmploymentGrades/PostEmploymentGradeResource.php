@@ -30,6 +30,8 @@ class PostEmploymentGradeResource extends Resource
     protected static ?string $modelLabel = 'ระดับพนักงาน';
 
     protected static ?string $navigationLabel = 'ระดับพนักงาน';
+    
+    protected static ?string $slug = 'position_grade';
 
     public static function form(Schema $schema): Schema
     {

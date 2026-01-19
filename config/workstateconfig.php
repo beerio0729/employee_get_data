@@ -12,6 +12,6 @@ return [
         'doc_passed_time' => 'เมื่อเอกสารผ่านแล้ว',
         'interview_scheduled_time' => 'เมื่อนัดสัมภาษณ์แล้ว',
         'post_interview_time' => 'หลังจากสัมภาษณ์',
-        'post_result_time'    => 'หลังจากประกาศผล',
+        'post_result_time'    => 'หลังจากประกาศผลสัมภาษณ์',
     ],
 ];

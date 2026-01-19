@@ -5,7 +5,7 @@ namespace App\Jobs;
 use Illuminate\Support\Collection;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use App\Services\Interview\InterviewService;
+use App\Services\PreEmployment\InterviewService;
 
 class BulkInterview implements ShouldQueue
 {
