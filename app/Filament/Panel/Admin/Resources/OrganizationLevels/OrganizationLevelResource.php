@@ -19,7 +19,7 @@ class OrganizationLevelResource extends Resource
 {
     protected static ?string $model = OrganizationLevel::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::BuildingOffice2;
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::UserGroup;
 
     protected static ?string $recordTitleAttribute = 'name_th';
 

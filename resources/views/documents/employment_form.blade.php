@@ -1,3 +1,70 @@
+@php
+use Carbon\Carbon;
+use App\Models\Organization\OrganizationStructure;
+$user = $data['user'];
+$company = $data['company'];
+$post_emp = $data['post_emp'];
+
+$now_date = function ()
+{
+$now = Carbon::now()->locale('th');
+return $now->translatedFormat('j F ').$now->year + 543;
+};
+
+$companyName = $company?->name ?? null;
+$companyAddress = $company?->address ?? null;
+$companyProvince = $company?->companyBelongtoProvince->name_th ?? null;
+$companyDistrict = $company?->companyBelongtoDistrict->name_th ?? null;
+$companySubdistrict = $company?->companyBelongtoSubdistrict->name_th ?? null;
+$companySubdistrict_type = fn() => $company->province_id === 1 ? "แขวง" : "ต.";
+$companyDistrict_type = fn() => $company->province_id === 1 ? "เขต" : "อ.";
+$companyZipcode = $company?->companyBelongtosubdistrict->zipcode ?? null;
+$companyAddressFull = "{$companyAddress} {$companySubdistrict_type()}{$companySubdistrict} {$companyDistrict_type()}{$companyDistrict} จ.{$companyProvince} {$companyZipcode}";
+
+$idcard = $user->userHasoneIdcard;
+$idcardName = "{$idcard->prefix_name_th} {$idcard->name_th} {$idcard->last_name_th}";
+$idcardNum = $formattedIdCard = preg_replace(
+'/^(\d)(\d{4})(\d{5})(\d{2})(\d)$/',
+'$1-$2-$3-$4-$5',$idcard->id_card_number);
+$idcardAddress = $idcard?->address ?? null;
+$idcardProvince = $idcard?->idcardBelongtoprovince->name_th ?? null;
+$idcardDistrict = $idcard?->idcardBelongtodistrict->name_th ?? null;
+$idcardSubdistrict = $idcard?->idcardBelongtosubdistrict->name_th ?? null;
+$idcardSubdistrict_type = fn() => $idcard->province_id === 1 ? "แขวง" : "ต.";
+$idcardDistrict_type = fn() => $idcard->province_id === 1 ? "เขต" : "อ.";
+$idcardZipcode = $idcard?->idcardBelongtosubdistrict->zipcode ?? null;
+$idcardAddressFull = "{$idcardAddress} {$idcardSubdistrict_type()}{$idcardSubdistrict} {$idcardDistrict_type()}{$idcardDistrict} จ.{$idcardProvince} {$idcardZipcode}";
+
+$postEmp_position = fn() => OrganizationStructure::where('id' , $post_emp->lowest_org_structure_id)->first()->name_th;
+$postEmp_hired_at = fn() => Carbon::parse($post_emp->hired_at)->locale('th')->translatedFormat('j F ').
+Carbon::parse($post_emp->hired_at)->locale('th')->year + 543;
+
+$salary = $post_emp->salary;
+$salaryUse = number_format($salary, 2);
+$salaryText = thaiBahtText($salary);
+
+
+
+function thaiBahtText(float|int|string $amount): string
+{
+$formatter = new NumberFormatter('th_TH', NumberFormatter::SPELLOUT);
+$formatter->setTextAttribute(NumberFormatter::DEFAULT_RULESET, '%spellout-numbering');
+
+$amount = number_format((float) $amount, 2, '.', '');
+[$baht, $satang] = explode('.', $amount);
+
+$bahtText = $formatter->format((int) $baht);
+
+if ((int) $satang === 0) {
+return $bahtText . 'บาทถ้วน';
+}
+
+$satangText = $formatter->format((int) $satang);
+
+return $bahtText . 'บาท' . $satangText . 'สตางค์';
+}
+
+@endphp
 <!DOCTYPE html>
 <html lang="th">
 
@@ -99,6 +166,11 @@
             line-height: 34px;
             text-indent: 40pt;
             text-align: left;
+            text-align: justify;
+        }
+
+        i {
+            text-decoration: underline;
         }
 
         .flex_detail_container {
@@ -159,16 +231,14 @@
         </div>
         <div class="intro-section">
             <div class="text-indent">
-                สัญญาจ้างแรงงานนี้ (<B>“สัญญา”</B>) จัดทำขึ้นเมื่อวันที่ ......................................... ระหว่าง ..............................
-                ................................ ซึ่งจัดตั้งขึ้น
-                ตามกฎหมายไทยสำนักงานใหญ่ตั้งอยู่เลขที่ ........................................................... (<B>“บริษัท”</B>) ฝ่ายหนึ่ง
+                สัญญาจ้างแรงงานนี้ (<B>“สัญญา”</B>) จัดทำขึ้นเมื่อวันที่ <i>{{$now_date()}}</i> ระหว่าง <i>{{$companyName}}</i> ซึ่งจัดตั้งขึ้น
+                ตามกฎหมายไทยสำนักงานใหญ่ตั้งอยู่เลขที่ <i>{{$companyAddressFull}}</i> (<B>“บริษัท”</B>) ฝ่ายหนึ่ง
             </div>
             <div class="text-indent">
-                กับ ....................................... บัตรประชาชน/หนังสือเดินทางเลขที่ ..................................................
-                อยู่บ้านเลขที่ ................................................................................... (<B>“พนักงาน”</B>) อีกฝ่ายหนึ่ง
+                กับ <i>{{$idcardName}}</i> บัตรประชาชน/หนังสือเดินทางเลขที่ <i>{{$idcardNum}}</i> อยู่บ้านเลขที่ <i>{{$idcardAddressFull}}</i> (<B>“พนักงาน”</B>) อีกฝ่ายหนึ่ง
             </div>
             <div class="text-indent">
-                บริษัทประสงค์ว่าจ้างพนักงานในตำแหน่ง .................................... ซึ่งจะต้องรายงานต่อผู้บังคับบัญชาตำแหน่ง
+                บริษัทประสงค์ว่าจ้างพนักงานในตำแหน่ง <i>{{$postEmp_position()}}</i> ซึ่งจะต้องรายงานต่อผู้บังคับบัญชาตำแหน่ง
                 ....................................................... รายละเอียดเป็นไปตามข้อตกลงและเงื่อนไขที่ระบุในสัญญานี้
                 พนักงานประสงค์ที่จะได้รับการจ้างจากบริษัท รายละเอียดเป็นไปตามข้อตกลงและเงื่อนไขที่ระบุในสัญญานี้
             </div>
@@ -181,7 +251,7 @@
             </div>
             <div class="flex_detail_container">
                 <div class="num">1.1</div>
-                <div class="detail"><U>การจ้างงานพนักงาน</U> บริษัทตกลงว่าจ้างพนักงานและพนักงานยอมรับการจ้างงานกับบริษัท เริ่มตั้งแต่วันที่ ……………………………………….(“วันที่มีผลบังคับใช้”) รายละเอียดเป็นไปตามข้อตกลงและเงื่อนไข</div>
+                <div class="detail"><U>การจ้างงานพนักงาน</U> บริษัทตกลงว่าจ้างพนักงานและพนักงานยอมรับการจ้างงานกับบริษัท เริ่มตั้งแต่วันที่ <i>{{$postEmp_hired_at()}}</i> (“วันที่มีผลบังคับใช้”) รายละเอียดเป็นไปตามข้อตกลงและเงื่อนไข</div>
             </div>
             <div class="flex_detail_container">
                 <div class="num">1.2</div>
@@ -196,7 +266,7 @@
             <div class="flex_detail_container">
                 <div class="num">2.1</div>
                 <div class="detail">
-                    พนักงานจะปฏิบัติงานในตำแหน่ง ................................. ซึ่งจะต้องรายงานต่อผู้บังคับบัญชา ตำแหน่ง .................................................... และจะต้องปฏิบัติงานและรับผิดชอบหน้าที่ของพนักงานตามขอบเขตการทำงานตามที่ระบุในเอกสารแนบท้าย ตลอดระยะเวลาสัญญานี้
+                    พนักงานจะปฏิบัติงานในตำแหน่ง <i>{{$postEmp_position()}}</i> ซึ่งจะต้องรายงานต่อผู้บังคับบัญชา ตำแหน่ง .................................................... และจะต้องปฏิบัติงานและรับผิดชอบหน้าที่ของพนักงานตามขอบเขตการทำงานตามที่ระบุในเอกสารแนบท้าย ตลอดระยะเวลาสัญญานี้
                 </div>
             </div>
             <div class="flex_detail_container">
@@ -236,7 +306,7 @@
                 <div class="num">3.1</div>
                 <div class="detail">
                     ค่าจ้างรายเดือน พนักงานจะได้รับค่าจ้างรายเดือนรวม
-                    เป็นจำนวนเงิน ……………………… บาท (…………………………………………………)
+                    เป็นจำนวนเงิน <i>{{$salaryUse}}</i> บาท (<i>{{$salaryText}}</i>)
                     บริษัทมีสิทธิหักภาษี ณ ที่จ่าย และหักเงินใดๆ จากค่าจ้างรายเดือน
                     และสวัสดิการของพนักงานเพื่อชำระให้แก่เจ้าหน้าที่ของรัฐ
                     หรือกองทุนประกันสังคม และ/หรือกองทุนอื่นๆ
@@ -562,7 +632,7 @@
                 <div class="num"></div>
                 <div class="detail">
                     <div class="text-indent">ในนามของ</div>
-                    <div class="text-indent"><B>บริษัท.............................................................จำกัด</B></div>
+                    <div class="text-indent"><B>{{$companyName}}</B></div>
                 </div>
             </div>
 

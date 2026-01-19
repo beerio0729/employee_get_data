@@ -20,13 +20,13 @@ class RoleResource extends Resource
 {
     protected static ?string $model = Role::class;
 
-    protected static string|BackedEnum|null $navigationIcon = 'heroicon-s-shield-exclamation';
+    protected static string|BackedEnum|null $navigationIcon = 'heroicon-s-key';
     
     protected static string | UnitEnum | null $navigationGroup = 'Settings';
     
     protected static ?int $navigationSort = 12;
 
-    protected static ?string $recordTitleAttribute = 'กำหนดสิทธิ์การเข้าถึง';
+    protected static ?string $recordTitleAttribute = 'name';
     
     protected static ?string $modelLabel = 'กำหนดสิทธิ์การเข้าถึง';
     

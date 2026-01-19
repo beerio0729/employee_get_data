@@ -5,7 +5,6 @@ namespace App\Models\WorkStatus;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class WorkStatus extends Model
@@ -26,8 +25,8 @@ class WorkStatus extends Model
         return $this->hasOne(PreEmployment::class, 'work_status_id', 'id')->withDefault();
     }
     
-    public function workStatusHasmanyPostEmp() :HasMany
+    public function workStatusHasonePostEmp() :HasOne
     {
-        return $this->hasMany(PostEmployment::class, 'work_status_id', 'id');
+        return $this->hasOne(PostEmployment::class, 'work_status_id', 'id')->withDefault();
     }
 }

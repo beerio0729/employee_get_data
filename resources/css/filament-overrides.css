@@ -11,6 +11,12 @@
         padding-inline: calc(var(--spacing) * 3);
     }
 
+    /******ระยะขอบ fieldset******/
+    .fi-fieldset:not(.fi-fieldset-not-contained) {
+        padding: calc(var(--spacing) * 6) calc(var(--spacing) * 3);
+    }
+
+
     /*******ระยะห่างของ widget******/
     .fi-sc.fi-sc-has-gap {
         gap: calc(var(--spacing) * 3);
@@ -150,6 +156,8 @@ input[type=radio].fi-radio-input:where(.dark, .dark *):disabled:checked {
 .fi-sidebar-item-btn>.fi-icon,
 .fi-sidebar-group-label,
 .fi-sidebar-group-btn .fi-icon,
+input.fi-input,
+.fi-fo-textarea textarea,
 select.fi-select-input {
     color: var(--info-900);
 }
@@ -164,9 +172,8 @@ select.fi-select-input {
 .fi-topbar-item.fi-active .fi-topbar-item-btn>.fi-icon,
 .fi-topbar-item.fi-active .fi-topbar-item-label,
 .fi-sidebar-item.fi-active>.fi-sidebar-item-btn>.fi-icon,
-.fi-sidebar-item.fi-active>.fi-sidebar-item-btn>.fi-sidebar-item-label
-{
-color: var(--info-600);
+.fi-sidebar-item.fi-active>.fi-sidebar-item-btn>.fi-sidebar-item-label {
+    color: var(--info-600);
 }
 
 .fi-tabs-item:hover,
@@ -200,4 +207,11 @@ color: var(--info-600);
 /************ปรับขนาดสีขอบของเมนูย่อยของ Top Menu**********/
 :where(:scope .fi-dropdown-panel:not(.fi-dropdown-list)>:not(:last-child)) {
     border-color: var(--gray-300);
+}
+
+/***********Label FieldSet*************/
+.fi-fieldset>legend {
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-bold);
+    color: var(--info-900);
 }

@@ -64,7 +64,7 @@ class UserResource extends Resource
                 'userHasoneIdcard',
                 'userHasoneWorkStatus.workStatusBelongToWorkStatusDefDetail',
                 'userHasoneWorkStatus.workStatusHasonePreEmp',
-                'userHasoneWorkStatus.workStatusHasmanyPostEmp',
+                'userHasoneWorkStatus.workStatusHasonePostEmp',
             ]);
     }
 

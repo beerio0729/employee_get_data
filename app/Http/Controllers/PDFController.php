@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CompanyProfile;
+use App\Models\WorkStatus\PostEmployment;
+
 class PDFController extends Controller
 {
     public function pdf($name_doc)
@@ -12,9 +15,16 @@ class PDFController extends Controller
             'non_disclosure_form' => 'สัญญาไม่เปิดเผยข้อมูลของบริษัทของ',
         ];
         $user = auth()->user();
+        $company = CompanyProfile::first();
+        $post_emp = PostEmployment::where('work_status_id', $user->userHasoneWorkStatus->id)->first();
 
+        $data = [
+            'user' => $user,
+            'company' => $company,
+            'post_emp' => $post_emp, 
+        ];
         $title = "{$name[$name_doc]}_{$user->userHasoneIdcard->name_th}";
-        return view("documents.{$name_doc}", compact('user','title'));
+        return view("documents.{$name_doc}", compact('data','title'));
 
     }
 }

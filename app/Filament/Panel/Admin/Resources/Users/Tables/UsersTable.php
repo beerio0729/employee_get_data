@@ -33,6 +33,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Enums\FiltersLayout;
+use App\Models\WorkStatus\PostEmployment;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Components\Fieldset;
@@ -43,9 +44,11 @@ use Illuminate\Database\Eloquent\Builder;
 use App\Services\Interview\InterviewService;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Forms\Components\DateTimePicker;
+use App\Models\WorkStatus\PostEmploymentGrade;
 use App\Models\Organization\OrganizationStructure;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Forms\Components\Repeater\TableColumn;
+use App\Models\Document\Resume\ResumeJobPreferences;
 use App\Models\WorkStatusDefination\WorkStatusDefination;
 use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 
@@ -204,6 +207,67 @@ class UsersTable
             ->deferFilters(false)
             ->recordActions([
                 ActionGroup::make([
+                    Action::make('employment_contract')
+                        ->label('ทำสัญญาจ้างงาน')
+                        ->mountUsing(function (Schema $form, $record) {
+                            $form->fill($record->userHasoneWorkStatus->workStatusHasonePostEmp->attributesToArray());
+                        })
+                        ->icon('heroicon-m-document-text')
+                        ->color(Color::Stone)
+                        ->modalHeading('ข้อมูลการจ้างงาน')
+                        ->modalWidth(Width::FourExtraLarge)
+                        ->closeModalByClickingAway(false)
+                        ->schema([
+                            Fieldset::make('employment_contract_form')
+                                ->columnSpanFull()
+                                ->hiddenLabel()
+                                ->columns(3)
+                                ->contained(false)
+                                ->schema([
+                                    Select::make('lowest_org_structure_id')
+                                        ->label('เลือกตำแหน่งที่สมัคร')
+                                        ->options(function ($record) {
+                                            $position = [];
+                                            $positions_id = $record->userHasoneResumeToJobPreference->positions_id;
+                                            foreach ($positions_id as $position_id) {
+                                                $position[$position_id] = OrganizationStructure::where('id', $position_id)->first()->name_th;
+                                            }
+                                            return $position;
+                                        })
+                                        ->preload()
+                                        ->live(),
+                                    TextInput::make('salary')
+                                        ->label('เงินเดือน'),
+                                    Select::make('post_employment_grade_id')
+                                        ->label('ระดับพนักงาน')
+                                        ->options(PostEmploymentGrade::pluck('name_th', 'id')),
+                                    DatePicker::make('hired_at')
+                                        ->label('วันที่เริ่มงาน')
+                                        ->minDate(now())
+                                        ->required()
+                                        ->validationMessages(['required' => 'กรุณาเลือกวันนัดสัมภาษณ์'])
+                                        ->native(false)
+                                        ->placeholder('DD MM YYYY')
+                                        ->displayFormat('d M Y')
+                                        ->seconds(false)
+                                        ->prefix('วันที่')
+                                        ->locale('th')
+                                        ->buddhist()
+                                ])
+                        ])
+                        ->action(function ($data, $record) {
+                            $work_status = $record->userHasoneWorkStatus;
+                            $work_status->workStatusHasonePostEmp()
+                                ->updateOrCreate(
+                                    ['work_status_id' => $work_status->id],
+                                    [
+                                        'lowest_org_structure_id' => $data['lowest_org_structure_id'],
+                                        'post_employment_grade_id' => $data['post_employment_grade_id'],
+                                        'salary' => $data['salary'],
+                                        'hired_at' => $data['hired_at'],
+                                    ]
+                                );
+                        }),
                     Action::make('interview')
                         ->label('นัดหมายวันสัมภาษณ์')
                         ->mountUsing(function (Schema $form, $record) {
@@ -382,7 +446,7 @@ class UsersTable
                         ->visible(fn() => auth()->user()->role_id === 1)
                         ->color(fn($record) => $record->role_id === 3 ? 'info' : 'gray')
                         ->label('สิทธิ์การเข้าถึง')
-                        ->icon(Heroicon::UserGroup)
+                        ->icon(Heroicon::Key)
                         ->modalSubmitActionLabel('กำหนดสิทธิ์')
                         ->modalHeading('เลือกระดับสิทธิ์')
                         ->modalWidth(Width::Medium)
@@ -866,3 +930,16 @@ class UsersTable
         return $fill;
     }
 }
+
+                                    // TextInput::make('employee_code')
+                                    //     ->label('รหัสพนักงาน')
+                                    //     ->default(function () {
+                                    //         $hiredAt =  PostEmployment::latest()->first()->hired_at;
+                                    //         if (! $hiredAt) {
+                                    //             return null;
+                                    //         }
+                                    //         $year = Carbon::parse($hiredAt)->year;
+                                    //         $count = PostEmployment::whereYear('hired_at', $year)->count() + 1;
+                                    //         return sprintf('%d/%03d', $year, $count);
+                                    //     })
+                                    //     ->readOnly(),

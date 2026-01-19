@@ -1,7 +1,7 @@
 @php
 use Carbon\Carbon;
 use App\Models\Organization\OrganizationStructure;
-
+$user = $data['user'];
 $resume = $user->userHasoneResume;
 $job_preference = $resume?->resumeHasoneJobPreference;
 $jop_positions_id = $job_preference?->positions_id;

@@ -8,4 +8,10 @@ use App\Filament\Panel\Admin\Resources\Roles\RoleResource;
 class CreateRole extends CreateRecord
 {
     protected static string $resource = RoleResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        // redirect ไปหน้า list ของ resource
+        return $this->getResource()::getUrl('index');
+    }
 }

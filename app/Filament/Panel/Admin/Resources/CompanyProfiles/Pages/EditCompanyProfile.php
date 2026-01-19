@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Panel\Admin\Resources\Roles\Pages;
+namespace App\Filament\Panel\Admin\Resources\CompanyProfiles\Pages;
 
+use App\Filament\Panel\Admin\Resources\CompanyProfiles\CompanyProfileResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
-use App\Filament\Panel\Admin\Resources\Roles\RoleResource;
 
-class EditRole extends EditRecord
+class EditCompanyProfile extends EditRecord
 {
-    protected static string $resource = RoleResource::class;
+    protected static string $resource = CompanyProfileResource::class;
 
     protected function getHeaderActions(): array
     {

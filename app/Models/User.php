@@ -28,6 +28,7 @@ use App\Models\Document\Resume\ResumeCertificates;
 use App\Models\Document\Resume\ResumeOtherContacts;
 use App\Models\Document\Resume\ResumeJobPreferences;
 use App\Models\Document\Resume\ResumeWorkExperiences;
+use App\Models\WorkStatus\PostEmployment;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -167,13 +168,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasOne(UserHistory::class, 'user_id', 'id')->withDefault();
     }
 
-    /********User Hasone work status********/
-
     public function userHasoneWorkStatus() //resume
     {
         return $this->hasOne(WorkStatus::class, 'user_id', 'id')->withDefault();
     }
-
+    
     /**************User HasOne ไปที่เอกสาร*************/
 
     public function userHasoneResume() //resume

@@ -10,8 +10,8 @@ class PostEmployment extends Model
     protected $table = 'post_employments';
 
     protected $fillable = [
-        'user_id',  // อ้างอิง users
         'work_status_id', //
+        'position_id',
         'employee_code',   // รหัสพนักงาน
         'lowest_org_structure_id', //id ของช้อมูลในระดับต่ำสุดของโครงสร้างองค์กร ซึ่งส่วนมากจะเป็นตำแหน่ง เช่น หัวหน้าวิศวกร
         'post_employment_grade_id', //ระดับชั้นของคนๆ นั้น

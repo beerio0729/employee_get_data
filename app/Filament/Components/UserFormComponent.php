@@ -2,6 +2,7 @@
 
 namespace App\Filament\Components;
 
+use Closure;
 use Carbon\Carbon;
 use App\Models\Geography\Districts;
 use App\Models\Geography\Provinces;
@@ -98,17 +99,30 @@ class UserFormComponent
                         ->displayFormat('d M Y')
                         ->locale('th')
                         ->buddhist()
-                        ->live(),
-                    // TextInput::make('age_id_card')
-                    //     ->placeholder(function (Get $get) {
-                    //         return blank($get('date_of_birth'))
-                    //             ? 'ต้องกรอกวันเกิดเพื่อคำนวณอายุ'
-                    //             : Carbon::parse($get('date_of_birth'))->age;
+                        ->live(onBlur: true)
+                        ->afterStateUpdated(function ($state, $set, $component) {
+                            dump($component);
+                            if (blank($state)) {
+                                $set('ages', 'ต้องกรอกวันเกิดเพื่อคำนวณอายุ');
+                            } else {
+                                $set('ages', Carbon::parse($state)->age);
+                            }
+                        }),
+                    // TextInput::make('ages')
+                    //     // ->placeholder(function (Get $get) {
+                    //     //     return blank($get('date_of_birth'))
+                    //     //         ? 'ต้องกรอกวันเกิดเพื่อคำนวณอายุ'
+                    //     //         : Carbon::parse($get('date_of_birth'))->age;
+                    //     // })
+                    //     ->live(onBlur: true)
+                    //     ->afterStateHydrated(function (Get $get, $set, TextInput $component, $state) {
+                    //         $component->state(Carbon::parse($get('date_of_birth'))->age);
+                    //         //$component->state('eefefefef');
+                    //         //dump($component);
                     //     })
                     //     ->suffix('ปี')
                     //     ->label('อายุ')
-                    //     ->readonly() // ทำให้เป็นแบบอ่านอย่างเดียว
-                    //     ->dehydrated(false), // ป้องกันไม่ให้บันทึกค่านี้ลง DB/ สำคัญ: ป้องกันไม่ให้ Filament พยายามบันทึกค่านี้
+                    //     ->readonly(), // ทำให้เป็นแบบอ่านอย่างเดียว
                     TextInput::make('religion')
                         ->placeholder('กรอกหรือแก้ไขศาสนาที่คุณนับถือ')
                         ->label('ศาสนา'),
