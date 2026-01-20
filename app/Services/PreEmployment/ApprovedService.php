@@ -6,6 +6,7 @@ use Filament\Actions\Action;
 use Illuminate\Support\Carbon;
 use App\Services\LineSendMessageService;
 use Filament\Notifications\Notification;
+use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 
 class ApprovedService
 {
@@ -16,10 +17,10 @@ class ApprovedService
         $position = $workStatus->workStatusHasonePostEmp->postEmpBelongToOrg->name_th;
         $hired_date = Carbon::parse($data['hired_at'])->locale('th');
         $hired_date_text = $hired_date->translatedFormat('D ที่ j M ') . $hired_date->year + 543;
-
+        $updateStatusId = WorkStatusDefinationDetail::where('code', 'approved')->first()->id;
 
         $workStatus->update([
-            'work_status_def_detail_id' => 21,
+            'work_status_def_detail_id' => $updateStatusId,
         ]);
 
         

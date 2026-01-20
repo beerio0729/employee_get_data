@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Services\LineSendMessageService;
 use Laravel\Socialite\Facades\Socialite;
+use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 
 
 class SocialAuthController extends Controller
@@ -39,7 +40,7 @@ class SocialAuthController extends Controller
                 'role_id'     => 3,
             ]);
             $workStatus = $user->userHasoneWorkStatus()->create([
-                'work_status_def_detail_id' => 1,
+                'work_status_def_detail_id' => WorkStatusDefinationDetail::where('code', 'new_applicant')->first()->id,
             ]);
 
             $workStatus->workStatusHasonePreEmp()->create([

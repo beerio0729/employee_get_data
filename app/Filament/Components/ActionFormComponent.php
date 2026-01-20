@@ -26,6 +26,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use App\Filament\Components\UserFormComponent;
 use Filament\Schemas\Components\Utilities\Set;
 use Asmit\FilamentUpload\Forms\Components\AdvancedFileUpload;
+use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
 class ActionFormComponent
@@ -1464,11 +1465,11 @@ class ActionFormComponent
 
                     $msg = implode('<br><br>', $parts) . '<br><br>' . $ending;
 
-                    $work_status->update(['work_status_def_detail_id' => 1]);
+                    $work_status->update(['work_status_def_detail_id' => $this->updateStatusId('new_applicant')]);
                     event(new ProcessEmpDocEvent($msg, $record, 'popup', null, false));
                 } else {
-                    if ($work_status->first()->work_status_def_detail_id === 1) {
-                        $work_status->update(['work_status_def_detail_id' => 2]);
+                    if ($work_status->first()->work_status_def_detail_id === $this->updateStatusId('new_applicant')) {
+                        $work_status->update(['work_status_def_detail_id' => $this->updateStatusId('doc_passed')]);
                         $history = $record->userHasoneHistory();
                         $history->updateOrCreate(
                             ['user_id' => $record->id],
@@ -1494,7 +1495,7 @@ class ActionFormComponent
         return
             Action::make('employment')
             ->record(auth()->user())
-            ->visible(fn($record) => $record->userHasoneWorkStatus?->work_status_def_detail_id === 6)
+            ->visible(fn($record) => $record->userHasoneWorkStatus?->work_status_def_detail_id === $this->updateStatusId('waiting_approval'))
             ->label('สัญญาจ้างงาน')
             ->icon(new HtmlString($this->pdficon))
             ->button()
@@ -1508,12 +1509,17 @@ class ActionFormComponent
         return
             Action::make('non_disclosure')
             ->record(auth()->user())
-            ->visible(fn($record) => $record->userHasoneWorkStatus?->work_status_def_detail_id === 6)
+            ->visible(fn($record) => $record->userHasoneWorkStatus?->work_status_def_detail_id === $this->updateStatusId('waiting_approval'))
             ->label('สัญญาไม่เปิดเผยข้อมูลของบริษัท')
             ->icon(new HtmlString($this->pdficon))
             ->button()
             ->url(function () {
                 return '/pdf/non_disclosure_form';
             }, shouldOpenInNewTab: true);
+    }
+
+    public function updateStatusId($status)
+    {
+        return WorkStatusDefinationDetail::where('code', $status)->first()->id;
     }
 }

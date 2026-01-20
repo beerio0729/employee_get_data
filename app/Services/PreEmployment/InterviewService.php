@@ -7,6 +7,7 @@ use Illuminate\Support\Carbon;
 use App\Services\GoogleCalendarService;
 use App\Services\LineSendMessageService;
 use Filament\Notifications\Notification;
+use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 
 class InterviewService
 {
@@ -27,7 +28,7 @@ class InterviewService
         }
 
         $workStatus->update([
-            'work_status_def_detail_id' => 3,
+            'work_status_def_detail_id' => $this->updateStatusId('interview_scheduled'), //3
         ]);
 
         $workStatus->workStatusHasonePreEmp()->update([
@@ -95,7 +96,7 @@ class InterviewService
         $calendar = new GoogleCalendarService();
         $calendar->deleteEvent($calendar_id);
         $workStatus->update([
-            'work_status_def_detail_id' => 2,
+            'work_status_def_detail_id' => $this->updateStatusId('doc_passed'),
         ]);
         $workStatus->workStatusHasonePreEmp()->update([
             'interview_channel' => null,
@@ -223,5 +224,11 @@ class InterviewService
                 . "โปรดเตรียมเอกสารที่เกี่ยวข้องและมาถึงก่อนเวลานัดหมาย 10 นาที \n\n"
                 . "ขออภัยมา ณ ที่นี้"
         ]);
+    }
+    
+    /***********Helper Function************/
+    public function updateStatusId($status) :int
+    {
+        return WorkStatusDefinationDetail::where('code', $status)->first()->id;
     }
 }

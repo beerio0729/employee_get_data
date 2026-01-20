@@ -10,6 +10,7 @@ use Filament\Forms\Components\Hidden;
 use Illuminate\Database\Eloquent\Model;
 use Filament\Forms\Components\TextInput;
 use Filament\Auth\Pages\Register as BaseRegister;
+use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 
 class Register extends BaseRegister
 {
@@ -42,7 +43,7 @@ class Register extends BaseRegister
         $user = parent::handleRegistration($data);
         DB::transaction(function () use ($user) {
             $workStatus = $user->userHasoneWorkStatus()->create([
-                'work_status_def_detail_id' => 1,
+                'work_status_def_detail_id' => WorkStatusDefinationDetail::where('code', 'new_applicant')->first()->id,
             ]);
 
             $workStatus->workStatusHasonePreEmp()->create([
