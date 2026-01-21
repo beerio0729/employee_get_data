@@ -566,13 +566,14 @@ class UsersTable
                         ->schema([
                             Repeater::make('multiform_interview')
                                 ->hiddenLabel()
-                                ->columns(2)
+                                ->columns(['default' => 2])
                                 ->reorderable(false)
                                 ->deletable(false)
                                 ->addable(false)
                                 ->schema([
                                     TextInput::make('employee_name')
                                         ->label('ชื่อพนักงาน')
+                                        ->columnSpan(['default' => 2])
                                         ->readOnly(),
                                     ...self::interviewActionComponent(),
                                 ])
