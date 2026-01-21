@@ -31,6 +31,10 @@ class BulkInterview implements ShouldQueue
         if ($this->action === "create") {
             $this->createInterview();
         }
+        
+        if ($this->action === "update") {
+            $this->updateInterview();
+        }
 
         if ($this->action === "delete") {
             $this->deleteInterview();
@@ -44,6 +48,16 @@ class BulkInterview implements ShouldQueue
 
             $interviewService = new InterviewService();
             $interviewService->create($record, $data_interview);
+        }
+    }
+    
+    public function updateInterview()
+    {
+        foreach ($this->records as $index => $record) {
+            $data_interview = $this->data['multiform_interview'][$index];
+
+            $interviewService = new InterviewService();
+            $interviewService->update($record, $data_interview);
         }
     }
 
