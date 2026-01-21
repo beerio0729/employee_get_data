@@ -315,10 +315,10 @@ class UsersTable
                                 }
                             );
                         })
-                        ->modalHeading( fn($record) =>
-                            filled($record?->userHasoneWorkStatus?->workStatusHasonePreEmp->start_interview_at)
-                                ? 'แก้ไขนัดหมายวันสัมภาษณ์'
-                                : 'นัดหมายวันสัมภาษณ์')
+                        ->modalHeading(fn($record) =>
+                        filled($record?->userHasoneWorkStatus?->workStatusHasonePreEmp->start_interview_at)
+                            ? 'แก้ไขนัดหมายวันสัมภาษณ์'
+                            : 'นัดหมายวันสัมภาษณ์')
                         ->modalWidth(Width::ExtraLarge)
                         ->closeModalByClickingAway(false)
                         ->schema([
@@ -544,6 +544,7 @@ class UsersTable
                     DeleteBulkAction::make()->label('ลบข้อมูลของบุคคลที่เลือก')->requiresConfirmation()
                         ->visible(fn($model) => (new $model())->isSuperAdmin()),
                     BulkAction::make('interview')
+                        ->modalWidth(Width::ExtraLarge)
                         ->label(
                             fn($livewire) => (int)$livewire->tableFilters['filter_component']['status_detail_id'] === self::updateStatusId('interview_scheduled')
                                 ? 'อัตเดตวันนัดสัมภาษณ์หลายคน'
