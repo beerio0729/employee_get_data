@@ -30,9 +30,9 @@ class PreEmployMentStatusDefinationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name_th';
 
-    protected static ?string $modelLabel = 'สถานะก่อนจ้างงาน';
+    protected static ?string $modelLabel = 'สถานะบุคคลากรก่อนจ้างงาน';
 
-    protected static ?string $navigationLabel = 'กำหนดสถานะก่อนจ้างงาน';
+    protected static ?string $navigationLabel = 'สถานะบุคคลากรก่อนจ้างงาน';
     
     public static function getNavigationIcon(): ?Heroicon
     {
@@ -50,7 +50,7 @@ class PreEmployMentStatusDefinationResource extends Resource
         if (($detect->isiOS() || $detect->isAndroidOS()) || !Cache::get('top_navigation_' . auth()->id()) ?? 0) {
             return null;
         } else {
-            return 'กำหนดสถานะบุคคล';
+            return 'ประเภทบุคคลากร';
         }
     }
 

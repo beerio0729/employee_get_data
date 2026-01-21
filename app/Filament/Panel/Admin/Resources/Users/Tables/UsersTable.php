@@ -108,6 +108,7 @@ class UsersTable
                     ->columnSpan(4)
                     ->columns(4)
                     ->schema([
+                    /*
                         Select::make('work_status_id')
                             ->label('เลือกสถานะ')
                             ->preload()
@@ -122,17 +123,22 @@ class UsersTable
                                     $set('interview_at', null);
                                 }
                             ),
+                        */
                         Select::make('status_detail_id')
                             ->label('เลือกรายละเอียดสถานะ')
+                            ->hidden(fn($livewire) => $livewire->activeTab === 'all')
                             ->preload()
-                            ->reactive()
+                            ->live()
                             ->searchable()
                             ->options(
-                                fn($get) =>
-                                WorkStatusDefinationDetail::where('work_status_def_id', $get('work_status_id'))->pluck('name_th', 'id')
+                                function ($livewire) {
+                                    $activeTab = $livewire->activeTab;
+                                    $work_status_id = WorkStatusDefination::where('code', $activeTab)?->first()?->id;
+                                    return WorkStatusDefinationDetail::where('work_status_def_id', $work_status_id)->pluck('name_th', 'id');
+                                }
                             )
                             ->afterStateUpdated(
-                                fn($state, $set) => $state === 3
+                                fn($state, $set) => $state === self::updateStatusId('interview_scheduled') //3นัดสัมภาษณ์แล้ว
                                     ? $set('interview_at', now())
                                     : $set('interview_at', null)
                             ),
@@ -142,12 +148,12 @@ class UsersTable
                             ->locale('th')
                             ->buddhist()
                             ->minutesStep(5)
-                            ->visible(fn($get) => $get('status_detail_id') === 3)
+                            ->visible(fn($get) => $get('status_detail_id') === self::updateStatusId('interview_scheduled')) //3นัดสัมภาษณ์แล้ว)
                             ->seconds(false),
                         Select::make('positions_id')
                             ->label('เลือกตำแหน่งที่สมัคร')
                             ->preload()
-                            ->visible(fn($get) => $get('work_status_id') === 1)
+                            ->visible(fn($livewire) => $livewire->activeTab === 'applicant')
                             ->reactive()
                             ->multiple()
                             ->options(function () {
@@ -159,12 +165,6 @@ class UsersTable
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
-                            ->when(
-                                $data['work_status_id'],
-                                function ($query) use ($data) {
-                                    $query->whereRelation('userHasoneWorkStatus.workStatusBelongToWorkStatusDefDetail.workStatusDefDetailBelongsToWorkStatusDef', 'id', $data['work_status_id']);
-                                }
-                            )
                             ->when(
                                 $data['status_detail_id'],
                                 function ($query) use ($data) {
@@ -309,9 +309,9 @@ class UsersTable
                         }),
                     Action::make('interview')
                         ->label('นัดหมายวันสัมภาษณ์')
-                        ->mountUsing(function (Schema $form, $record) {
-                            $form->fill($record->userHasoneWorkStatus->workStatusHasonePreEmp->attributesToArray());
-                        })
+                        // ->mountUsing(function (Schema $form, $record) {
+                        //     $form->fill($record->userHasoneWorkStatus->workStatusHasonePreEmp->attributesToArray());
+                        // })
                         ->hidden(
                             function ($record) {
                                 $work_state_detail = $record->userHasoneWorkStatus?->workStatusBelongToWorkStatusDefDetail;
@@ -395,6 +395,14 @@ class UsersTable
 
                                 ])
                         ])
+                        ->fillForm(function($record) {
+                            $state = $record->userHasoneWorkStatus->workStatusHasonePreEmp;
+                            return[
+                                'interview_day' => Carbon::parse($state->interview_at)->format('Y-m-d'),
+                                'interview_time' => Carbon::parse($state->interview_at)->format('h:i'),
+                                'interview_channel' => $state->interview_channel,
+                            ];
+                        })
                         ->action(function ($record, array $data) {
                             $data['interview_at'] = "{$data['interview_day']} {$data['interview_time']}";
 
@@ -671,13 +679,13 @@ class UsersTable
                         ->icon(Heroicon::ChatBubbleLeftRight)
                         ->visible(
                             fn($livewire) =>
-                            $livewire->tableFilters['filter_component']['status_detail_id'] === self::updateStatusId('interview_scheduled')//3 นัดสัมภาษณ์แล้ว
+                            $livewire->tableFilters['filter_component']['status_detail_id'] === self::updateStatusId('interview_scheduled') // นัดสัมภาษณ์แล้ว
                         )
                         ->label('มาสัมภาษณ์แล้ว')
                         ->action(function ($records) {
                             foreach ($records as $record) {
                                 $record->userHasoneWorkStatus->update([
-                                    'work_status_def_detail_id' => self::updateStatusId('interviewed'), //4 สัมภาษณ์แล้ว
+                                    'work_status_def_detail_id' => self::updateStatusId('interviewed'), // สัมภาษณ์แล้ว
                                 ]);
                                 $history = $record->userHasoneHistory();
                                 $history->updateOrCreate(
@@ -703,10 +711,10 @@ class UsersTable
                         ->visible(fn($livewire) => in_array(
                             (int) $livewire->tableFilters['filter_component']['status_detail_id'],
                             [
-                                self::updateStatusId('interviewed'), //4 สัมภาษณ์แล้ว
-                                self::updateStatusId('rejected'), //7 ไม่ผ่านการคัดเลือก
-                                self::updateStatusId('waiting_compare'), //8 รอเปรียบเทียบ
-                                self::updateStatusId('substitute'), //9 สำรอง
+                                self::updateStatusId('interviewed'), // สัมภาษณ์แล้ว
+                                self::updateStatusId('rejected'), // ไม่ผ่านการคัดเลือก
+                                self::updateStatusId('waiting_compare'), // รอเปรียบเทียบ
+                                self::updateStatusId('substitute'), // สำรอง
                             ],
                         ))
                         ->action(function ($records, $action) {
@@ -750,10 +758,10 @@ class UsersTable
                             fn($livewire) => in_array(
                                 (int) $livewire->tableFilters['filter_component']['status_detail_id'],
                                 [
-                                    self::updateStatusId('interviewed'), //4 สัมภาษณ์แล้ว
-                                    self::updateStatusId('waiting_approval'), //6 รออนุมัติจ้างงาน
-                                    self::updateStatusId('waiting_compare'), //8 รอเปรียบเทียบ
-                                    self::updateStatusId('substitute'), //9 สำรอง
+                                    self::updateStatusId('interviewed'), // สัมภาษณ์แล้ว
+                                    self::updateStatusId('waiting_approval'), // รออนุมัติจ้างงาน
+                                    self::updateStatusId('waiting_compare'), // รอเปรียบเทียบ
+                                    self::updateStatusId('substitute'), // สำรอง
                                 ]
                             )
                         )
@@ -799,10 +807,10 @@ class UsersTable
                             fn($livewire) => in_array(
                                 (int) $livewire->tableFilters['filter_component']['status_detail_id'],
                                 [
-                                    self::updateStatusId('interviewed'), //4 สัมภาษณ์แล้ว
-                                    self::updateStatusId('waiting_approval'), //6 รออนุมัติจ้างงาน
+                                    self::updateStatusId('interviewed'), // สัมภาษณ์แล้ว
+                                    self::updateStatusId('waiting_approval'), // รออนุมัติจ้างงาน
                                     self::updateStatusId('rejected'), //7 ไม่ผ่านการคัดเลือก
-                                    self::updateStatusId('substitute'), //9 สำรอง
+                                    self::updateStatusId('substitute'), // สำรอง
                                 ]
                             )
                         )
@@ -810,7 +818,7 @@ class UsersTable
                             foreach ($records as $record) {
                                 $work_status = $record->userHasoneWorkStatus;
                                 $work_status->update([
-                                    'work_status_def_detail_id' => self::updateStatusId('waiting_compare'), //8 รอเปรียบเทียบ
+                                    'work_status_def_detail_id' => self::updateStatusId('waiting_compare'), // รอเปรียบเทียบ
                                 ]);
                                 $work_status->workStatusHasonePreEmp()->update([
                                     'result_at' => now(),
@@ -847,10 +855,10 @@ class UsersTable
                             fn($livewire) => in_array(
                                 (int) $livewire->tableFilters['filter_component']['status_detail_id'],
                                 [
-                                    self::updateStatusId('interviewed'), //4 สัมภาษณ์แล้ว
-                                    self::updateStatusId('waiting_approval'), //6 รออนุมัติจ้างงาน
+                                    self::updateStatusId('interviewed'), // สัมภาษณ์แล้ว
+                                    self::updateStatusId('waiting_approval'), // รออนุมัติจ้างงาน
                                     self::updateStatusId('rejected'), //7 ไม่ผ่านการคัดเลือก
-                                    self::updateStatusId('waiting_compare'), //8 รอเปรียบเทียบ
+                                    self::updateStatusId('waiting_compare'), // รอเปรียบเทียบ
                                 ]
                             )
                         )
@@ -858,7 +866,7 @@ class UsersTable
                             foreach ($records as $record) {
                                 $work_status = $record->userHasoneWorkStatus;
                                 $work_status->update([
-                                    'work_status_def_detail_id' => self::updateStatusId('substitute'), //9 สำรอง
+                                    'work_status_def_detail_id' => self::updateStatusId('substitute'), // สำรอง
                                 ]);
                                 $work_status->workStatusHasonePreEmp()->update([
                                     'result_at' => now(),

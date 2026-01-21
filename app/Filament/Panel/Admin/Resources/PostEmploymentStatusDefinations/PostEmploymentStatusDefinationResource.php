@@ -27,9 +27,9 @@ class PostEmploymentStatusDefinationResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name_th';
 
-    protected static ?string $modelLabel = 'สถานะหลังอนุมัติจ้างงาน';
+    protected static ?string $modelLabel = 'สถานะบุคคลากรหลังอนุมัติจ้างงาน';
 
-    protected static ?string $navigationLabel = 'กำหนดสถานะหลังอนุมัติจ้างงาน';
+    protected static ?string $navigationLabel = 'สถานะบุคคลากรหลังอนุมัติจ้างงาน';
 
     public static function getNavigationIcon(): ?Heroicon
     {
@@ -47,7 +47,7 @@ class PostEmploymentStatusDefinationResource extends Resource
         if (($detect->isiOS() || $detect->isAndroidOS()) || !Cache::get('top_navigation_' . auth()->id()) ?? 0) {
             return null;
         } else {
-            return 'กำหนดสถานะบุคคล';
+            return 'ประเภทบุคคลากร';
         }
     }
 

@@ -72,6 +72,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Blue,
             ])
+            ->discoverClusters(in: app_path('Filament/Panel/Admin/Clusters'), for: 'App\Filament\Panel\Admin\Clusters')
             //->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverResources(in: app_path('Filament/Panel/Admin/Resources'), for: 'App\Filament\Panel\Admin\Resources')
             ->resources($this->organizationResources())

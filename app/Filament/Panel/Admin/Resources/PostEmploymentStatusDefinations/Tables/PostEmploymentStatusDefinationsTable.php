@@ -22,7 +22,7 @@ class PostEmploymentStatusDefinationsTable
             ->modifyQueryUsing(
                 fn($query) =>
                 $query->whereRelation(
-                    'workStatusDefinationDetailBelongsToWorkStatusDefination',
+                    'workStatusDefDetailBelongsToWorkStatusDef',
                     'main_work_status',
                     'post_employment'
                 )
@@ -31,17 +31,7 @@ class PostEmploymentStatusDefinationsTable
                 ...WorkStatusDefinationTableComponent::tableForPostComponent(),
             ])
             ->filters([
-                SelectFilter::make('work_status_def_id')
-                    ->label('กรองตามสถานะบุคคล')
-                    ->relationship(
-                        'workStatusDefinationDetailBelongsToWorkStatusDefination',
-                        'name_th',
-                        fn(Builder $query) => $query->where(
-                            'main_work_status',
-                            'post_employment'
-                        )
-                    )
-                    ->multiple(),
+                //
             ])->deferFilters(false)
             ->recordActions([
                 EditAction::make(),

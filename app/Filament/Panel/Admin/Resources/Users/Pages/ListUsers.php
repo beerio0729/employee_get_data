@@ -2,11 +2,16 @@
 
 namespace App\Filament\Panel\Admin\Resources\Users\Pages;
 
+use Livewire\Component;
 use Filament\Actions\Action;
 use App\Jobs\RefreshInterviewStatusJob;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Tabs\Tab;
+use Illuminate\Database\Eloquent\Builder;
+use App\Models\WorkStatusDefination\WorkStatusDefination;
 use App\Filament\Panel\Admin\Resources\Users\UserResource;
+use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 
 class ListUsers extends ListRecords
 {
@@ -23,14 +28,14 @@ class ListUsers extends ListRecords
             Action::make('refresh_status_interview')
                 ->color('danger')
                 ->label('คัดกรองคนไม่มาสัมภาษณ์')
-                ->visible(fn($livewire) => $livewire->tableFilters['filter_component']['status_detail_id'] === '3' ? 1 : 0)
+                ->visible(fn($livewire) => (int) $livewire->tableFilters['filter_component']['status_detail_id'] === self::updateStatusId('interview_scheduled')) //นัดสัมภาษณ์แล้ว
                 ->action(function ($livewire) {
                     RefreshInterviewStatusJob::dispatch();
                     Notification::make()
                         ->title("คัดกรองคนไม่มาสัมภาษณ์เรียบร้อยแล้ว")
                         ->success()
                         ->send();
-                    $livewire->tableFilters['filter_component']['status_detail_id'] = 5;
+                    $livewire->tableFilters['filter_component']['status_detail_id'] = self::updateStatusId('no_interviewed');
                     $livewire->tableFilters['filter_component']['interview_at'] = null;
                 }),
             Action::make('refresh_table')
@@ -49,5 +54,57 @@ class ListUsers extends ListRecords
     public function closeActionModal()
     {
         $this->unmountAction();
+    }
+
+    public function getTabs(): array
+    {
+        return [
+            'all' => Tab::make()
+                ->icon('heroicon-m-user-group')
+                ->label('All'),
+            ...$this->tabFilterComponent()
+
+        ];
+    }
+
+    // public function getDefaultActiveTab(): string | int | null
+    // {
+    //     return 'active';
+    // }
+
+    public function updatedActiveTab(): void
+    {
+        $this->resetPage();
+
+        $this->cachedDefaultTableColumnState = null;
+
+        $this->applyTableColumnManager();
+
+        $this->tableFilters['filter_component']['status_detail_id'] = null;
+        $this->tableFilters['filter_component']['interview_at'] = null;
+        $this->tableFilters['filter_component']['positions_id'] = null;
+    }
+
+    public function tabFilterComponent(): array
+    {
+        $tabs = [];
+        $workSates = WorkStatusDefination::all()->toArray();
+        foreach ($workSates as $workSate) {
+            $tabs[$workSate['code']] =
+                Tab::make()
+                ->label($workSate['name_th'])
+                ->modifyQueryUsing(fn(Builder $query) =>
+                $query->whereRelation(
+                    'userHasoneWorkStatus.workStatusBelongToWorkStatusDefDetail.workStatusDefDetailBelongsToWorkStatusDef',
+                    'code',
+                    $workSate['code']
+                ));
+        }
+        return $tabs;
+    }
+
+    public static function updateStatusId($status): int
+    {
+        return WorkStatusDefinationDetail::where('code', $status)->first()->id;
     }
 }

@@ -63,7 +63,7 @@ class WorkStatusDefinationTableComponent
 
         array_splice($columns, 2, 0, [
             TextColumn::make(
-                'workStatusDefinationDetailBelongsToWorkStatusDefination.name_th'
+                'workStatusDefDetailBelongsToWorkStatusDef.name_th'
             )
                 ->label('สถานะบุคคล')
                 ->searchable()

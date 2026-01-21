@@ -26,11 +26,11 @@ class WorkStatusDefinationResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::UserCircle;
 
-    protected static ?string $recordTitleAttribute = 'สถานะบุคคล';
+    protected static ?string $recordTitleAttribute = 'ประเภทบุคคลากร';
 
-    protected static ?string $modelLabel = 'สถานะบุคคล';
+    protected static ?string $modelLabel = 'ประเภทบุคคลากร';
 
-    protected static ?string $navigationLabel = 'กำหนดสถานะบุคคล';
+    protected static ?string $navigationLabel = 'ประเภทบุคคลากร';
 
     public static function form(Schema $schema): Schema
     {
