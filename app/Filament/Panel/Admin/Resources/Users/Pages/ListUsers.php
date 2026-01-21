@@ -57,39 +57,26 @@ class ListUsers extends ListRecords
     }
 
     public function getTabs(): array
-    {
+    {   
+        $workSate = WorkStatusDefination::all();
+
+        if ($workSate->count() === 1) {
+            return [];
+        }
+        
         return [
             'all' => Tab::make()
                 ->icon('heroicon-m-user-group')
                 ->label('All'),
-            ...$this->tabFilterComponent()
+            ...$this->tabFilterComponent($workSate)
 
         ];
     }
 
-    // public function getDefaultActiveTab(): string | int | null
-    // {
-    //     return 'active';
-    // }
-
-    public function updatedActiveTab(): void
-    {
-        $this->resetPage();
-
-        $this->cachedDefaultTableColumnState = null;
-
-        $this->applyTableColumnManager();
-
-        $this->tableFilters['filter_component']['status_detail_id'] = null;
-        $this->tableFilters['filter_component']['interview_at'] = null;
-        $this->tableFilters['filter_component']['positions_id'] = null;
-    }
-
-    public function tabFilterComponent(): array
+    public function tabFilterComponent($workSate): array
     {
         $tabs = [];
-        $workSates = WorkStatusDefination::all()->toArray();
-        foreach ($workSates as $workSate) {
+        foreach ($workSate->toArray() as $workSate) {
             $tabs[$workSate['code']] =
                 Tab::make()
                 ->label($workSate['name_th'])
@@ -101,6 +88,21 @@ class ListUsers extends ListRecords
                 ));
         }
         return $tabs;
+    }
+
+    // public function getDefaultActiveTab(): string | int | null
+    // {
+    //     return 'active';
+    // }
+
+
+    public function updatedActiveTab(): void
+    {
+        parent::updatedActiveTab();
+
+        $this->tableFilters['filter_component']['status_detail_id'] = null;
+        $this->tableFilters['filter_component']['interview_at'] = null;
+        $this->tableFilters['filter_component']['positions_id'] = null;
     }
 
     public static function updateStatusId($status): int

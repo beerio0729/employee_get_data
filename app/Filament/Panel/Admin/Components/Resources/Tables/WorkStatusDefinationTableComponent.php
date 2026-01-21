@@ -43,6 +43,12 @@ class WorkStatusDefinationTableComponent
         $columns = self::tableComponent();
 
         array_splice($columns, 2, 0, [
+            TextColumn::make(
+                'workStatusDefDetailBelongsToWorkStatusDef.name_th'
+            )
+                ->label('สถานะบุคคล')
+                ->searchable()
+                ->sortable(),
             TextColumn::make('work_phase')
                 ->formatStateUsing(
                     fn($state) =>

@@ -22,18 +22,24 @@ class ListPostEmploymentStatusDefinations extends ListRecords
 
     public function getTabs(): array
     {
+        $workSate = WorkStatusDefination::where('main_work_status', 'post_employment')->get();
+
+        if ($workSate->count() === 1) {
+            return [];
+        }
+
         return [
             'all' => Tab::make()
                 ->label('All'),
-            ...$this->tabFilterComponent()
+            ...$this->tabFilterComponent($workSate)
         ];
     }
 
-    public function tabFilterComponent(): array
+    public function tabFilterComponent($workSate): array
     {
         $tabs = [];
-        $workSates = WorkStatusDefination::where('main_work_status', 'post_employment')->get()->toArray();
-        foreach ($workSates as $workSate) {
+
+        foreach ($workSate->toArray() as $workSate) {
             $tabs[$workSate['code']] =
                 Tab::make()
                 ->label($workSate['name_th'])
@@ -43,7 +49,6 @@ class ListPostEmploymentStatusDefinations extends ListRecords
                     'code',
                     $workSate['code']
                 ));
-        
         }
         return $tabs;
     }
