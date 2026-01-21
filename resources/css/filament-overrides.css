@@ -2,7 +2,8 @@
 
     /* sm breakpoint ของ Tailwind */
     :is(.fi-modal>.fi-modal-window-ctn>.fi-modal-window:not(.fi-modal-window-has-icon), .fi-modal>.fi-modal-window-ctn>.fi-modal-window.fi-modal-window-has-sticky-header) .fi-modal-content,
-    :is(.fi-modal>.fi-modal-window-ctn>.fi-modal-window:not(.fi-modal-window-has-icon), .fi-modal>.fi-modal-window-ctn>.fi-modal-window.fi-modal-window-has-sticky-header) .fi-modal-footer {
+    :is(.fi-modal>.fi-modal-window-ctn>.fi-modal-window:not(.fi-modal-window-has-icon), .fi-modal>.fi-modal-window-ctn>.fi-modal-window.fi-modal-window-has-sticky-header) .fi-modal-footer,
+    .fi-fo-repeater .fi-fo-repeater-item-content {
         padding-inline: calc(var(--spacing) * 2);
     }
 
