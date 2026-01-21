@@ -20,6 +20,10 @@ class WorkStatusDefinationTableComponent
                 ->label('Status Name')
                 ->searchable()
                 ->sortable(),
+            TextColumn::make('workStatusDefDetailBelongsToWorkStatusDef.name_th')
+                ->label('ประเภทบุคคลากร')
+                ->searchable()
+                ->sortable(),
             ToggleColumn::make('is_active')
                 ->label('Active')
                 ->grow(false)
@@ -42,13 +46,7 @@ class WorkStatusDefinationTableComponent
     {
         $columns = self::tableComponent();
 
-        array_splice($columns, 2, 0, [
-            TextColumn::make(
-                'workStatusDefDetailBelongsToWorkStatusDef.name_th'
-            )
-                ->label('สถานะบุคคล')
-                ->searchable()
-                ->sortable(),
+        array_splice($columns, 3, 0, [
             TextColumn::make('work_phase')
                 ->formatStateUsing(
                     fn($state) =>
@@ -65,17 +63,6 @@ class WorkStatusDefinationTableComponent
 
     public static function tableForPostComponent(): array
     {
-        $columns = self::tableComponent();
-
-        array_splice($columns, 2, 0, [
-            TextColumn::make(
-                'workStatusDefDetailBelongsToWorkStatusDef.name_th'
-            )
-                ->label('สถานะบุคคล')
-                ->searchable()
-                ->sortable(),
-        ]);
-
-        return $columns;
+        return self::tableComponent();
     }
 }
