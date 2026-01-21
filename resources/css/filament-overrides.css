@@ -32,10 +32,6 @@
     .fi-no-notification {
         padding: 10px 30px;
     }
-
-    input.fi-input {
-        padding-inline: calc(var(--spacing) * 2);
-    }
 }
 
 
