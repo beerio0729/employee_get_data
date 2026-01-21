@@ -22,6 +22,8 @@ use Filament\Forms\Components\Radio;
 use Filament\Support\Icons\Heroicon;
 use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\Select;
+use Filament\Schemas\Components\Flex;
+use Filament\Schemas\Components\Icon;
 use Filament\Support\Enums\Alignment;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Support\Enums\FontWeight;
@@ -127,6 +129,14 @@ class UsersTable
                                     : $set('start_interview_at', null)
                             ),
                         DateTimePicker::make('start_interview_at')
+                            ->afterLabel([
+                                Action::make('clear')
+                                    ->icon(Heroicon::ArrowPath)
+                                    ->color('danger')
+                                    ->action(function ($livewire) {
+                                        $livewire->tableFilters['filter_component']['start_interview_at'] = null;
+                                    }),
+                            ])
                             ->label('ระบุเวลานัดสัมภาณษ์')
                             ->displayFormat('D, j M Y, G:i น.')
                             ->locale('th')

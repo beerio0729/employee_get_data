@@ -36,7 +36,7 @@ class ListUsers extends ListRecords
                         ->success()
                         ->send();
                     $livewire->tableFilters['filter_component']['status_detail_id'] = self::updateStatusId('no_interviewed');
-                    $livewire->tableFilters['filter_component']['interview_at'] = null;
+                    $livewire->tableFilters['filter_component']['start_interview_at'] = null;
                 }),
             Action::make('refresh_table')
                 ->color('warning')
@@ -101,7 +101,7 @@ class ListUsers extends ListRecords
         parent::updatedActiveTab();
 
         $this->tableFilters['filter_component']['status_detail_id'] = null;
-        $this->tableFilters['filter_component']['interview_at'] = null;
+        $this->tableFilters['filter_component']['start_interview_at'] = null;
         $this->tableFilters['filter_component']['positions_id'] = null;
     }
 
