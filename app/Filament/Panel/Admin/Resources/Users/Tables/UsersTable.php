@@ -309,9 +309,6 @@ class UsersTable
                         }),
                     Action::make('interview')
                         ->label('นัดหมายวันสัมภาษณ์')
-                        // ->mountUsing(function (Schema $form, $record) {
-                        //     $form->fill($record->userHasoneWorkStatus->workStatusHasonePreEmp->attributesToArray());
-                        // })
                         ->hidden(
                             function ($record) {
                                 $work_state_detail = $record->userHasoneWorkStatus?->workStatusBelongToWorkStatusDefDetail;
@@ -341,7 +338,7 @@ class UsersTable
                             Fieldset::make('interview_fieldset')
                                 ->contained(false)
                                 ->hiddenLabel()
-                                ->columns(2)
+                                ->columns(['default' => 2])
                                 ->schema([
                                     DatePicker::make('interview_day')
                                         ->hiddenLabel()
@@ -355,9 +352,10 @@ class UsersTable
                                         ->prefix('วันที่')
                                         ->locale('th')
                                         ->buddhist()
-                                        ->columnSpan(2),
+                                        ->columnSpan(['default' => 2]),
                                     TimePicker::make('start_interview_time')
                                         ->hiddenLabel()
+                                        ->columnSpan(['default' => 1])
                                         ->live()
                                         ->prefix('เริ่ม')
                                         ->suffix('น.')
@@ -380,6 +378,7 @@ class UsersTable
 
                                     TimePicker::make('end_interview_time')
                                         ->hiddenLabel()
+                                        ->columnSpan(['default' => 1])
                                         ->live()
                                         ->prefix('ถึง')
                                         ->suffix('น.')
@@ -466,6 +465,10 @@ class UsersTable
                                     ? null
                                     : Carbon::parse($status->end_interview_at)->format('H:i'),
 
+                                'interview_duration' => blank($status?->end_interview_at)
+                                    ? null
+                                    : Carbon::parse($status->start_interview_at)->diffInMinutes($status?->end_interview_at),
+
                                 'interview_channel' => $status?->interview_channel,
                             ];
                         })
@@ -476,7 +479,7 @@ class UsersTable
 
                             $hasInterview = filled($record?->userHasoneWorkStatus?->workStatusHasonePreEmp->interview_at);
                             $interviewService = new InterviewService();
-                            
+
                             if ($hasInterview) {
                                 $interviewService->update($record, $data);
                             } else {
@@ -990,13 +993,24 @@ class UsersTable
                     ->url(fn($record) => 'tel:' . $record->userHasoneResume->tel),
             ])->space(1),
             Stack::make([
-                TextColumn::make('userHasoneWorkStatus.workStatusHasonePreEmp.interview_at')
-                    ->sortable()
-                    ->label('วันนัดสัมภาษณ์')
-                    ->buddhistDate('D, j M Y, G:i น.')
-                    ->prefix(new HtmlString('<div><B>วันที่นัดสัมภาษณ์ : </B></div>')),
                 TextColumn::make('userHasoneWorkStatus.workStatusHasonePreEmp.interview_channel')
-                    ->formatStateUsing(fn($state) => ucwords($state))
+                    ->formatStateUsing(fn($state) => new HtmlString("<B>นัดสัมภาษณ์</B> : (".ucwords($state).")")),
+                TextColumn::make('userHasoneWorkStatus.workStatusHasonePreEmp.start_interview_at')
+                    ->sortable()
+                    ->formatStateUsing(function($state, $record) {
+                        $date = Carbon::parse($state)->locale('th');
+                        $start = Carbon::parse($state)->format('h:i');
+                        $end = Carbon::parse($record->userHasoneWorkStatus?->workStatusHasonePreEmp->end_interview_at)->format('h:i');
+                        $year = $date->year + 543;
+                        return new HtmlString("
+                        {$date->translatedFormat('วัน D ที่ j M ')} {$year}<br>
+                        {$start} น. - {$end} น.
+                        ");
+                    })
+                    ->label('วันนัดสัมภาษณ์')
+                    //->buddhistDate('D, j M Y, G:i น.')
+                    
+                
             ])->visible(fn($record) => $record?->isPreEmployment()),
             Stack::make([
                 TextColumn::make('label_job_preferrnet')
