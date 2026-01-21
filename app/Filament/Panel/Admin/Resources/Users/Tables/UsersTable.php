@@ -108,7 +108,7 @@ class UsersTable
                     ->columnSpan(4)
                     ->columns(4)
                     ->schema([
-                    /*
+                        /*
                         Select::make('work_status_id')
                             ->label('เลือกสถานะ')
                             ->preload()
@@ -338,10 +338,10 @@ class UsersTable
                         ->modalWidth(Width::ExtraLarge)
                         ->closeModalByClickingAway(false)
                         ->schema([
-                            Fieldset::make('Label')
+                            Fieldset::make('interview_fieldset')
                                 ->contained(false)
                                 ->hiddenLabel()
-                                ->columns(3)
+                                ->columns(2)
                                 ->schema([
                                     DatePicker::make('interview_day')
                                         ->hiddenLabel()
@@ -356,22 +356,64 @@ class UsersTable
                                         ->locale('th')
                                         ->buddhist()
                                         ->columnSpan(2),
-                                    TimePicker::make('interview_time')
+                                    TimePicker::make('start_interview_time')
                                         ->hiddenLabel()
-                                        ->prefix('เวลา')
+                                        ->live()
+                                        ->prefix('เริ่ม')
                                         ->suffix('น.')
-                                        ->native(false)
                                         ->required()
                                         ->seconds(false)
-                                        ->validationMessages(['required' => 'กรุณาเลือกเวลานัดสัมภาษณ์'])
-                                        ->placeholder('hh:mm')
                                         ->minutesStep(5)
-                                        ->columns(1),
+                                        ->afterStateUpdated(function ($get, $set, $state) {
+                                            $duration = $get('interview_duration');
+
+                                            if (blank($state) || blank($duration)) {
+                                                return;
+                                            }
+
+                                            $end = Carbon::createFromFormat('H:i', $state)
+                                                ->addMinutes((int) $duration)
+                                                ->format('H:i');
+
+                                            $set('end_interview_time', $end);
+                                        }),
+
+                                    TimePicker::make('end_interview_time')
+                                        ->hiddenLabel()
+                                        ->live()
+                                        ->prefix('ถึง')
+                                        ->suffix('น.')
+                                        ->required()
+                                        ->seconds(false)
+                                        ->minutesStep(5)
+                                        ->afterStateUpdated(function ($get, $set, $state) {
+                                            $start = $get('start_interview_time');
+
+                                            if (blank($start) || blank($state)) {
+                                                return;
+                                            }
+
+                                            $minutes = Carbon::createFromFormat('H:i', $start)
+                                                ->diffInMinutes(
+                                                    Carbon::createFromFormat('H:i', $state),
+                                                    false
+                                                );
+
+                                            // กันกรณีเวลาย้อน
+                                            if ($minutes <= 0) {
+                                                $set('interview_duration', null);
+                                                return;
+                                            }
+
+                                            $set('interview_duration', $minutes);
+                                        }),
+
                                     Select::make('interview_duration')
+                                        ->live()
+                                        ->disabled(fn($get) => blank($get('start_interview_time')))
                                         ->label('ระยะเวลาการสัมภาษณ์')
                                         ->required()
                                         ->columnSpanFull()
-                                        ->validationMessages(['required' => 'กรุณาระบุระยะเวลาในการสัมภาษณ์'])
                                         ->options([
                                             15 => '15 นาที',
                                             30 => '30 นาที',
@@ -381,7 +423,20 @@ class UsersTable
                                             90 => '1 ชั่วโมง 30 นาที',
                                             105 => '1 ชั่วโมง 45 นาที',
                                             120 => '2 ชั่วโมง',
-                                        ]),
+                                        ])
+                                        ->afterStateUpdated(function ($get, $set, $state) {
+                                            $start = $get('start_interview_time');
+
+                                            if (blank($start) || blank($state)) {
+                                                return;
+                                            }
+
+                                            $end = Carbon::createFromFormat('H:i', $start)
+                                                ->addMinutes((int) $state)
+                                                ->format('H:i');
+
+                                            $set('end_interview_time', $end);
+                                        }),
                                     Radio::make('interview_channel')
                                         ->required()
                                         ->columnSpanFull()
@@ -395,19 +450,33 @@ class UsersTable
 
                                 ])
                         ])
-                        ->fillForm(function($record) {
-                            $state = $record->userHasoneWorkStatus->workStatusHasonePreEmp;
-                            return[
-                                'interview_day' => Carbon::parse($state->interview_at)->format('Y-m-d'),
-                                'interview_time' => Carbon::parse($state->interview_at)->format('h:i'),
-                                'interview_channel' => $state->interview_channel,
+                        ->fillForm(function ($record) {
+                            $status = $record->userHasoneWorkStatus->workStatusHasonePreEmp;
+
+                            return [
+                                'interview_day' => blank($status?->start_interview_at)
+                                    ? null
+                                    : Carbon::parse($status->start_interview_at)->format('Y-m-d'),
+
+                                'start_interview_time' => blank($status?->start_interview_at)
+                                    ? null
+                                    : Carbon::parse($status->start_interview_at)->format('H:i'),
+
+                                'end_interview_time' => blank($status?->end_interview_at)
+                                    ? null
+                                    : Carbon::parse($status->end_interview_at)->format('H:i'),
+
+                                'interview_channel' => $status?->interview_channel,
                             ];
                         })
+
                         ->action(function ($record, array $data) {
-                            $data['interview_at'] = "{$data['interview_day']} {$data['interview_time']}";
+                            $data['start_interview_at'] = "{$data['interview_day']} {$data['start_interview_time']}";
+                            $data['end_interview_at'] = "{$data['interview_day']} {$data['end_interview_time']}";
 
                             $hasInterview = filled($record?->userHasoneWorkStatus?->workStatusHasonePreEmp->interview_at);
                             $interviewService = new InterviewService();
+                            
                             if ($hasInterview) {
                                 $interviewService->update($record, $data);
                             } else {

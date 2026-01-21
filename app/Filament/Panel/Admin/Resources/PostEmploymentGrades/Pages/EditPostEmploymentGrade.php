@@ -19,37 +19,37 @@ class EditPostEmploymentGrade extends EditRecord
         ];
     }
 
-    protected function fillForm(): void
-    {
-        // ดึงข้อมูลทั้งหมดจาก DB
-        $grades = PostEmploymentGrade::query()
-            ->orderBy('grade')
-            ->get();
+    // protected function fillForm(): void
+    // {
+    //     // ดึงข้อมูลทั้งหมดจาก DB
+    //     $grades = PostEmploymentGrade::query()
+    //         ->orderBy('grade')
+    //         ->get();
 
-        // แปลงให้อยู่รูปแบบที่ Repeater ต้องการ
-        $data = [
-            'grade_emp' => $grades->map(fn($g) => [
-                'grade'   => $g->grade,
-                'name_th' => $g->name_th,
-                'name_en' => $g->name_en,
-            ])->toArray(),
-        ];
+    //     // แปลงให้อยู่รูปแบบที่ Repeater ต้องการ
+    //     $data = [
+    //         'grade_emp' => $grades->map(fn($g) => [
+    //             'grade'   => $g->grade,
+    //             'name_th' => $g->name_th,
+    //             'name_en' => $g->name_en,
+    //         ])->toArray(),
+    //     ];
 
-        // fill ลงฟอร์ม
-        $this->form->fill($data);
-    }
+    //     // fill ลงฟอร์ม
+    //     $this->form->fill($data);
+    // }
 
-    protected function handleRecordUpdate(Model $record, array $data): Model
-    {
-        foreach ($data['grade_emp'] as $grade) {
-            PostEmploymentGrade::updateOrCreate(
-                ['grade' => $grade['grade'] ?? null],
-                $grade
-            );
-        }
+    // protected function handleRecordUpdate(Model $record, array $data): Model
+    // {
+    //     foreach ($data['grade_emp'] as $grade) {
+    //         PostEmploymentGrade::updateOrCreate(
+    //             ['grade' => $grade['grade'] ?? null],
+    //             $grade
+    //         );
+    //     }
 
-        return $record; // Filament ต้องการ Model กลับ
-    }
+    //     return $record; // Filament ต้องการ Model กลับ
+    // }
 
     protected function getRedirectUrl(): string
     {

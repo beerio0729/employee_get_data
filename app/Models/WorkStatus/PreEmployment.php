@@ -15,13 +15,15 @@ class PreEmployment extends Model
         'interview_channel', //ช่องทางการสัมภาษณ์
         'google_calendar_id',
         'applied_at',     // วันที่สมัคร
-        'interview_at',   // วันสัมภาษณ์ (ถ้ามี)
+        'start_interview_at', 
+        'end_interview_time',  // วันสัมภาษณ์ (ถ้ามี)
         'result_at',      // วันที่สรุปผล (ถ้ามี)
     ];
 
     protected $casts = [
         'applied_at'   => 'datetime',  // วันที่สมัคร
-        'interview_at' => 'datetime',  // วันสัมภาษณ์
+        'start_interview_at' => 'datetime',
+        'end_interview_time' => 'datetime',
         'result_at'    => 'datetime',  // วันที่สรุปผล
     ];
 }

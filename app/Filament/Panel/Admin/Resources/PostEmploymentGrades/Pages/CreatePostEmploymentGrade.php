@@ -11,14 +11,14 @@ class CreatePostEmploymentGrade extends CreateRecord
 {
     protected static string $resource = PostEmploymentGradeResource::class;
 
-    protected function handleRecordCreation(array $data): Model
-    {
-        foreach ($data['grade_emp'] as $grade) {
-            $record = PostEmploymentGrade::create($grade);
-        }
+    // protected function handleRecordCreation(array $data): Model
+    // {
+    //     foreach ($data['grade_emp'] as $grade) {
+    //         $record = PostEmploymentGrade::create($grade);
+    //     }
 
-        return $record;
-    }
+    //     return $record;
+    // }
 
     protected function getRedirectUrl(): string
     {

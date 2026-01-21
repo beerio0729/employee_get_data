@@ -31,7 +31,7 @@ class GoogleCalendarService
         try {
             $duration = $data['duration'] ?? 30; // ถ้าไม่ส่งมา ให้ Default ที่ 30 นาที
             $start = Carbon::parse($data['start_time'])->format('Y-m-d\TH:i:s');
-            $end = Carbon::parse($data['start_time'])->addMinutes($duration)->format('Y-m-d\TH:i:s');
+            $end = Carbon::parse($data['end_time'])->format('Y-m-d\TH:i:s');
 
             $attendees = [];
             if (filled($data['email'])) {
@@ -104,7 +104,7 @@ class GoogleCalendarService
         
         $duration = $data['duration'] ?? 30; // ถ้าไม่ส่งมา ให้ Default ที่ 30 นาที
         $start = Carbon::parse($data['start_time'])->format('Y-m-d\TH:i:s');
-        $end = Carbon::parse($data['start_time'])->addMinutes($duration)->format('Y-m-d\TH:i:s');
+        $end = Carbon::parse($data['end_time'])->format('Y-m-d\TH:i:s');
         // แก้ไข: ส่งแค่ $eventId ตามโครงสร้างฟังก์ชัน getEvent ด้านบน
         $event = $this->getEvent($eventId);
 

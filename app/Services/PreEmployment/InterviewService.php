@@ -15,13 +15,13 @@ class InterviewService
     {
         $view_notification = 'view_interview_' . now()->timestamp;
         $workStatus = $record->userHasoneWorkStatus()->first();
-        $interview_date = Carbon::parse($data['interview_at'])->locale('th');
-        
+        $interview_date = Carbon::parse($data['start_interview_at'])->locale('th');
+
         if ($data['interview_channel'] === 'online') {
             $calendar = new GoogleCalendarService();
             $calendar_response = $calendar->createEvent([
-                'start_time' => $data['interview_at'],
-                'duration' => $data['interview_duration'], //ระยะเวลาการประชุม
+                'start_time' => $data['start_interview_at'],
+                'end_time' => $data['end_interview_at'],
                 'email' => $record->email,
                 'title' => "นัดประชุมคุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th}",
             ]);
@@ -34,7 +34,8 @@ class InterviewService
         $workStatus->workStatusHasonePreEmp()->update([
             'google_calendar_id' => $calendar_response?->id ?? null,
             'interview_channel' => $data['interview_channel'],
-            'interview_at' => $data['interview_at'],
+            'start_interview_at' => $data['start_interview_at'],
+            'end_interview_at' => $data['end_interview_at'],
         ]);
         $history = $record->userHasoneHistory();
         $history->updateOrCreate(
@@ -45,7 +46,7 @@ class InterviewService
                     [
                         'event' => 'interview scheduled',
                         'description' => "นัดหมายวัน-เวลานัดสัมภาษณ์ผ่านช่องทาง \"{$data['interview_channel']}\"",
-                        'value' => $data['interview_at'],
+                        'value' => $data['start_interview_at'],
                         'date' => carbon::now()->format('y-m-d H:i:s'),
                     ]
                 ],
@@ -90,9 +91,11 @@ class InterviewService
     {
         $view_notification = 'view_interview_' . now()->timestamp;
         $workStatus = $record->userHasoneWorkStatus()->first();
-        $interview_date = $workStatus?->workStatusHasonePreEmp?->interview_at;
-        $interview_date = Carbon::parse($interview_date)->locale('th');
+        
+        $start_interview_date = $workStatus?->workStatusHasonePreEmp?->start_interview_at;
+        $interview_date = Carbon::parse($start_interview_date)->locale('th');
         $calendar_id = $record?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id;
+        
         $calendar = new GoogleCalendarService();
         $calendar->deleteEvent($calendar_id);
         $workStatus->update([
@@ -100,7 +103,8 @@ class InterviewService
         ]);
         $workStatus->workStatusHasonePreEmp()->update([
             'interview_channel' => null,
-            'interview_at' => null,
+            'start_interview_at' => null,
+            'end_interview_at' => null,
             'google_calendar_id' => null
         ]);
 
@@ -160,12 +164,13 @@ class InterviewService
         $view_notification = 'view_interview_' . now()->timestamp;
         $workStatus = $record->userHasoneWorkStatus()->first();
         $google_calendar_id = $workStatus->workStatusHasonePreEmp->google_calendar_id;
-        $interview_date = Carbon::parse($data['interview_at'])->locale('th');
+        $interview_date = Carbon::parse($data['start_interview_at'])->locale('th');
+
         if ($data['interview_channel'] === 'online') {
             $calendar = new GoogleCalendarService();
             $calendar->updateEvent($google_calendar_id, [
-                'start_time' => $data['interview_at'],
-                'duration' => $data['interview_duration'], //ระยะเวลาการประชุม
+                'start_time' => $data['start_interview_at'],
+                'end_time' => $data['end_interview_at'],
                 'email' => $record->email,
                 'title' => "นัดประชุมคุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th}",
             ]);
@@ -173,7 +178,8 @@ class InterviewService
 
         $workStatus->workStatusHasonePreEmp()->update([
             'interview_channel' => $data['interview_channel'],
-            'interview_at' => $data['interview_at'],
+            'start_interview_at' => $data['start_interview_at'],
+            'end_interview_at' => $data['end_interview_at'],
         ]);
 
         $history = $record->userHasoneHistory();
@@ -185,7 +191,7 @@ class InterviewService
                     [
                         'event' => 'update interview scheduled',
                         'description' => "แก้ไข้วัน-เวลานัดสัมภาษณ์ผ่านช่องทาง \"{$data['interview_channel']}\"",
-                        'value' => $data['interview_at'],
+                        'value' => $data['start_interview_at'],
                         'date' => carbon::now()->format('y-m-d H:i:s'),
                     ]
                 ],
@@ -225,9 +231,9 @@ class InterviewService
                 . "ขออภัยมา ณ ที่นี้"
         ]);
     }
-    
+
     /***********Helper Function************/
-    public function updateStatusId($status) :int
+    public function updateStatusId($status): int
     {
         return WorkStatusDefinationDetail::where('code', $status)->first()->id;
     }

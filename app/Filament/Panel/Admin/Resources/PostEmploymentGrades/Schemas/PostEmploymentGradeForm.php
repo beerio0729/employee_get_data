@@ -14,22 +14,13 @@ class PostEmploymentGradeForm
     {
         return $schema
             ->components([
-                Repeater::make('grade_emp')
-                    ->columnSpanFull()
-                    ->addActionLabel('เพิ่มข้อมูล')
-                    ->compact()
-                    ->hiddenLabel()
-                    ->table([
-                        TableColumn::make('ระดับ')->width('40px')->alignment(Alignment::Center)->wrapHeader(),
-                        TableColumn::make('ชื่อระดับพนักงาน (TH)')->alignment(Alignment::Center),
-                        TableColumn::make('ชื่อระดับพนักงาน (EN)')->alignment(Alignment::Center),
-                    ])
-                    ->schema([
-                        TextInput::make('grade')
-                            ->extraAlpineAttributes(['style' => 'text-align: center']),
-                        TextInput::make('name_th')->extraAlpineAttributes(['style' => 'text-align: center']),
-                        TextInput::make('name_en')->extraAlpineAttributes(['style' => 'text-align: center']),
-                    ])
-            ]);
+                TextInput::make('grade')
+                    ->label('ระดับ'),
+                TextInput::make('name_th')
+                    ->label('ชื่อระดับพนักงาน (TH)'),
+                TextInput::make('name_en')
+                    ->label('ชื่อระดับพนักงาน (EN)'),
+
+            ])->columns(3);
     }
 }
