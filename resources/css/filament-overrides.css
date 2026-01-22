@@ -218,6 +218,11 @@ select.fi-select-input {
 }
 
 /*********** Content ที่อยู่ใกล้ๆ label ของ from ลดความสูง*************/
-.fi-sc {
+/* .fi-sc.fi-inline.fi-align-end.fi-sc-has-gap.fi-sc-dense {
+    line-height: 0;
+} */
+
+.fi-sc.fi-align-end,
+.fi-sc.fi-align-right {
     line-height: 0;
 }

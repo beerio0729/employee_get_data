@@ -140,7 +140,8 @@ class UsersTable
                                     ->action(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at'])
                                         ? $livewire->tableFilters['filter_component']['start_interview_at'] = now()
                                         : $livewire->tableFilters['filter_component']['start_interview_at'] = null
-                                    ),
+                                    )
+                                    ->extraAttributes(['style' => 'line-height : 0']),
                             ])
                             ->label('ระบุเวลานัดสัมภาณษ์')
                             ->displayFormat('D, j M Y, H:i น.')
