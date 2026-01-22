@@ -130,15 +130,20 @@ class UsersTable
                             ),
                         DateTimePicker::make('start_interview_at')
                             ->afterLabel([
-                                Action::make('clear')
-                                    ->icon(Heroicon::ArrowPath)
-                                    ->color('danger')
-                                    ->action(function ($livewire) {
-                                        $livewire->tableFilters['filter_component']['start_interview_at'] = null;
-                                    }),
+                                Action::make('interview_field_action')
+                                    ->label(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at'])
+                                        ? 'Now' : 'Clear')
+                                    ->color(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at'])
+                                        ? 'success' : 'danger')
+                                    ->icon(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at'])
+                                        ? Heroicon::Calendar : Heroicon::ArrowPath)
+                                    ->action(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at'])
+                                        ? $livewire->tableFilters['filter_component']['start_interview_at'] = now()
+                                        : $livewire->tableFilters['filter_component']['start_interview_at'] = null
+                                    ),
                             ])
                             ->label('ระบุเวลานัดสัมภาณษ์')
-                            ->displayFormat('D, j M Y, G:i น.')
+                            ->displayFormat('D, j M Y, H:i น.')
                             ->locale('th')
                             ->buddhist()
                             ->minutesStep(5)
@@ -619,7 +624,7 @@ class UsersTable
                         ->label('ยกเลิกนัดสัมภาษณ์')
                         ->visible(fn($livewire) => (int) $livewire->tableFilters['filter_component']['status_detail_id'] === self::updateStatusId('interview_scheduled')) //3นัดสัมภาษณ์แล้ว
                         ->requiresConfirmation()
-                        ->color('danger')
+                        ->color(Color::Orange)
                         ->label('ยกเลิกนัดสัมภาษณ์')
                         ->modalHeading("ยกเลิกนัดสัมภาษณ์")
                         ->modalDescription("คุณต้องการยกเลิกนัดสัมภาษณ์ใช่หรือไม่")
