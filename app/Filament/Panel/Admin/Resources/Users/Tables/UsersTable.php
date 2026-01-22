@@ -131,7 +131,7 @@ class UsersTable
                             ),
                         DateTimePicker::make('start_interview_at')
                             ->afterLabel([
-                                Action::make('interview_field_action_now')
+                                Action::make('action_now')
                                     ->label('Now')
                                     ->color('success')
                                     ->icon(Heroicon::Calendar)
@@ -139,7 +139,7 @@ class UsersTable
                                         fn($livewire) => $livewire->tableFilters['filter_component']['start_interview_at'] = now()
                                     )
                                     ->extraAttributes(['style' => 'line-height : 0']),
-                                Action::make('interview_field_action_clear')
+                                Action::make('action_clear')
                                     ->hidden(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at']))
                                     ->label('Clear')
                                     ->color('danger')
@@ -149,7 +149,7 @@ class UsersTable
                                     )
                                     ->extraAttributes(['style' => 'line-height : 0']),
                             ])
-                            ->label('เวลาสัมภาณษ์ (00:00 - เวลาที่กรอง)')
+                            ->label('เวลาสัมภาณษ์')
                             ->displayFormat('D, j M Y, H:i:s น.')
                             ->locale('th')
                             ->buddhist()
