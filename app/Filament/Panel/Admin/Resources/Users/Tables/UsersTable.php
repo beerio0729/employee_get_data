@@ -2,6 +2,7 @@
 
 namespace App\Filament\Panel\Admin\Resources\Users\Tables;
 
+use Closure;
 use Carbon\Carbon;
 use App\Models\Role;
 use Filament\Tables\Table;
@@ -137,13 +138,14 @@ class UsersTable
                                         ? 'success' : 'danger')
                                     ->icon(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at'])
                                         ? Heroicon::Calendar : Heroicon::ArrowPath)
-                                    ->action(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at'])
-                                        ? $livewire->tableFilters['filter_component']['start_interview_at'] = now()
-                                        : $livewire->tableFilters['filter_component']['start_interview_at'] = null
+                                    ->action(
+                                        fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at'])
+                                            ? $livewire->tableFilters['filter_component']['start_interview_at'] = now()
+                                            : $livewire->tableFilters['filter_component']['start_interview_at'] = null
                                     )
                                     ->extraAttributes(['style' => 'line-height : 0']),
                             ])
-                            ->label('ระบุเวลานัดสัมภาณษ์')
+                            ->label('เวลาสัมภาณษ์ (00:00 - Now)')
                             ->displayFormat('D, j M Y, H:i น.')
                             ->locale('th')
                             ->buddhist()
@@ -955,9 +957,12 @@ class UsersTable
         return [
             DatePicker::make('interview_day')
                 ->hiddenLabel()
-                ->minDate(now())
+                ->minDate(today())
                 ->required()
-                ->validationMessages(['required' => 'กรุณาเลือกวันนัดสัมภาษณ์'])
+                ->validationMessages([
+                    'required' => 'กรุณาเลือกวันนัดสัมภาษณ์',
+                    'after_or_equal' => 'อย่าเลือกอดีด'
+                ])
                 ->native(false)
                 ->placeholder('DD MM YYYY')
                 ->displayFormat('d M Y')
@@ -974,7 +979,13 @@ class UsersTable
                 ->suffix(static::$isMobile ? null : 'น.')
                 ->required()
                 ->seconds(false)
-                ->minutesStep(5)
+                ->rules([
+                    fn(): Closure => function (string $attribute, $value, Closure $fail) {
+                        if ($value <= now()->format('H:i')) {
+                            $fail('ต้องเลือกเวลาในอนาคตเท่านั้น.');
+                        }
+                    },
+                ])
                 ->afterStateUpdated(function ($get, $set, $state) {
                     $duration = $get('interview_duration');
 
@@ -999,7 +1010,7 @@ class UsersTable
                 ->suffix(static::$isMobile ? null : 'น.')
                 ->required()
                 ->seconds(false)
-                ->minutesStep(5)
+                //->minutesStep(5)
                 ->afterStateUpdated(function ($get, $set, $state) {
                     $start = $get('start_interview_time');
 
