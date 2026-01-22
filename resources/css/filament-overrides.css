@@ -216,3 +216,8 @@ select.fi-select-input {
     font-weight: var(--font-weight-bold);
     color: var(--info-900);
 }
+
+/*********** Content ที่อยู่ใกล้ๆ label ของ from ลดความสูง*************/
+.fi-sc {
+    line-height: 0;
+}
