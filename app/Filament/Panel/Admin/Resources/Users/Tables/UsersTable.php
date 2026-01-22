@@ -975,14 +975,18 @@ class UsersTable
                 ->hiddenLabel()
                 ->columnSpan(['default' => 1])
                 ->live(onBlur: true)
+
                 ->prefix('เริ่ม')
                 ->suffix(static::$isMobile ? null : 'น.')
                 ->required()
                 ->seconds(false)
                 ->rules([
-                    fn(): Closure => function (string $attribute, $value, Closure $fail) {
-                        if ($value <= now()->format('H:i')) {
-                            $fail('ต้องเลือกเวลาในอนาคตเท่านั้น.');
+                    fn($get): Closure => function (string $attribute, $value, Closure $fail) use ($get) {
+
+                        if ($get('interview_day') === now()->format('Y-m-d')) {
+                            if ($value <= now()->format('H:i')) {
+                                $fail('ต้องเลือกเวลาในอนาคตเท่านั้น.');
+                            }
                         }
                     },
                 ])
