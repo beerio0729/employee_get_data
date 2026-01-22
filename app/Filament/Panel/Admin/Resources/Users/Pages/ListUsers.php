@@ -4,6 +4,7 @@ namespace App\Filament\Panel\Admin\Resources\Users\Pages;
 
 use Livewire\Component;
 use Filament\Actions\Action;
+use Illuminate\Support\Carbon;
 use App\Jobs\RefreshInterviewStatusJob;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
@@ -28,7 +29,7 @@ class ListUsers extends ListRecords
             Action::make('refresh_status_interview')
                 ->color('danger')
                 ->label('คัดกรองคนไม่มาสัมภาษณ์')
-                ->visible(fn($livewire) => (int) $livewire->tableFilters['filter_component']['status_detail_id'] === self::updateStatusId('interview_scheduled')) //นัดสัมภาษณ์แล้ว
+                ->visible(fn($livewire) => $livewire->activeTab === 'applicant')
                 ->action(function ($livewire) {
                     RefreshInterviewStatusJob::dispatch();
                     Notification::make()
@@ -57,13 +58,13 @@ class ListUsers extends ListRecords
     }
 
     public function getTabs(): array
-    {   
+    {
         $workSate = WorkStatusDefination::all();
 
         if ($workSate->count() === 1) {
             return [];
         }
-        
+
         return [
             'all' => Tab::make()
                 ->icon('heroicon-m-user-group')

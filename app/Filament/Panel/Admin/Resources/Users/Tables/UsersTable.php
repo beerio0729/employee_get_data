@@ -131,22 +131,26 @@ class UsersTable
                             ),
                         DateTimePicker::make('start_interview_at')
                             ->afterLabel([
-                                Action::make('interview_field_action')
-                                    ->label(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at'])
-                                        ? 'Now' : 'Clear')
-                                    ->color(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at'])
-                                        ? 'success' : 'danger')
-                                    ->icon(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at'])
-                                        ? Heroicon::Calendar : Heroicon::ArrowPath)
+                                Action::make('interview_field_action_now')
+                                    ->label('Now')
+                                    ->color('success')
+                                    ->icon(Heroicon::Calendar)
                                     ->action(
-                                        fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at'])
-                                            ? $livewire->tableFilters['filter_component']['start_interview_at'] = now()
-                                            : $livewire->tableFilters['filter_component']['start_interview_at'] = null
+                                        fn($livewire) => $livewire->tableFilters['filter_component']['start_interview_at'] = now()
+                                    )
+                                    ->extraAttributes(['style' => 'line-height : 0']),
+                                Action::make('interview_field_action_clear')
+                                    ->hidden(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at']))
+                                    ->label('Clear')
+                                    ->color('danger')
+                                    ->icon(Heroicon::ArrowPath)
+                                    ->action(
+                                        fn($livewire) => $livewire->tableFilters['filter_component']['start_interview_at'] = null
                                     )
                                     ->extraAttributes(['style' => 'line-height : 0']),
                             ])
-                            ->label('เวลาสัมภาณษ์ (00:00 - Now)')
-                            ->displayFormat('D, j M Y, H:i น.')
+                            ->label('เวลาสัมภาณษ์ (00:00 - เวลาที่กรอง)')
+                            ->displayFormat('D, j M Y, H:i:s น.')
                             ->locale('th')
                             ->buddhist()
                             ->minutesStep(5)
@@ -580,8 +584,8 @@ class UsersTable
                                 ]
                             )
                         )
-                        ->color('success')
-                        ->icon('heroicon-m-calendar')
+                        ->color(Color::Purple)
+                        ->icon(Heroicon::CalendarDateRange)
                         ->schema([
                             Repeater::make('multiform_interview')
                                 ->hiddenLabel()
@@ -625,7 +629,10 @@ class UsersTable
                         }),
                     BulkAction::make('cancel_interviewe')
                         ->label('ยกเลิกนัดสัมภาษณ์')
-                        ->visible(fn($livewire) => (int) $livewire->tableFilters['filter_component']['status_detail_id'] === self::updateStatusId('interview_scheduled')) //3นัดสัมภาษณ์แล้ว
+                        ->visible(
+                            fn($livewire) =>
+                            (int) $livewire->tableFilters['filter_component']['status_detail_id'] === self::updateStatusId('interview_scheduled')
+                        ) //3นัดสัมภาษณ์แล้ว
                         ->requiresConfirmation()
                         ->color(Color::Orange)
                         ->label('ยกเลิกนัดสัมภาษณ์')
@@ -644,9 +651,9 @@ class UsersTable
                         ->icon(Heroicon::ChatBubbleLeftRight)
                         ->visible(
                             fn($livewire) =>
-                            $livewire->tableFilters['filter_component']['status_detail_id'] === self::updateStatusId('interview_scheduled') // นัดสัมภาษณ์แล้ว
+                            (int)$livewire->tableFilters['filter_component']['status_detail_id'] === self::updateStatusId('interview_scheduled') // นัดสัมภาษณ์แล้ว
                         )
-                        ->label('มาสัมภาษณ์แล้ว')
+                        ->label('กำหนดสถานะเป็น "มาสัมภาษณ์แล้ว"')
                         ->action(function ($records) {
                             foreach ($records as $record) {
                                 $record->userHasoneWorkStatus->update([
@@ -672,7 +679,7 @@ class UsersTable
                         ->color('success'),
                     BulkAction::make('mark_as_waiting_approval')
                         ->icon(Heroicon::CheckCircle)
-                        ->label('รออนุมัติจ้างงาน')
+                        ->label('กำหนดสถานะเป็น "รออนุมัติจ้างงาน"')
                         ->visible(fn($livewire) => in_array(
                             (int) $livewire->tableFilters['filter_component']['status_detail_id'],
                             [
@@ -718,7 +725,7 @@ class UsersTable
                         ->color('success'),
                     BulkAction::make('mark_as_rejected')
                         ->icon(Heroicon::XCircle)
-                        ->label('ไม่ผ่านการคัดเลือก')
+                        ->label('กำหนดสถานะเป็น "ไม่ผ่านการคัดเลือก"')
                         ->visible(
                             fn($livewire) => in_array(
                                 (int) $livewire->tableFilters['filter_component']['status_detail_id'],
@@ -767,7 +774,7 @@ class UsersTable
                         ->color('danger'),
                     BulkAction::make('mark_as_waiting_compare')
                         ->icon(Heroicon::Users)
-                        ->label('รอเปรียบเทียบ')
+                        ->label('กำหนดสถานะเป็น "รอเปรียบเทียบ"')
                         ->visible(
                             fn($livewire) => in_array(
                                 (int) $livewire->tableFilters['filter_component']['status_detail_id'],
@@ -815,7 +822,7 @@ class UsersTable
                         ->color('warning'),
                     BulkAction::make('mark_as_substitute')
                         ->icon(Heroicon::ArrowPathRoundedSquare)
-                        ->label('สำรอง')
+                        ->label('กำหนดสถานะเป็น "สำรอง"')
                         ->visible(
                             fn($livewire) => in_array(
                                 (int) $livewire->tableFilters['filter_component']['status_detail_id'],

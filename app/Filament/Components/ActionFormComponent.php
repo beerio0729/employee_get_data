@@ -1495,7 +1495,7 @@ class ActionFormComponent
         return
             Action::make('employment')
             ->record(auth()->user())
-            ->visible(fn($record) => $record->userHasoneWorkStatus?->work_status_def_detail_id === $this->updateStatusId('waiting_approval'))
+            ->visible(fn($record) => $record->userHasoneWorkStatus?->work_status_def_detail_id >= $this->updateStatusId('waiting_approval'))
             ->label('สัญญาจ้างงาน')
             ->icon(new HtmlString($this->pdficon))
             ->button()
@@ -1509,7 +1509,7 @@ class ActionFormComponent
         return
             Action::make('non_disclosure')
             ->record(auth()->user())
-            ->visible(fn($record) => $record->userHasoneWorkStatus?->work_status_def_detail_id === $this->updateStatusId('waiting_approval'))
+            ->visible(fn($record) => $record->userHasoneWorkStatus?->work_status_def_detail_id >= $this->updateStatusId('waiting_approval'))
             ->label('สัญญาไม่เปิดเผยข้อมูลของบริษัท')
             ->icon(new HtmlString($this->pdficon))
             ->button()
