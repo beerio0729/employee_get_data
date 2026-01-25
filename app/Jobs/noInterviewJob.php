@@ -64,6 +64,7 @@ class noInterviewJob implements ShouldQueue
                     'interview_channel' => null,
                     'google_calendar_id' => null
                 ]);
+                
                 Notification::make() // ต้องรัน Queue
                     ->title('แจ้งวันนัดสัมภาษณ์')
                     ->body(
