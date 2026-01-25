@@ -39,7 +39,8 @@ class ListUsers extends ListRecords
                         ->success()
                         ->send();
                     $livewire->tableFilters['filter_component']['status_detail_id'] = WorkStatusDefinationDetail::statusId('no_interviewed');
-                    $livewire->tableFilters['filter_component']['start_interview_at'] = null;
+                    $livewire->tableFilters['filter_component']['start_filter'] = null;
+                    $livewire->tableFilters['filter_component']['end_filter'] = null;
                 }),
             Action::make('refresh_table')
                 ->color('warning')
@@ -104,7 +105,8 @@ class ListUsers extends ListRecords
         parent::updatedActiveTab();
 
         $this->tableFilters['filter_component']['status_detail_id'] = null;
-        $this->tableFilters['filter_component']['start_interview_at'] = null;
+        $this->tableFilters['filter_component']['start_filter'] = null;
+        $this->tableFilters['filter_component']['end_filter'] = null;
         $this->tableFilters['filter_component']['positions_id'] = null;
     }
 

@@ -10,6 +10,7 @@ use App\Jobs\BulkInterview;
 use Detection\MobileDetect;
 use Filament\Actions\Action;
 use Filament\Schemas\Schema;
+use function Termwind\style;
 use App\Models\Document\Idcard;
 use Filament\Actions\BulkAction;
 use Filament\Actions\ViewAction;
@@ -21,6 +22,7 @@ use Illuminate\Support\HtmlString;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Radio;
 use Filament\Support\Icons\Heroicon;
+use Nette\Schema\Elements\Structure;
 use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\Select;
 use Filament\Support\Enums\Alignment;
@@ -49,10 +51,9 @@ use App\Services\PreEmployment\InterviewService;
 use App\Models\Organization\OrganizationStructure;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Forms\Components\Repeater\TableColumn;
+
 use App\Models\WorkStatusDefination\WorkStatusDefination;
 use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
-
-use function Termwind\style;
 
 class UsersTable
 {
@@ -124,38 +125,15 @@ class UsersTable
                                     return WorkStatusDefinationDetail::where('work_status_def_id', $work_status_id)->pluck('name_th', 'id');
                                 }
                             )
-                            ->afterStateUpdated(
-                                fn($state, $set) => $state === WorkStatusDefinationDetail::statusId('interview_scheduled') //3นัดสัมภาษณ์แล้ว
-                                    ? $set('start_interview_at', now())
-                                    : $set('start_interview_at', null)
-                            ),
-                        DateTimePicker::make('start_interview_at')
-                            ->afterLabel([
-                                Action::make('action_now')
-                                    ->label('Now')
-                                    ->color('success')
-                                    ->icon(Heroicon::Calendar)
-                                    ->action(
-                                        fn($livewire) => $livewire->tableFilters['filter_component']['start_interview_at'] = now()
-                                    )
-                                    ->extraAttributes(['style' => 'line-height : 0']),
-                                Action::make('action_clear')
-                                    ->hidden(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_interview_at']))
-                                    ->label('Clear')
-                                    ->color('danger')
-                                    ->icon(Heroicon::ArrowPath)
-                                    ->action(
-                                        fn($livewire) => $livewire->tableFilters['filter_component']['start_interview_at'] = null
-                                    )
-                                    ->extraAttributes(['style' => 'line-height : 0']),
-                            ])
-                            ->label('เวลาสัมภาณษ์')
-                            ->displayFormat('D, j M Y, H:i:s น.')
-                            ->locale('th')
-                            ->buddhist()
-                            ->minutesStep(5)
-                            ->visible(fn($get) => $get('status_detail_id') === WorkStatusDefinationDetail::statusId('interview_scheduled')) //3นัดสัมภาษณ์แล้ว)
-                            ->seconds(false),
+                            ->afterStateUpdated(function ($state, $set) {
+                                if ($state === WorkStatusDefinationDetail::statusId('interview_scheduled')) {
+                                    $set('start_filter', now()->startOfDay());
+                                    $set('end_filter', now());
+                                } else {
+                                    $set('start_filter', null);
+                                    $set('end_filter', null);
+                                }
+                            }),
                         Select::make('positions_id')
                             ->label('เลือกตำแหน่งที่สมัคร')
                             ->preload()
@@ -168,6 +146,61 @@ class UsersTable
                                 $org_name = OrganizationStructure::where('organization_level_id', $level_id)->pluck('name_th', 'id');
                                 return $org_name;
                             }),
+                        DateTimePicker::make('start_filter')
+                            ->afterLabel([
+                                Action::make('action_now')
+                                    ->label('Now')
+                                    ->color('success')
+                                    ->icon(Heroicon::Calendar)
+                                    ->action(
+                                        fn($livewire) => $livewire->tableFilters['filter_component']['start_filter'] = now()
+                                    )
+                                    ->extraAttributes(['style' => 'line-height : 0']),
+                                Action::make('action_clear')
+                                    ->hidden(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_filter']))
+                                    ->label('Clear')
+                                    ->color('danger')
+                                    ->icon(Heroicon::ArrowPath)
+                                    ->action(
+                                        fn($livewire) => $livewire->tableFilters['filter_component']['start_filter'] = null
+                                    )
+                                    ->extraAttributes(['style' => 'line-height : 0']),
+                            ])
+                            ->label('ตั้งแต่')
+                            ->displayFormat('D, j M Y, H:i น.')
+                            ->locale('th')
+                            ->buddhist()
+                            //->minutesStep(5)
+                            // ->visible(fn($get) => $get('status_detail_id') === WorkStatusDefinationDetail::statusId('interview_scheduled')) //3นัดสัมภาษณ์แล้ว)
+                            ->seconds(false),
+                        DateTimePicker::make('end_filter')
+                            ->afterLabel([
+                                Action::make('action_now')
+                                    ->label('Now')
+                                    ->color('success')
+                                    ->icon(Heroicon::Calendar)
+                                    ->action(
+                                        fn($livewire) => $livewire->tableFilters['filter_component']['end_filter'] = now()
+                                    )
+                                    ->extraAttributes(['style' => 'line-height : 0']),
+                                Action::make('action_clear')
+                                    ->hidden(fn($livewire) => blank($livewire->tableFilters['filter_component']['end_filter']))
+                                    ->label('Clear')
+                                    ->color('danger')
+                                    ->icon(Heroicon::ArrowPath)
+                                    ->action(
+                                        fn($livewire) => $livewire->tableFilters['filter_component']['end_filter'] = null
+                                    )
+                                    ->extraAttributes(['style' => 'line-height : 0']),
+                            ])
+                            ->label('ถึง')
+                            ->displayFormat('D, j M Y, H:i น.')
+                            ->locale('th')
+                            ->buddhist()
+                            //->minutesStep(5)
+                            // ->visible(fn($get) => $get('status_detail_id') === WorkStatusDefinationDetail::statusId('interview_scheduled')) //3นัดสัมภาษณ์แล้ว)
+                            ->seconds(false),
+
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -175,19 +208,6 @@ class UsersTable
                                 $data['status_detail_id'],
                                 function ($query) use ($data) {
                                     $query->whereRelation('userHasoneWorkStatus.workStatusBelongToWorkStatusDefDetail', 'id', $data['status_detail_id']);
-                                }
-                            )
-                            ->when(
-                                $data['start_interview_at'],
-                                function (Builder $query, $value) {
-                                    $carbonValue = Carbon::parse($value);
-                                    $date = $carbonValue->toDateString();   // YYYY-MM-DD
-                                    $time = $carbonValue->format('H:i');   // HH:MM
-
-                                    $query->whereHas('userHasoneWorkStatus.workStatusHasonePreEmp', function (Builder $q) use ($date, $time) {
-                                        $q->whereDate('start_interview_at', $date)
-                                            ->whereTime('start_interview_at', '<=', $time);
-                                    });
                                 }
                             )
                             ->when(
@@ -205,6 +225,27 @@ class UsersTable
                                     );
                                 }
                             )
+                            ->when(
+                                $data['start_filter'],
+                                function (Builder $query, $value) {
+                                    $date = Carbon::parse($value);
+
+                                    $query->whereHas('userHasoneWorkStatus.workStatusHasonePreEmp', function (Builder $q) use ($date) {
+                                        $q->where('start_interview_at', '>=', $date);
+                                    });
+                                }
+                            )
+                            ->when(
+                                $data['end_filter'],
+                                function (Builder $query, $value) {
+                                    $date = Carbon::parse($value);
+
+                                    $query->whereHas('userHasoneWorkStatus.workStatusHasonePreEmp', function (Builder $q) use ($date) {
+                                        $q->where('start_interview_at', '<=', $date);
+                                    });
+                                }
+                            )
+
                         ;
                     })
             ], layout: FiltersLayout::AboveContent)
@@ -919,7 +960,7 @@ class UsersTable
                     ->formatStateUsing(function ($state, $record) {
                         $date = Carbon::parse($state)->locale('th');
                         $start = Carbon::parse($state)->format('H:i');
-                        $end = Carbon::parse($record->userHasoneWorkStatus?->workStatusHasonePreEmp->end_interview_at)->format('h:i');
+                        $end = Carbon::parse($record->userHasoneWorkStatus?->workStatusHasonePreEmp->end_interview_at)->format('H:i');
                         $year = $date->year + 543;
                         return new HtmlString("
                         {$date->translatedFormat('วัน D ที่ j M ')} {$year}<br>
@@ -1171,6 +1212,4 @@ class UsersTable
 
         return $fill;
     }
-
-    
 }

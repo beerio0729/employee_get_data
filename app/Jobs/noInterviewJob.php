@@ -25,7 +25,7 @@ class noInterviewJob implements ShouldQueue
                 });
         })
             ->each(function ($q) {
-
+                dump($q);
                 $workStatus = $q->userHasoneWorkStatus;
                 $preEmp = $workStatus?->workStatusHasonePreEmp;
                 $dt = Carbon::parse($preEmp?->start_interview_at)->locale('th');
