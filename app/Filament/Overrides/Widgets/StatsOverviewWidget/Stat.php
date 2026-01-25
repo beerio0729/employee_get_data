@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Overrides\Filament\Widgets\StatsOverviewWidget;
+namespace App\Filament\Overrides\Widgets\StatsOverviewWidget;
 
 use Filament\Widgets\StatsOverviewWidget\Stat as BaseStat;
 

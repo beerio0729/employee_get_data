@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Filament\Overrides\Filament\Panel;
+namespace App\Filament\Overrides\Panel;
 
 use Closure;
 use Filament\Panel;
 use Filament\Support\Enums\Width;
 
-class OverridePanel extends Panel
+class OverridePanel extends Panel //ที่ต้องทำเพราะ maxContentWidth มันใส่ function ไม่ได้ เลยต้องมา override
 {
     protected ?Closure $dynamicMaxContentWidth = null;
 

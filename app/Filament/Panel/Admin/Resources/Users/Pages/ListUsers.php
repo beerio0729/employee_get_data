@@ -2,14 +2,14 @@
 
 namespace App\Filament\Panel\Admin\Resources\Users\Pages;
 
-use Livewire\Component;
+use App\Jobs\noInterviewJob;
 use Filament\Actions\Action;
-use Illuminate\Support\Carbon;
-use App\Jobs\RefreshInterviewStatusJob;
+use Illuminate\Support\HtmlString;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Support\Htmlable;
 use App\Models\WorkStatusDefination\WorkStatusDefination;
 use App\Filament\Panel\Admin\Resources\Users\UserResource;
 use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
@@ -26,17 +26,19 @@ class ListUsers extends ListRecords
     {
         return [
             //CreateAction::make(),
-            Action::make('refresh_status_interview')
+            Action::make('no_interview_action')
                 ->color('danger')
+                ->tooltip(new HtmlString('หากกดปุ่มนี้ คนที่วันสัมภาษณ์เลยเวลาปัจจุบันไปแล้ว หากไม่ได้รับสถานะว่า "มาสัมภาษณ์แล้ว" 
+                จะได้รับสถานะเป็น<br><br><B>"ไม่มาสัมภาษณ์"</B><br><br>*โปรดระมัดระวังในการใช้ปุ่มนี้โดยที่ต้องมั่นใจว่า คนที่มาสัมภาษณ์ตามเวลา ได้รับสถานะว่า "สัมภาษณ์แล้ว" ครบทุกคน'))
                 ->label('คัดกรองคนไม่มาสัมภาษณ์')
                 ->visible(fn($livewire) => $livewire->activeTab === 'applicant')
                 ->action(function ($livewire) {
-                    RefreshInterviewStatusJob::dispatch();
+                    noInterviewJob::dispatch();
                     Notification::make()
                         ->title("คัดกรองคนไม่มาสัมภาษณ์เรียบร้อยแล้ว")
                         ->success()
                         ->send();
-                    $livewire->tableFilters['filter_component']['status_detail_id'] = self::updateStatusId('no_interviewed');
+                    $livewire->tableFilters['filter_component']['status_detail_id'] = WorkStatusDefinationDetail::statusId('no_interviewed');
                     $livewire->tableFilters['filter_component']['start_interview_at'] = null;
                 }),
             Action::make('refresh_table')
@@ -106,8 +108,10 @@ class ListUsers extends ListRecords
         $this->tableFilters['filter_component']['positions_id'] = null;
     }
 
-    public static function updateStatusId($status): int
+    public function getTitle(): string | Htmlable
     {
-        return WorkStatusDefinationDetail::where('code', $status)->first()->id;
+        return $this->activeTab === 'all'
+            ? 'บุคคลากรทั้งหมด'
+            : WorkStatusDefination::where('code', $this->activeTab)->value('name_th');
     }
 }

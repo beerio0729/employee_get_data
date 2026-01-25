@@ -2,7 +2,6 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Overrides\Filament\Panel\OverridePanel;
 use Filament\Panel;
 use Detection\MobileDetect;
 use Filament\PanelProvider;
@@ -17,6 +16,7 @@ use App\Filament\Pages\Auth\Register;
 use Illuminate\Support\Facades\Cache;
 use Filament\Http\Middleware\Authenticate;
 use App\Models\Organization\OrganizationLevel;
+use App\Filament\Overrides\Panel\OverridePanel;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Filament\Http\Middleware\AuthenticateSession;

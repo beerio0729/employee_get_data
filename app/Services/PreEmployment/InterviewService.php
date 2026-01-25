@@ -28,7 +28,7 @@ class InterviewService
         }
 
         $workStatus->update([
-            'work_status_def_detail_id' => $this->updateStatusId('interview_scheduled'), //3
+            'work_status_def_detail_id' => WorkStatusDefinationDetail::statusId('interview_scheduled'), //3
         ]);
 
         $workStatus->workStatusHasonePreEmp()->update([
@@ -99,7 +99,7 @@ class InterviewService
         $calendar = new GoogleCalendarService();
         $calendar->deleteEvent($calendar_id);
         $workStatus->update([
-            'work_status_def_detail_id' => $this->updateStatusId('doc_passed'),
+            'work_status_def_detail_id' => WorkStatusDefinationDetail::statusId('doc_passed'),
         ]);
         $workStatus->workStatusHasonePreEmp()->update([
             'interview_channel' => null,
@@ -232,9 +232,4 @@ class InterviewService
         ]);
     }
 
-    /***********Helper Function************/
-    public function updateStatusId($status): int
-    {
-        return WorkStatusDefinationDetail::where('code', $status)->first()->id;
-    }
 }

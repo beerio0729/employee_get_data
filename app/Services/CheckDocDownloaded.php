@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-class checkDocDownloaded {
+class CheckDocDownloaded {
     public static function check($record) :array
     {
         // ดึง prefix จากบัตรประชาชน (ถ้ามี)

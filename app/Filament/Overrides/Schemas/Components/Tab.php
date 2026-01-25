@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Overrides\Filament\Schemas\Components;
+namespace App\Filament\Overrides\Schemas\Components;
 
 use Closure;
 

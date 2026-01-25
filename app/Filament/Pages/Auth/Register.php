@@ -43,7 +43,7 @@ class Register extends BaseRegister
         $user = parent::handleRegistration($data);
         DB::transaction(function () use ($user) {
             $workStatus = $user->userHasoneWorkStatus()->create([
-                'work_status_def_detail_id' => WorkStatusDefinationDetail::where('code', 'new_applicant')->first()->id,
+                'work_status_def_detail_id' => WorkStatusDefinationDetail::statusId('new_applicant'),
             ]);
 
             $workStatus->workStatusHasonePreEmp()->create([

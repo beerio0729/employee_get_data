@@ -13,9 +13,9 @@ use Filament\Support\Facades\FilamentAsset;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Support\Enums\IconSize as BaseIconSize;
-use App\Filament\Overrides\Filament\Schemas\Components\Tab as MyTab;
-use App\Filament\Overrides\Filament\Support\Enums\IconSize as MyIconSize;
-use App\Filament\Overrides\Filament\Widgets\StatsOverviewWidget\Stat as MyStat;
+use App\Filament\Overrides\Schemas\Components\Tab as MyTab;
+use App\Filament\Overrides\Support\Enums\IconSize as MyIconSize;
+use App\Filament\Overrides\Widgets\StatsOverviewWidget\Stat as MyStat;
 
 class AppServiceProvider extends ServiceProvider
 {

@@ -16,14 +16,14 @@ class PreEmployment extends Model
         'google_calendar_id',
         'applied_at',     // วันที่สมัคร
         'start_interview_at', 
-        'end_interview_time',  // วันสัมภาษณ์ (ถ้ามี)
+        'end_interview_at',  // วันสัมภาษณ์ (ถ้ามี)
         'result_at',      // วันที่สรุปผล (ถ้ามี)
     ];
 
     protected $casts = [
         'applied_at'   => 'datetime',  // วันที่สมัคร
         'start_interview_at' => 'datetime',
-        'end_interview_time' => 'datetime',
+        'end_interview_at' => 'datetime',
         'result_at'    => 'datetime',  // วันที่สรุปผล
     ];
 }

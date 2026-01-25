@@ -10,30 +10,31 @@ use App\Services\LineSendMessageService;
 use Filament\Notifications\Notification;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 
-class RefreshInterviewStatusJob implements ShouldQueue
+class noInterviewJob implements ShouldQueue
 {
     use Queueable;
     public function handle(): void
     {
         User::whereHas('userHasoneWorkStatus', function ($q) {
-            $q->where('work_status_def_detail_id', 3) // นัดสัมภาษณ์แล้ว
+            $q->where('work_status_def_detail_id', WorkStatusDefinationDetail::statusId('interview_scheduled')) // นัดสัมภาษณ์แล้ว
                 ->whereHas('workStatusHasonePreEmp', function ($q2) {
-                    $q2->whereNotNull('interview_at')
-                        ->where('interview_at', '<', now());
+                    $q2->whereNotNull('start_interview_at')
+                        ->where('start_interview_at', '<', now());
                 });
         })
             ->each(function ($q) {
 
                 $workStatus = $q->userHasoneWorkStatus;
                 $preEmp = $workStatus?->workStatusHasonePreEmp;
-                $dt = Carbon::parse($preEmp?->interview_at)->locale('th');
+                $dt = Carbon::parse($preEmp?->start_interview_at)->locale('th');
                 $calendar_id = $q?->userHasoneWorkStatus?->workStatusHasonePreEmp?->google_calendar_id;
                 $calendar = new GoogleCalendarService();
                 $calendar->deleteEvent($calendar_id);
                 // อัปเดตสถานะ → ไม่มาสัมภาษณ์
                 $workStatus->update([
-                    'work_status_def_detail_id' => 5,
+                    'work_status_def_detail_id' => WorkStatusDefinationDetail::statusId('no_interviewed'),
                 ]);
 
                 $history = $q->userHasoneHistory();
@@ -58,7 +59,8 @@ class RefreshInterviewStatusJob implements ShouldQueue
 
                 // เคลียร์วันสัมภาษณ์
                 $preEmp?->update([
-                    'interview_at' => null,
+                    'start_interview_at' => null,
+                    'end_interview_at' => null,
                     'interview_channel' => null,
                     'google_calendar_id' => null
                 ]);
@@ -94,4 +96,5 @@ class RefreshInterviewStatusJob implements ShouldQueue
                 ]);
             });
     }
+    
 }

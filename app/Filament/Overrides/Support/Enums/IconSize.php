@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Overrides\Filament\Support\Enums;
+namespace App\Filament\Overrides\Support\Enums;
 
 enum IconSize: string
 {
