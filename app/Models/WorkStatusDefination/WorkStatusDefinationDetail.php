@@ -27,9 +27,16 @@ class WorkStatusDefinationDetail extends Model
     {
         return $this->belongsTo(WorkStatusDefination::class, 'work_status_def_id', 'id');
     }
-    
+
     public static function statusId($status): int
     {
         return static::where('code', $status)->value('id');
+    }
+
+    public static function workPhase($id, $phase): bool
+    {
+        return blank($id) || blank($phase)
+            ? false
+            : static::find($id)->work_phase === $phase;
     }
 }

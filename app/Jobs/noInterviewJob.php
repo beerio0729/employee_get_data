@@ -59,12 +59,11 @@ class noInterviewJob implements ShouldQueue
 
                 // เคลียร์วันสัมภาษณ์
                 $preEmp?->update([
-                    'start_interview_at' => null,
-                    'end_interview_at' => null,
-                    'interview_channel' => null,
+                    // 'start_interview_at' => null,
+                    // 'end_interview_at' => null,
+                    // 'interview_channel' => null,
                     'google_calendar_id' => null
                 ]);
-                
                 Notification::make() // ต้องรัน Queue
                     ->title('แจ้งวันนัดสัมภาษณ์')
                     ->body(

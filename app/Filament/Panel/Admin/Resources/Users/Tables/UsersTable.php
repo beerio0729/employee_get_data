@@ -109,98 +109,143 @@ class UsersTable
             ])
             ->filters([
                 Filter::make('filter_component')
-                    ->columnSpan(4)
-                    ->columns(4)
+                    ->columnSpanFull()
+                    ->columns(5)
                     ->schema([
-                        Select::make('status_detail_id')
-                            ->label('เลือกรายละเอียดสถานะ')
-                            ->hidden(fn($livewire) => $livewire->activeTab === 'all')
-                            ->preload()
-                            ->live()
-                            ->searchable()
-                            ->options(
-                                function ($livewire) {
-                                    $activeTab = $livewire->activeTab;
-                                    $work_status_id = WorkStatusDefination::where('code', $activeTab)?->first()?->id;
-                                    return WorkStatusDefinationDetail::where('work_status_def_id', $work_status_id)->pluck('name_th', 'id');
-                                }
-                            )
-                            ->afterStateUpdated(function ($state, $set) {
-                                if ($state === WorkStatusDefinationDetail::statusId('interview_scheduled')) {
-                                    $set('start_filter', now()->startOfDay());
-                                    $set('end_filter', now());
-                                } else {
-                                    $set('start_filter', null);
-                                    $set('end_filter', null);
-                                }
-                            }),
-                        Select::make('positions_id')
-                            ->label('เลือกตำแหน่งที่สมัคร')
-                            ->preload()
-                            ->visible(fn($livewire) => $livewire->activeTab === 'applicant')
-                            ->reactive()
-                            ->multiple()
-                            ->options(function () {
-                                $lowest_level = OrganizationStructure::getLevelLowest(); //ระดับต่ำสุดของโครงสร้างองค์กร
-                                $level_id = organizationStructure::getLevelId($lowest_level); //id ของระดับต่ำสุดของโครงสร้างองค์กร มักเป็น "ตำแหน่งพนักงาน"
-                                $org_name = OrganizationStructure::where('organization_level_id', $level_id)->pluck('name_th', 'id');
-                                return $org_name;
-                            }),
-                        DateTimePicker::make('start_filter')
-                            ->afterLabel([
-                                Action::make('action_now')
-                                    ->label('Now')
-                                    ->color('success')
-                                    ->icon(Heroicon::Calendar)
-                                    ->action(
-                                        fn($livewire) => $livewire->tableFilters['filter_component']['start_filter'] = now()
+                        FieldSet::make('field_status_filter')
+                            ->contained(false)
+                            ->hiddenLabel()
+                            ->columnSpan(2)
+                            ->columns(2)
+                            ->schema([
+                                Select::make('status_detail_id')
+                                    ->label('เลือกรายละเอียดสถานะ')
+                                    ->hidden(fn($livewire) => $livewire->activeTab === 'all')
+                                    ->preload()
+                                    ->live()
+                                    ->searchable()
+                                    ->options(
+                                        function ($livewire) {
+                                            $activeTab = $livewire->activeTab;
+                                            $work_status_id = WorkStatusDefination::where('code', $activeTab)?->first()?->id;
+                                            return WorkStatusDefinationDetail::where('work_status_def_id', $work_status_id)->pluck('name_th', 'id');
+                                        }
                                     )
-                                    ->extraAttributes(['style' => 'line-height : 0']),
-                                Action::make('action_clear')
-                                    ->hidden(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_filter']))
-                                    ->label('Clear')
-                                    ->color('danger')
-                                    ->icon(Heroicon::ArrowPath)
-                                    ->action(
-                                        fn($livewire) => $livewire->tableFilters['filter_component']['start_filter'] = null
-                                    )
-                                    ->extraAttributes(['style' => 'line-height : 0']),
-                            ])
-                            ->label('ตั้งแต่')
-                            ->displayFormat('D, j M Y, H:i น.')
-                            ->locale('th')
-                            ->buddhist()
-                            //->minutesStep(5)
-                            // ->visible(fn($get) => $get('status_detail_id') === WorkStatusDefinationDetail::statusId('interview_scheduled')) //3นัดสัมภาษณ์แล้ว)
-                            ->seconds(false),
-                        DateTimePicker::make('end_filter')
-                            ->afterLabel([
-                                Action::make('action_now')
-                                    ->label('Now')
-                                    ->color('success')
-                                    ->icon(Heroicon::Calendar)
-                                    ->action(
-                                        fn($livewire) => $livewire->tableFilters['filter_component']['end_filter'] = now()
-                                    )
-                                    ->extraAttributes(['style' => 'line-height : 0']),
-                                Action::make('action_clear')
-                                    ->hidden(fn($livewire) => blank($livewire->tableFilters['filter_component']['end_filter']))
-                                    ->label('Clear')
-                                    ->color('danger')
-                                    ->icon(Heroicon::ArrowPath)
-                                    ->action(
-                                        fn($livewire) => $livewire->tableFilters['filter_component']['end_filter'] = null
-                                    )
-                                    ->extraAttributes(['style' => 'line-height : 0']),
-                            ])
-                            ->label('ถึง')
-                            ->displayFormat('D, j M Y, H:i น.')
-                            ->locale('th')
-                            ->buddhist()
-                            //->minutesStep(5)
-                            // ->visible(fn($get) => $get('status_detail_id') === WorkStatusDefinationDetail::statusId('interview_scheduled')) //3นัดสัมภาษณ์แล้ว)
-                            ->seconds(false),
+                                    ->afterStateUpdated(function ($state, $set) {
 
+                                        if (WorkStatusDefinationDetail::workPhase($state, 'interview_time')) {
+                                            $set('att_filter', 'start_interview_at');
+                                        } elseif (WorkStatusDefinationDetail::workPhase($state, 'post_result_time')) {
+                                            $set('att_filter', 'result_at');
+                                        } else {
+                                            $set('att_filter', 'applied_at');
+                                        }
+
+                                        $set('start_filter', now()->startOfDay());
+                                        $set('end_filter', now());
+                                    }),
+                                Select::make('positions_id')
+                                    ->label('เลือกตำแหน่งที่สมัคร')
+                                    ->afterLabel([
+                                        Action::make('action_clear')
+                                            ->label('Clear')
+                                            ->hidden(fn($livewire) => blank($livewire->tableFilters['filter_component']['positions_id']))
+                                            ->color('danger')
+                                            ->icon(Heroicon::ArrowPath)
+                                            ->action(
+                                                fn($livewire) => $livewire->tableFilters['filter_component']['positions_id'] = null
+                                            )
+                                            ->extraAttributes(['style' => 'line-height : 0']),
+                                    ])
+                                    ->preload()
+                                    ->visible(fn($livewire) => $livewire->activeTab === 'applicant')
+                                    ->reactive()
+                                    ->multiple()
+                                    ->options(function () {
+                                        $lowest_level = OrganizationStructure::getLevelLowest(); //ระดับต่ำสุดของโครงสร้างองค์กร
+                                        $level_id = organizationStructure::getLevelId($lowest_level); //id ของระดับต่ำสุดของโครงสร้างองค์กร มักเป็น "ตำแหน่งพนักงาน"
+                                        $org_name = OrganizationStructure::where('organization_level_id', $level_id)->pluck('name_th', 'id');
+                                        return $org_name;
+                                    }),
+
+                            ]),
+
+                        FieldSet::make('field_date_filter')
+                            ->contained(false)
+                            ->hiddenLabel()
+                            ->columnSpan(3)
+                            ->columns(3)
+                            ->schema([
+                                Select::make('att_filter')
+                                    ->label('เลือกประเภทเวลา')
+                                    ->live()
+                                    ->afterStateUpdated(function ($state, $livewire) {
+                                        if (blank($state)) {
+                                            $livewire->tableFilters['filter_component']['start_filter'] = null;
+                                            $livewire->tableFilters['filter_component']['end_filter'] = null;
+                                        }
+                                    })
+                                    ->options([
+                                        'applied_at' => 'วันสมัคร',
+                                        'start_interview_at' => 'วันนัดสัมภาษณ์',
+                                        'result_at' => 'วันประกาศผลสัมภาษณ์',
+                                    ]),
+                                DateTimePicker::make('start_filter')
+                                    ->afterLabel([
+                                        Action::make('action_now')
+                                            ->hidden(fn($livewire) =>  blank($livewire->tableFilters['filter_component']['att_filter']))
+                                            ->label('Now')
+                                            ->color('success')
+                                            ->icon(Heroicon::Calendar)
+                                            ->action(
+                                                fn($livewire) => $livewire->tableFilters['filter_component']['start_filter'] = now()
+                                            )
+                                            ->extraAttributes(['style' => 'line-height : 0']),
+                                        Action::make('action_clear')
+                                            ->hidden(fn($livewire) => blank($livewire->tableFilters['filter_component']['start_filter']))
+                                            ->label('Clear')
+                                            ->color('danger')
+                                            ->icon(Heroicon::ArrowPath)
+                                            ->action(
+                                                fn($livewire) => $livewire->tableFilters['filter_component']['start_filter'] = null
+                                            )
+                                            ->extraAttributes(['style' => 'line-height : 0']),
+                                    ])
+                                    ->label('ตั้งแต่')
+                                    ->displayFormat('D, j M Y, H:i น.')
+                                    ->locale('th')
+                                    ->buddhist()
+                                    ->disabled(fn($get) => blank($get('att_filter')))
+                                    ->seconds(false),
+                                DateTimePicker::make('end_filter')
+                                    ->afterLabel([
+                                        Action::make('action_now')
+                                            ->label('Now')
+                                            ->hidden(fn($livewire) =>  blank($livewire->tableFilters['filter_component']['att_filter']))
+                                            ->color('success')
+                                            ->icon(Heroicon::Calendar)
+                                            ->action(
+                                                fn($livewire) => $livewire->tableFilters['filter_component']['end_filter'] = now()
+                                            )
+                                            ->extraAttributes(['style' => 'line-height : 0']),
+                                        Action::make('action_clear')
+                                            ->hidden(fn($livewire) => blank($livewire->tableFilters['filter_component']['end_filter']))
+                                            ->label('Clear')
+                                            ->color('danger')
+                                            ->icon(Heroicon::ArrowPath)
+                                            ->action(
+                                                fn($livewire) => $livewire->tableFilters['filter_component']['end_filter'] = null
+                                            )
+                                            ->extraAttributes(['style' => 'line-height : 0']),
+                                    ])
+                                    ->label('ถึง')
+                                    ->displayFormat('D, j M Y, H:i น.')
+                                    ->locale('th')
+                                    ->buddhist()
+                                    //->minutesStep(5)
+                                    ->disabled(fn($get) => blank($get('att_filter')))
+                                    ->seconds(false),
+                            ])
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -227,21 +272,19 @@ class UsersTable
                             )
                             ->when(
                                 $data['start_filter'],
-                                function (Builder $query, $value) {
+                                function (Builder $query, $value) use ($data) {
                                     $date = Carbon::parse($value);
-
-                                    $query->whereHas('userHasoneWorkStatus.workStatusHasonePreEmp', function (Builder $q) use ($date) {
-                                        $q->where('start_interview_at', '>=', $date);
+                                    $query->whereHas('userHasoneWorkStatus.workStatusHasonePreEmp', function (Builder $q) use ($date, $data) {
+                                        $q->where($data['att_filter'], '>=', $date);
                                     });
                                 }
                             )
                             ->when(
                                 $data['end_filter'],
-                                function (Builder $query, $value) {
+                                function (Builder $query, $value) use ($data) {
                                     $date = Carbon::parse($value);
-
-                                    $query->whereHas('userHasoneWorkStatus.workStatusHasonePreEmp', function (Builder $q) use ($date) {
-                                        $q->where('start_interview_at', '<=', $date);
+                                    $query->whereHas('userHasoneWorkStatus.workStatusHasonePreEmp', function (Builder $q) use ($date, $data) {
+                                        $q->where($data['att_filter'], '<=', $date);
                                     });
                                 }
                             )

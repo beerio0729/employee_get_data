@@ -165,6 +165,7 @@ class InterviewService
         $workStatus = $record->userHasoneWorkStatus()->first();
         $google_calendar_id = $workStatus->workStatusHasonePreEmp->google_calendar_id;
         $interview_date = Carbon::parse($data['start_interview_at'])->locale('th');
+        $title = $data['title'] ?? "นัดประชุมคุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th}";
 
         if ($data['interview_channel'] === 'online') {
             $calendar = new GoogleCalendarService();
@@ -172,7 +173,7 @@ class InterviewService
                 'start_time' => $data['start_interview_at'],
                 'end_time' => $data['end_interview_at'],
                 'email' => $record->email,
-                'title' => "นัดประชุมคุณ {$record->userHasoneIdcard->name_th} {$record->userHasoneIdcard->last_name_th}",
+                'title' => $title
             ]);
         }
 

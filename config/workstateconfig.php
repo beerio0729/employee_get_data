@@ -9,9 +9,7 @@ return [
 
     'pre_employment_phase_state' => [
         'pre_interview_time'  => 'ก่อนเวลานัดสัมภาษณ์',
-        'doc_passed_time' => 'เมื่อเอกสารผ่านแล้ว',
-        'interview_scheduled_time' => 'เมื่อนัดสัมภาษณ์แล้ว',
-        'post_interview_time' => 'หลังจากสัมภาษณ์',
-        'post_result_time'    => 'หลังจากประกาศผลสัมภาษณ์',
+        'interview_time' => 'ช่วงนัดสัมภาษณ์',
+        'post_result_time'    => 'ช่วงประกาศผลสัมภาษณ์',
     ],
 ];
