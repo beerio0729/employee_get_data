@@ -7,7 +7,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Services\PreEmployment\InterviewService;
 
-class BulkInterview implements ShouldQueue
+class BulkInterviewJob implements ShouldQueue
 {
     use Queueable;
 

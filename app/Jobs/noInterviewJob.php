@@ -12,7 +12,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 
-class noInterviewJob implements ShouldQueue
+class NoInterviewJob implements ShouldQueue
 {
     use Queueable;
     public function handle(): void

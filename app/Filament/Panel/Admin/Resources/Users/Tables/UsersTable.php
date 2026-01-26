@@ -6,11 +6,10 @@ use Closure;
 use Carbon\Carbon;
 use App\Models\Role;
 use Filament\Tables\Table;
-use App\Jobs\BulkInterview;
+use App\Jobs\BulkInterviewJob;
 use Detection\MobileDetect;
 use Filament\Actions\Action;
 use Filament\Schemas\Schema;
-use function Termwind\style;
 use App\Models\Document\Idcard;
 use Filament\Actions\BulkAction;
 use Filament\Actions\ViewAction;
@@ -22,7 +21,6 @@ use Illuminate\Support\HtmlString;
 use Filament\Tables\Filters\Filter;
 use Filament\Forms\Components\Radio;
 use Filament\Support\Icons\Heroicon;
-use Nette\Schema\Elements\Structure;
 use Filament\Actions\BulkActionGroup;
 use Filament\Forms\Components\Select;
 use Filament\Support\Enums\Alignment;
@@ -51,7 +49,6 @@ use App\Services\PreEmployment\InterviewService;
 use App\Models\Organization\OrganizationStructure;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Forms\Components\Repeater\TableColumn;
-
 use App\Models\WorkStatusDefination\WorkStatusDefination;
 use App\Models\WorkStatusDefination\WorkStatusDefinationDetail;
 
@@ -724,7 +721,7 @@ class UsersTable
                                 ? ['en' => 'update', 'th' => 'อับเดต']
                                 : ['en' => 'create', 'th' => 'นัดหมาย'];
 
-                            BulkInterview::dispatch(records: $records, data: $data, action: $action_interview['en']);
+                            BulkInterviewJob::dispatch(records: $records, data: $data, action: $action_interview['en']);
                             Notification::make()
                                 ->title("{$action_interview['th']}วันสัมภาษณ์เรียบร้อยแล้ว")
                                 ->success()
@@ -744,7 +741,7 @@ class UsersTable
                         ->modalSubmitActionLabel('ยืนยัน')
                         ->icon('heroicon-m-x-circle')
                         ->action(function ($records) {
-                            BulkInterview::dispatch(records: $records, action: 'delete');
+                            BulkInterviewJob::dispatch(records: $records, action: 'delete');
                             Notification::make()
                                 ->title('ยกเลิกนัดสัมภาษณ์เรียบร้อยแล้ว')
                                 ->success()

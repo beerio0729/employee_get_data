@@ -2,7 +2,7 @@
 
 namespace App\Filament\Panel\Admin\Resources\Users\Pages;
 
-use App\Jobs\noInterviewJob;
+use App\Jobs\NoInterviewJob;
 use Filament\Actions\Action;
 use Illuminate\Support\HtmlString;
 use Filament\Notifications\Notification;
@@ -33,7 +33,7 @@ class ListUsers extends ListRecords
                 ->label('คัดกรองคนไม่มาสัมภาษณ์')
                 ->visible(fn($livewire) => $livewire->activeTab === 'applicant')
                 ->action(function ($livewire) {
-                    noInterviewJob::dispatch();
+                    NoInterviewJob::dispatch();
                     Notification::make()
                         ->title("คัดกรองคนไม่มาสัมภาษณ์เรียบร้อยแล้ว")
                         ->success()
